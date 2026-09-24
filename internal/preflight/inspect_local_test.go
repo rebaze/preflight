@@ -1,7 +1,9 @@
 package preflight
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -202,5 +204,92 @@ func TestInspectLocalSHA256RepositoryAndIgnoredSources(t *testing.T) {
 		if strings.Contains(s.Content, "PRIVATE_IGNORED") {
 			t.Fatal("ignored source included")
 		}
+	}
+}
+
+func TestInspectLocalComparisonTipChangesIdentity(t *testing.T) {
+	repo, baseline, _ := snapshotFixture(t)
+	snapshotGit(t, repo, "switch", "-c", "topic")
+	snapshotWrite(t, repo, "topic.txt", "topic")
+	snapshotGit(t, repo, "add", "topic.txt")
+	snapshotGit(t, repo, "commit", "-m", "topic")
+	before := InspectLocal(context.Background(), repo, "main")
+	// Advance the other branch with the baseline tree, without checking it out.
+	// Checkout can change raw permission bits and accidentally mask this bug.
+	tree := snapshotGit(t, repo, "rev-parse", baseline+"^{tree}")
+	next := snapshotGit(t, repo, "commit-tree", strings.TrimSpace(tree), "-p", baseline, "-m", "advance comparison")
+	snapshotGit(t, repo, "update-ref", "refs/heads/main", strings.TrimSpace(next))
+	after := InspectLocal(context.Background(), repo, "main")
+	if before.Subject.MergeBase != after.Subject.MergeBase || before.Subject.BaseCommit == after.Subject.BaseCommit || before.Subject.Head != after.Subject.Head || before.Subject.IndexDigest != after.Subject.IndexDigest {
+		t.Fatal("invalid fixture")
+	}
+	if before.Subject.InputDigest == after.Subject.InputDigest {
+		t.Fatal("comparison tip change invisible to freshness")
+	}
+}
+
+func TestInspectLocalSerializedFactsStayBounded(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	for i := 0; i < 2500; i++ {
+		snapshotWrite(t, repo, fmt.Sprintf("%04d-%s.txt", i, strings.Repeat("x", 220)), "old")
+	}
+	snapshotGit(t, repo, "add", ".")
+	snapshotGit(t, repo, "commit", "-m", "bounded inventory")
+	for i := 0; i < 2500; i++ {
+		snapshotWrite(t, repo, fmt.Sprintf("%04d-%s.txt", i, strings.Repeat("x", 220)), "new")
+	}
+	d := InspectLocal(context.Background(), repo, "")
+	if d.ExitCode != 2 || d.Subject.Current {
+		t.Fatalf("over-budget inventory needs partial, non-current observation: exit=%d current=%t", d.ExitCode, d.Subject.Current)
+	}
+	if len(d.Changes) == 0 || len(d.Inputs) == 0 {
+		t.Fatal("useful partial facts were lost")
+	}
+	var out bytes.Buffer
+	if err := WriteDiscovery(&out, d, "json"); err != nil {
+		t.Fatal(err)
+	}
+	if out.Len() > (1536<<10)+(128<<10) {
+		t.Fatalf("serialized local inventory exceeded bounded budget: %d", out.Len())
+	}
+	if _, err := DecodeDiscovery(out.Bytes()); err != nil {
+		t.Fatalf("collector output cannot be decoded: %v", err)
+	}
+}
+
+func TestInspectLocalJSONEscapingIsIncludedInBudget(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	for i := 0; i < 8; i++ {
+		snapshotWrite(t, repo, fmt.Sprintf("docs/%d/AGENTS.md", i), strings.Repeat("\x01", 60<<10))
+	}
+	d := InspectLocal(context.Background(), repo, "")
+	if d.ExitCode != 2 || d.Subject.Current || len(d.Sources) == 0 {
+		t.Fatalf("escaped sources need useful partial facts: exit=%d current=%t sources=%d", d.ExitCode, d.Subject.Current, len(d.Sources))
+	}
+	var out bytes.Buffer
+	if err := WriteDiscovery(&out, d, "json"); err != nil {
+		t.Fatal(err)
+	}
+	if out.Len() > (1536<<10)+(128<<10) {
+		t.Fatalf("escaped output exceeds local budget: %d", out.Len())
+	}
+	if _, err := DecodeDiscovery(out.Bytes()); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestInspectLocalDiagnosticBudgetPreservesPartialCoverage(t *testing.T) {
+	d := NewDiscovery()
+	d.Subject.Current = true
+	for i := 0; i < 140; i++ {
+		inspectDiagnostic(&d, "unsupported_source", "Source unavailable", fmt.Sprint(i), false)
+	}
+	FinalizeDiscovery(&d)
+	if len(d.Diagnostics) != 129 || d.Subject.Current || d.ExitCode != 2 {
+		t.Fatalf("unbounded or falsely complete diagnostics: %d %t %d", len(d.Diagnostics), d.Subject.Current, d.ExitCode)
+	}
+	inspectDiagnostic(&d, "fatal", "Collector failed", "", true)
+	FinalizeDiscovery(&d)
+	if d.ExitCode != 3 {
+		t.Fatal("diagnostic bound hid fatal error")
 	}
 }
