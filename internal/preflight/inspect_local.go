@@ -5,6 +5,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"hash"
 	"io"
@@ -21,6 +22,7 @@ import (
 const inspectPathLimit = 10000
 const inspectSourceLimit = 64 << 10
 const inspectSourcesLimit = 512 << 10
+const inspectRecordsLimit = 1536 << 10
 
 type inspectEntry struct{ oid, mode string }
 
@@ -32,7 +34,7 @@ func InspectLocal(ctx context.Context, repo, base string) Discovery {
 		last := inspectLocalOnce(ctx, repo, base)
 		if first.Subject.InputDigest != last.Subject.InputDigest || first.Subject.Head != last.Subject.Head || first.Subject.IndexDigest != last.Subject.IndexDigest || (first.Subject.Current && !last.Subject.Current) {
 			first.Subject.Current = false
-			first.Diagnostics = append(first.Diagnostics, DiscoveryDiagnostic{Code: "source_changed", Message: "Source identity changed during discovery; collect a fresh observation before relying on these facts.", Severity: "warning"})
+			first.Diagnostics = append(first.Diagnostics, DiscoveryDiagnostic{Code: "source_changed", Message: "Source identity changed or could not be revalidated during discovery; collect a fresh observation before relying on these facts.", Severity: "warning"})
 		}
 	}
 	FinalizeDiscovery(&first)
@@ -267,10 +269,10 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 	}
 	d.Subject.IndexDigest = hex.EncodeToString(indexHash.Sum(nil))
 	snapshotHashField(inputHash, d.Subject.Head)
-	snapshotHashField(inputHash, d.Subject.IndexDigest)
-	snapshotHashField(inputHash, d.Subject.MergeBase)
 	snapshotHashField(inputHash, d.Subject.BaseRef)
 	snapshotHashField(inputHash, d.Subject.BaseCommit)
+	snapshotHashField(inputHash, d.Subject.IndexDigest)
+	snapshotHashField(inputHash, d.Subject.MergeBase)
 	d.Subject.InputDigest = hex.EncodeToString(inputHash.Sum(nil))
 	if excluded != 0 {
 		inspectDiagnostic(&d, "excluded_inputs", fmt.Sprintf("%d private, generated or dependency paths were excluded; their current contents and freshness are unknown.", excluded), "", false)
@@ -278,12 +280,25 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 	if !d.Subject.Current {
 		d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "worktree_cleanliness", Status: "partial", Detail: "Worktree cleanliness is unknown because some input identities could not be collected. dirty=false means no change was established, not a clean checkout."})
 	}
-	d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "local_sources", Status: "complete", Detail: "At most 10,000 non-excluded paths; raw file hashes bounded to 20 MiB/file and 256 MiB total. Text allowlist: 64 KiB/file, 512 KiB total. Git filters and line-ending transformations are not applied; raw differences may need review. Ignored untracked, private, generated and dependency paths are excluded."}, DiscoveryCoverage{Collector: "execution", Status: "not_requested", Detail: "No project code or checks were executed; documented and configured expectations remain unverified."})
+	d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "local_sources", Status: "complete", Detail: "At most 10,000 non-excluded paths; raw file hashes bounded to 20 MiB/file and 256 MiB total. Text allowlist: 64 KiB/file, 512 KiB total; serialized local facts bounded to 1.5 MiB. Git filters and line-ending transformations are not applied; raw differences may need review. Ignored untracked, private, generated and dependency paths are excluded."}, DiscoveryCoverage{Collector: "execution", Status: "not_requested", Detail: "No project code or checks were executed; documented and configured expectations remain unverified."})
+	inspectBoundRecords(&d)
+
 	FinalizeDiscovery(&d)
 	return d
 }
 
 func inspectDiagnostic(d *Discovery, code, message, p string, fatal bool) {
+	if len(d.Diagnostics) >= 128 {
+		d.Subject.Current = false
+		if len(d.Diagnostics) == 128 {
+			d.Diagnostics = append(d.Diagnostics, DiscoveryDiagnostic{Code: "diagnostic_limit", Severity: "warning", Message: "Additional local diagnostics were omitted after the bounded limit; coverage remains incomplete."})
+			d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "diagnostic_limit", Status: "partial", Detail: "Additional diagnostics omitted after 128 entries."})
+		}
+		if fatal {
+			d.Diagnostics[len(d.Diagnostics)-1].Severity = "error"
+		}
+		return
+	}
 	severity := "warning"
 	if fatal {
 		severity = "error"
@@ -440,4 +455,42 @@ func inspectWalk(root string, paths map[string]bool, d *Discovery) {
 	if err != nil {
 		inspectDiagnostic(d, "directory_scan", "Directory traversal was incomplete or exceeded its bounded path/depth limits.", "", false)
 	}
+}
+
+// Bound the serialized observation, independently of raw-byte and path-count
+// limits. A long filename is repeated in several records; JSON escaping also
+// expands selected text. Keep a useful prefix of each fact class and make the
+// omission explicit. The resulting digest must not be treated as full coverage.
+func inspectBoundRecords(d *Discovery) {
+	metadata, _ := json.MarshalIndent(struct {
+		Diagnostics []DiscoveryDiagnostic
+		Coverage    []DiscoveryCoverage
+	}{d.Diagnostics, d.Coverage}, "", "  ")
+	budget := inspectRecordsLimit - len(metadata)
+	if budget < 0 {
+		budget = 0
+	}
+	var used int
+	var sourcesLimited, changesLimited, inputsLimited bool
+	d.Sources, used, sourcesLimited = inspectRecordPrefix(d.Sources, budget/2)
+	budget -= used
+	d.Changes, used, changesLimited = inspectRecordPrefix(d.Changes, budget/2)
+	budget -= used
+	d.Inputs, _, inputsLimited = inspectRecordPrefix(d.Inputs, budget)
+	if sourcesLimited || changesLimited || inputsLimited {
+		d.Subject.Current = false
+		inspectDiagnostic(d, "observation_limit", "Serialized local facts exceed the 1.5 MiB budget; useful source, change and input prefixes were retained. Omitted identities and expectations remain unknown.", "", false)
+	}
+}
+func inspectRecordPrefix[T any](records []T, budget int) ([]T, int, bool) {
+	used := 0
+	for i, v := range records {
+		encoded, _ := json.MarshalIndent(v, "    ", "  ")
+		cost := len(encoded) + 6
+		if used+cost > budget {
+			return records[:i], used, true
+		}
+		used += cost
+	}
+	return records, used, false
 }

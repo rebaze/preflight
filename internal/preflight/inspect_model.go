@@ -11,10 +11,12 @@ import (
 )
 
 const DiscoverySchema = "preflight.discovery/v1"
+const DiscoveryMaxBytes = 16 << 20
 
 // Discovery is an observation, not a check report or authorization. Source
 // origin and verification are independent; no local test ran during discovery.
 type Discovery struct {
+	GitHub      *DiscoveryGitHub      `json:"github,omitempty"`
 	Schema      string                `json:"schema"`
 	Authority   string                `json:"authority"`
 	ObservedAt  string                `json:"observedAt"`
@@ -109,8 +111,8 @@ func discoveryExit(d Discovery) int {
 func FinalizeDiscovery(d *Discovery) { d.ExitCode = discoveryExit(*d) }
 func DecodeDiscovery(data []byte) (Discovery, error) {
 	var d Discovery
-	if len(data) > 4<<20 {
-		return d, fmt.Errorf("discovery exceeds 4 MiB")
+	if len(data) > DiscoveryMaxBytes {
+		return d, fmt.Errorf("discovery exceeds 16 MiB")
 	}
 	if err := DecodeStrict(data, &d); err != nil {
 		return d, err
@@ -198,6 +200,11 @@ func ValidateDiscovery(d Discovery) error {
 			}
 		}
 	}
+	if d.GitHub != nil {
+		if err := ValidateDiscoveryGitHub(d.GitHub); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -238,6 +245,9 @@ func WriteDiscovery(w io.Writer, d Discovery, format string) error {
 		for i, line := range strings.Split(strings.TrimSuffix(s.Content, "\n"), "\n") {
 			fmt.Fprintf(&b, "  %d: %s\n", s.StartLine+i, line)
 		}
+	}
+	if d.GitHub != nil {
+		writeDiscoveryGitHubText(&b, d.GitHub)
 	}
 	fmt.Fprintf(&b, "\nNo project checks executed. Discovery exit: %d\n", d.ExitCode)
 	_, err := w.Write(b.Bytes())

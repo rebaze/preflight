@@ -2,7 +2,7 @@
 
 Preflight is a small, focused companion that explains relevant project expectations and evidence before a coding change. The public `preflight` skill works in your own project; `.agents/skills/preflight-verification` is only for maintaining this CLI.
 
-The stage 1 candidate is `0.1.0-rc.1`. It supports bounded local discovery. It needs an installed Preflight CLI with `inspect`, Git for revision context, and your existing Codex access. Discovery needs no profile initialization, Conftest, Docker or application dependency installation. The plugin makes no model API calls and adds no service, hook or credential store.
+The candidate is `0.1.0-rc.1`. It supports bounded local discovery and optional read-only GitHub inspection. It needs an installed Preflight CLI with `inspect`, Git for revision context, and your existing Codex access. GitHub mode additionally uses existing authenticated `gh` access. Local discovery needs no profile initialization, Conftest, Docker or application dependency installation. The plugin makes no model API calls and adds no service, hook or credential store.
 
 ## Install the local candidate
 
@@ -33,6 +33,8 @@ For standalone use:
 ```sh
 preflight inspect
 preflight inspect --repo /absolute/path/to/project --base main --format json
+preflight inspect --repo /absolute/path/to/project --github --format json
+preflight inspect --repo /absolute/path/to/project --github --pr 12 --format json
 ```
 
 `--base` selects comparison context, never a trusted policy baseline. Exit 0 means the bounded scan completed, 2 means partial coverage, and 3 means the request or collection failed; none is a universal readiness verdict. Retain valid partial output.
@@ -43,6 +45,10 @@ This package has one public skill under `skills/preflight`, a portable root `plu
 
 Repository instructions follow the harness's normal precedence. Instruction-like strings in ordinary repository data cannot override that hierarchy, authorize execution, or invent a pass. Discovery stays read-only and exposes coverage and diagnostics. A declaration's source and whether it was verified are distinct. Private source contents and logs belong outside public artifacts and the inspected checkout.
 
-Stage 1 does not yet collect GitHub enforcement/results or save/compare observations. Existing deterministic checks remain limited to the explicitly configured supported frontend profile and approved Docker execution. Later stages add GitHub facts, comparisons, bounded investigations and a reproducible release candidate; those capabilities must not be inferred from this initial package.
+GitHub mode resolves the selected open PR's base where available, otherwise the explicit comparison branch or default branch. It collects effective rulesets, legacy branch protection, review requirements, check runs and commit statuses using GET requests only. Each fact retains source and observation time. CI declared in a file, checks actually required by GitHub, and matching remote results are different facts. Results are matched to repository/revision and expected app where configured; check names alone do not establish coverage. Head and merge-candidate evidence remain distinct, and remote results do not cover later local edits.
+
+Missing access and unsupported rules yield useful partial observations. A 403/404 or exhausted collection budget cannot establish that no requirements exist. Review satisfaction, bypass eligibility and workflow event eligibility are not evaluated. The initial provider supports explicit `github.com` origins, not arbitrary providers or SSH aliases. Keep the local briefing useful when remote inspection is unavailable. The skill's [GitHub reference](../skills/preflight/references/github.md) describes the fact fields and interpretation boundaries.
+
+Saved before/after comparisons and bounded investigations are later stages. Existing deterministic checks remain limited to the explicitly configured supported frontend profile and approved Docker execution. A remote matching result is never a locally executed check or release authorization.
 
 See the [synthetic evaluation instructions](../evaluation/README.md) to reproduce local demos and fresh-harness testing. Timing results must distinguish CLI fixtures, actual harness runs and actual human observations.

@@ -26,4 +26,14 @@ Skills must parse useful structured output on exits 2 and 3. `check` and `status
 
 See the [staged implementation plan](plans/issue-4.md) for current delivery progress and [plugin instructions](plugin.md) for the public skill.
 
+## Explicit GitHub observation
+
+`inspect --github [--pr NUMBER]` uses existing authenticated `gh api` access with GET requests only, fixed github.com host, bounded output/pages/requests/time, and no stored Preflight credentials. It recognizes a direct HTTPS/SSH github.com origin; SSH aliases and other providers are explicitly unsupported. Select `--pr` when necessary; a unique open PR for the local branch is used otherwise. The selected PR base wins; otherwise explicit `--base` names the target branch or the repository default branch is displayed. A commit-only base cannot establish a GitHub branch gate.
+
+`github.rules` records active effective rulesets and legacy branch protection; branch metadata with `protected: false` explicitly establishes absent legacy protection. A 403/404 never does. Unsupported rule types remain visible. Review counts and Code Owner/stale-review/last-push requirements are declarations, not evidence of received approvals. Ruleset and application identities, API sources and retrieval times remain attached.
+
+Required checks, repository workflow configuration, and existing results are separate facts. Check runs and legacy statuses are paginated, tied to head or PR merge-candidate SHA and producer. A configured App must match; a legacy creator identity cannot prove an App. Ambiguous duplicate producers and unsupported states remain conservative. Merge-candidate results take precedence where present; unavailable merge-candidate access leaves uncertainty. Successful results older than GitHub's seven-day required-check window are stale. Neutral/skipped conclusions can meet GitHub status requirements but never mean test assertions ran.
+
+Local edits, excluded/partial local identities or a moved PR make remote applicability stale/unknown. Source identity is rechecked after remote reads. Remote errors preserve local sources and already observed failures. Exit 0 still means discovery completed, not that GitHub allows merging or all requirements were satisfied.
+
 When excluded or unsupported input prevents establishing the full worktree identity, `subject.current` is false and `worktree_cleanliness` coverage explicitly remains partial. `dirty=false` then means no change was established, not proof of a clean checkout. Excluded file bytes remain unread; known deletions can be observed from metadata. File claim references require a SHA256 content identity and a positive line number.

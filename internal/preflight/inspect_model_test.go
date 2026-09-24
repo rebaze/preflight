@@ -77,6 +77,15 @@ func TestDiscoveryRejectsMismatchedSourceIdentity(t *testing.T) {
 	}
 }
 
+func TestDiscoveryMaximumSizeIsExplicit(t *testing.T) {
+	if DiscoveryMaxBytes != 16<<20 {
+		t.Fatal("update discovery/save/load documented bound together")
+	}
+	if _, err := DecodeDiscovery(make([]byte, DiscoveryMaxBytes+1)); err == nil || !strings.Contains(err.Error(), "16 MiB") {
+		t.Fatalf("oversized observation must fail at its explicit limit: %v", err)
+	}
+}
+
 func TestDiscoveryRejectsIncompleteClaimReferences(t *testing.T) {
 	for _, ref := range []DiscoveryReference{{Path: "README.md", Line: 1}, {Path: "README.md", Digest: strings.Repeat("a", 64), Line: 0}, {Path: "README.md", Digest: "not-a-digest", Line: 1}} {
 		d := NewDiscovery()

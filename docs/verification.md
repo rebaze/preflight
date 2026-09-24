@@ -127,6 +127,23 @@ Isolated implementation branch starts at current main `352e58d`. Baseline `go te
 
 The public plugin candidate 0.1.0-rc.1 was accepted by Codex CLI 0.156.1 in a fresh private CODEX_HOME. Plugin and skill validators passed. Fresh-home execution initially reported no authentication; this is not a successful skill invocation. Authenticated fresh-session evaluation using existing Codex access is recorded separately below. No credentials were copied into project/plugin files and no global config was edited. No Docker/runtime path changed; Docker/Vitest exercises were not rerun for discovery. No human usability claim is made.
 
+## 2026-09-24 — issue 4 stage 2 GitHub read adapter
+
+Synthetic adapter tests cover effective/legacy rules, reviews, pagination and page/request limits, same-name results from different Apps, same-name check plus legacy status, wrong/stale revision, PR head/merge precedence, unknown producer, unsupported rules, denied access and no-enforced-check repositories. A fake gh executable verifies GET-only argv and sanitized diagnostics. Normal tests do not require GitHub access.
+
+Authorized real-repository reads used rebaze/preflight only. First observation against an unpushed implementation SHA took 3.023 seconds and retained GitHub HTTP 422 for missing remote check-run coverage; it was partial, not no-results success. A subsequent observation of remote main took 3.014 seconds (3.94 seconds including resolution in the test), resolved target main, observed zero effective rules/required checks, explicit branch `protected=false`, and six check results with complete checks/status coverage. No rules were changed and no CI was dispatched. The opt-in reproduction is `PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`.
+
+Stage 2 exact-commit verification: the isolated `a7b1b8c` worktree passed `go test -race ./...` (all packages), vet, Conftest (2 passed), and build. A concurrent working-tree suite earlier failed an unfinished stage 3 result-ID fixture; it is retained as a development failure, not reported as stage 2 passing evidence. Independent review then identified comparison-tip freshness and oversized-observation round-trip gaps; regression fixes and their final validation are recorded below.
+
+
+## 2026-09-24 — issue 4 stage 2 Copilot review before integration
+
+The new focused regressions first failed for wrong fork/target result repository, forged legacy App identity, lost status update ordering, unnormalized `stale`, unknown merge SHA treated as head evidence, and an overflow of the post-GitHub diagnostic bound. Repairs then passed `go test ./internal/preflight -run '^TestGitHub' -count=1`, `go test -race ./...` (all packages), `go vet ./...`, `conftest verify --policy policy` (2/2), build and `git diff --check`. No runner or execution behavior changed; container exercises were not rerun.
+
+The requested removal of complete-empty merge-result fallback was not adopted: GitHub's official troubleshooting documentation selects head checks when a known test merge commit has no status. Tests distinguish complete empty results from an unavailable merge SHA, denied merge collection, and an observed merge failure alongside denied collection. Matching requires target-repository identity even for a fork head; strict saved observations reject a nonzero legacy-status App ID. The JSON schema records the same legacy status constraint.
+
+The explicitly authorized read-only smoke test (`PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`) passed: target `main`, 0 observed rules/requirements, 6 results, complete repository/PR/rules/protection/result coverage, `clean_head_only`; adapter duration 2.759 seconds. This is real repository evidence, not project test execution, merge eligibility or human usability validation. No API writes or workflow dispatch occurred during the smoke test.
+
 ## 2026-09-24 — pre-merge Copilot review, stage 1
 
 The owner authorized autonomous review-driven integration of the PR stack. Regression tests reproduced excluded/unsupported tracked inputs advertising current worktree identity, incomplete claim citations, and comparison-ref movement escaping the digest. Discovery now explicitly reports unknown cleanliness/current=false when identity is incomplete, observes excluded-file deletion via metadata without reading bytes, hashes comparison ref/commit, and requires a SHA256 digest plus positive source line. Historical failed initial harness authentication remains intact; later successful stage1 runs were already appended and are not replacements for it.

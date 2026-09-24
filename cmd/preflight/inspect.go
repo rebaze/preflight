@@ -13,6 +13,8 @@ func runInspect(args []string, out, diagnostic io.Writer) int {
 	f := flag.NewFlagSet("inspect", flag.ContinueOnError)
 	f.SetOutput(diagnostic)
 	repo := f.String("repo", ".", "repository or directory to observe read-only")
+	github := f.Bool("github", false, "explicit read-only GitHub inspection using existing gh authentication")
+	pr := f.Int("pr", 0, "select an open pull request (requires --github)")
 	base := f.String("base", "", "comparison ref; never selects trusted policy")
 	format := f.String("format", "text", "text or json")
 	fail := func(message string) int {
@@ -42,9 +44,15 @@ func runInspect(args []string, out, diagnostic io.Writer) int {
 	if *format != "text" && *format != "json" {
 		return fail("format must be text or json")
 	}
+	if *pr < 0 || (*pr > 0 && !*github) {
+		return fail("--pr requires --github and a positive pull request number")
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 	defer cancel()
 	d := pf.InspectLocal(ctx, *repo, *base)
+	if *github && d.Subject.RepoRoot != "" {
+		pf.InspectGitHub(ctx, &d, *base, *pr)
+	}
 	pf.FinalizeDiscovery(&d)
 	if err := pf.WriteDiscovery(out, d, *format); err != nil {
 		fmt.Fprintln(diagnostic, err)
