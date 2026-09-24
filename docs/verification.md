@@ -144,3 +144,7 @@ Private observation save/compare and structural workflow tests cover exclusive o
 Final stage 2 review-fix commit `0b10130` passed the full race suite, vet, Conftest (2 passed) and build in its isolated worktree. Stage 3 working increment then passed the full race suite (all three packages), vet, Conftest (2 passed), build and repeated public change/restoration demo. Discovery/evidence-only additions did not change the Docker runner; no new actual-container execution is claimed.
 
 Stage 3 integration review additionally reproduced a saved observation containing a workflow source without any corresponding captured input. That internally inconsistent source could otherwise produce a false verified deletion. Validation now requires every source to match a captured file's digest/mode; workflow coverage checks both directions. The bounded collector preserves those pairs when truncating, with a regression for long-path prefixes. Previously observed missing-source acceptance and pair-loss failures are preserved here; focused corrected tests and final suite establish the delivered behavior.
+
+## 2026-09-24 — pre-merge Copilot review, stage 3
+
+A regression reproduced duplicate event keys in a workflow `on` mapping producing known trigger semantics. The constrained parser now rejects duplicate event keys as ambiguous; no verified PR-trigger removal can be derived from that input. Focused structural regression tests passed after the fix.
