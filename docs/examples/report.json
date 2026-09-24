@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "mode": "check",
+  "authority": "local-feedback",
+  "runId": "f84387c6162b905206b3eea4",
+  "startedAt": "2026-09-23T06:13:02.021018Z",
+  "finishedAt": "2026-09-23T06:13:02.371869Z",
+  "current": true,
+  "subject": {
+    "repoRoot": "/synthetic/pilot",
+    "baselineCommit": "synthetic-baseline",
+    "comparisonBase": "synthetic-baseline",
+    "head": "synthetic-baseline",
+    "mergeBase": "synthetic-baseline",
+    "snapshotDigest": "sha256:71def8ba289812696ff2ad201554f8823eaa184baf09eb2f391371b6032cb70d",
+    "excludedCategories": [
+      "git metadata",
+      "dependency and generated output",
+      "environment and credential/private-key files",
+      "ignored untracked files",
+      "source npmrc (identity only; generated safe config used)"
+    ],
+    "changedPaths": [],
+    "outOfScopePaths": []
+  },
+  "policy": {
+    "packageDigest": "c1b2f57209315b60752f66685d9bc71b267806479bb9bbc5faec9a00b69fe951",
+    "profileDigest": "d9a74a5faaab9dad51060241697b53b9aedcb6c4426652c82e9b04615880a9c1",
+    "baselineCommit": "synthetic-baseline"
+  },
+  "runtime": {
+    "evaluatorDigest": "b2f75ccf2575da4543ecec646194ae2f5a476fdf810681b04d01042b8e73ff18",
+    "evaluatorVersion": "Conftest: dev\nOPA: 1.20.2",
+    "runnerImageId": "",
+    "preparationInputDigest": ""
+  },
+  "scope": {
+    "profile": "invoicex-frontend",
+    "deferred": [
+      "artifact verification at trusted build/release",
+      "vulnerability and license assessment"
+    ],
+    "excluded": [
+      "backend",
+      "hosted LLM",
+      "E2E, browser and visual tests",
+      "deployment and infrastructure",
+      "branch protection verification",
+      "compliance certification",
+      "test adequacy and business acceptance",
+      "release authorization",
+      "remote refs are not refreshed"
+    ]
+  },
+  "findings": [
+    {
+      "controlId": "ci.integrity",
+      "status": "pass",
+      "reasonCode": "protected_workflow_unchanged",
+      "message": "Protected semantic workflow objects and all baseline gate dependencies are preserved.",
+      "paths": [],
+      "evidence": [],
+      "owner": "frontend-maintainer",
+      "nextActions": []
+    },
+    {
+      "controlId": "eer.tests",
+      "status": "missing",
+      "reasonCode": "preparation_required",
+      "message": "No compatible preparation receipt. Run preflight prepare --state-dir /private/preflight-state --allow-downloads.",
+      "paths": [],
+      "evidence": [],
+      "owner": "frontend-maintainer",
+      "nextActions": [
+        {
+          "description": "Prepare dependencies explicitly",
+          "command": "preflight",
+          "args": [
+            "prepare",
+            "--state-dir",
+            "/private/preflight-state",
+            "--allow-downloads"
+          ]
+        }
+      ]
+    },
+    {
+      "controlId": "npm.dependencies",
+      "status": "pass",
+      "reasonCode": "dependency_declarations_accepted",
+      "message": "Complete npm lockfile declarations and existing compatibility overrides satisfy the pinned bounded policy; vulnerability and license assessment are excluded.",
+      "paths": [],
+      "evidence": [],
+      "owner": "frontend-maintainer",
+      "nextActions": []
+    },
+    {
+      "controlId": "artifact.verification",
+      "status": "deferred",
+      "reasonCode": "trusted_build_required",
+      "message": "Artifact contents and provenance require verification at a trusted build/release stage. Local feedback is not release authorization.",
+      "paths": [],
+      "evidence": [],
+      "owner": "frontend-maintainer",
+      "nextActions": []
+    }
+  ],
+  "summary": {
+    "pass": 2,
+    "fail": 0,
+    "missing": 1,
+    "error": 0,
+    "review_required": 0,
+    "deferred": 1,
+    "not_applicable": 0
+  },
+  "exitCode": 2
+}

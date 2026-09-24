@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "invoicex-frontend",
+  "sourcePrefixes": ["applications/frontend/"],
+  "sourceFiles": [".github/workflows/ci.yml"],
+  "nodeVersion": "24.18.0",
+  "npmVersion": "11.17.0",
+  "testWorkspace": "@clarula/einfache-erechnung-frontend",
+  "requiredOverrides": {"brace-expansion": "5.0.9", "js-yaml": "4.3.1"},
+  "requiredJobs": ["changes", "frontend-eer-run", "frontend-operator-run", "build-and-test"],
+  "protectedWorkflowKeys": ["on", "permissions"],
+  "owner": "frontend-maintainer",
+  "deferredControls": ["artifact.verification"]
+}

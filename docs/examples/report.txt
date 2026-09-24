@@ -1,0 +1,46 @@
+rebaze Preflight — check
+Authority: local-feedback
+Run: f84387c6162b905206b3eea4
+Started: 2026-09-23T06:13:02.021018Z
+Finished: 2026-09-23T06:13:02.371869Z
+Current: true
+Repository: /synthetic/pilot
+Baseline: synthetic-baseline
+Comparison base: synthetic-baseline
+Head: synthetic-baseline
+Merge base: synthetic-baseline
+Snapshot: sha256:71def8ba289812696ff2ad201554f8823eaa184baf09eb2f391371b6032cb70d
+Policy: c1b2f57209315b60752f66685d9bc71b267806479bb9bbc5faec9a00b69fe951
+Profile: invoicex-frontend (d9a74a5faaab9dad51060241697b53b9aedcb6c4426652c82e9b04615880a9c1)
+Policy baseline: synthetic-baseline
+Evaluator: b2f75ccf2575da4543ecec646194ae2f5a476fdf810681b04d01042b8e73ff18 (Conftest: dev
+OPA: 1.20.2)
+Runner image:
+Preparation:
+Excluded paths: git metadata, dependency and generated output, environment and credential/private-key files, ignored untracked files, source npmrc (identity only; generated safe config used)
+Changed paths:
+Out-of-scope paths:
+Deferred assurance: artifact verification at trusted build/release, vulnerability and license assessment
+Excluded assurance: backend, hosted LLM, E2E, browser and visual tests, deployment and infrastructure, branch protection verification, compliance certification, test adequacy and business acceptance, release authorization, remote refs are not refreshed
+
+pass ci.integrity [protected_workflow_unchanged]
+  Protected semantic workflow objects and all baseline gate dependencies are preserved.
+  Owner: frontend-maintainer
+
+missing eer.tests [preparation_required]
+  No compatible preparation receipt. Run preflight prepare --state-dir /private/preflight-state --allow-downloads.
+  Owner: frontend-maintainer
+  Next: Prepare dependencies explicitly
+  Command: "preflight" "prepare" "--state-dir" "/private/preflight-state" "--allow-downloads"
+
+pass npm.dependencies [dependency_declarations_accepted]
+  Complete npm lockfile declarations and existing compatibility overrides satisfy the pinned bounded policy; vulnerability and license assessment are excluded.
+  Owner: frontend-maintainer
+
+deferred artifact.verification [trusted_build_required]
+  Artifact contents and provenance require verification at a trusted build/release stage. Local feedback is not release authorization.
+  Owner: frontend-maintainer
+
+Summary: pass=2 fail=0 missing=1 error=0 review_required=0 deferred=1 not_applicable=0
+Exit code: 2
+Local feedback; no release authorization.

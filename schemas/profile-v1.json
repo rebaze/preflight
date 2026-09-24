@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://rebaze.local/preflight/schemas/profile-v1.json",
+  "title": "Preflight fixed invoicex frontend profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "sourcePrefixes",
+    "sourceFiles",
+    "nodeVersion",
+    "npmVersion",
+    "testWorkspace",
+    "requiredOverrides",
+    "requiredJobs",
+    "protectedWorkflowKeys",
+    "owner",
+    "deferredControls"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "const": "invoicex-frontend"
+    },
+    "sourcePrefixes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "applications/frontend/"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "sourceFiles": {
+      "type": "array",
+      "items": {
+        "enum": [
+          ".github/workflows/ci.yml"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "nodeVersion": {
+      "type": "string",
+      "const": "24.18.0"
+    },
+    "npmVersion": {
+      "type": "string",
+      "const": "11.17.0"
+    },
+    "testWorkspace": {
+      "type": "string",
+      "const": "@clarula/einfache-erechnung-frontend"
+    },
+    "requiredOverrides": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "brace-expansion",
+        "js-yaml"
+      ],
+      "properties": {
+        "brace-expansion": {
+          "type": "string",
+          "const": "5.0.9"
+        },
+        "js-yaml": {
+          "type": "string",
+          "const": "4.3.1"
+        }
+      }
+    },
+    "requiredJobs": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "changes",
+          "frontend-eer-run",
+          "frontend-operator-run",
+          "build-and-test"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "protectedWorkflowKeys": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "on",
+          "permissions"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deferredControls": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "artifact.verification"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 1
+    }
+  }
+}

@@ -1,0 +1,43 @@
+# Go binaries, test executables and release outputs.
+/bin/
+/dist/
+/preflight
+/preflight.exe
+*.test
+*.test.exe
+
+# Test coverage, profiles and local Go workspace configuration.
+/coverage/
+/coverage.out
+/coverage.html
+*.coverprofile
+*.prof
+*.pprof
+/go.work
+/go.work.sum
+
+# Private snapshots, preparation receipts and run artifacts belong outside Git.
+/state/
+/.preflight/
+/local-runs/
+/runs/
+/artifacts/
+/.local/
+*.log
+node_modules/
+
+# Local environment and key material; synthetic fixtures need explicit review.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local editor and operating-system files.
+/.idea/
+/.vscode/
+.DS_Store
+*.swp
+*.swo
+*~
