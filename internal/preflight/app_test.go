@@ -26,9 +26,9 @@ func appFixture(t *testing.T) (string, string, string) {
 	}
 	put("applications/frontend/.node-version", "24.18.0\n")
 	put("applications/frontend/package.json", `{"name":"fixture","packageManager":"npm@11.17.0","workspaces":["apps/*"],"overrides":{"brace-expansion":"5.0.9","js-yaml":"4.3.1"}}`)
-	put("applications/frontend/apps/einfache-erechnung/package.json", `{"name":"@clarula/einfache-erechnung-frontend","scripts":{"test":"vitest run"}}`)
-	put("applications/frontend/package-lock.json", `{"lockfileVersion":3,"packages":{"":{"name":"fixture"},"apps/einfache-erechnung":{"name":"@clarula/einfache-erechnung-frontend"},"node_modules/@clarula/einfache-erechnung-frontend":{"resolved":"apps/einfache-erechnung","link":true}}}`)
-	put("applications/frontend/apps/einfache-erechnung/test/example.test.ts", "// synthetic baseline\n")
+	put("applications/frontend/apps/web/package.json", `{"name":"@example/frontend","scripts":{"test":"vitest run"}}`)
+	put("applications/frontend/package-lock.json", `{"lockfileVersion":3,"packages":{"":{"name":"fixture"},"apps/web":{"name":"@example/frontend"},"node_modules/@example/frontend":{"resolved":"apps/web","link":true}}}`)
+	put("applications/frontend/apps/web/test/example.test.ts", "// synthetic baseline\n")
 	put(".github/workflows/ci.yml", "on: [push, pull_request]\njobs:\n  changes: {runs-on: ubuntu-latest}\n  frontend-eer-run: {needs: changes}\n  frontend-operator-run: {needs: changes}\n  build-and-test: {needs: [changes, frontend-eer-run, frontend-operator-run], if: 'always()'}\n")
 	git := func(args ...string) string {
 		t.Helper()
@@ -51,7 +51,7 @@ func initFixture(t *testing.T) (string, string) {
 	t.Helper()
 	evaluator, _ := testEvaluator(t)
 	repo, base, state := appFixture(t)
-	e := Init(context.Background(), InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/invoicex-frontend.json", PolicyDir: "../../policy", StateDir: state, ConftestPath: evaluator})
+	e := Init(context.Background(), InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/frontend-vitest.json", PolicyDir: "../../policy", StateDir: state, ConftestPath: evaluator})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -107,7 +107,7 @@ func TestExplainDoesNotExecute(t *testing.T) {
 func TestInitRefusesInsideAndNonemptyState(t *testing.T) {
 	evaluator, _ := testEvaluator(t)
 	repo, base, state := appFixture(t)
-	o := InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/invoicex-frontend.json", PolicyDir: "../../policy", StateDir: filepath.Join(repo, "state"), ConftestPath: evaluator}
+	o := InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/frontend-vitest.json", PolicyDir: "../../policy", StateDir: filepath.Join(repo, "state"), ConftestPath: evaluator}
 	if Init(context.Background(), o) == nil {
 		t.Fatal("accepted inside state")
 	}
@@ -153,7 +153,7 @@ func appTrustFixture(t *testing.T) (string, string, InitOptions) {
 	if err := os.WriteFile(evaluator, []byte("#!/bin/sh\nprintf 'synthetic evaluator\\n'\n"), 0700); err != nil {
 		t.Fatal(err)
 	}
-	return repo, state, InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/invoicex-frontend.json", PolicyDir: policy, StateDir: state, ConftestPath: evaluator}
+	return repo, state, InitOptions{Repo: repo, Baseline: base, ProfilePath: "../../profiles/frontend-vitest.json", PolicyDir: policy, StateDir: state, ConftestPath: evaluator}
 }
 
 func TestInitRepoSubdirectoryStillProtectsWholeWorktree(t *testing.T) {
@@ -399,7 +399,7 @@ func TestMalformedPreparationIsError(t *testing.T) {
 
 func TestCompatibilityAndAdditionalEERTestsRequireReview(t *testing.T) {
 	repo, state := initFixture(t)
-	for _, name := range []string{"applications/frontend/scripts/dependency-compatibility.test.mjs", "applications/frontend/apps/einfache-erechnung/extra.spec.ts"} {
+	for _, name := range []string{"applications/frontend/scripts/dependency-compatibility.test.mjs", "applications/frontend/apps/web/extra.spec.ts"} {
 		f := filepath.Join(repo, name)
 		os.MkdirAll(filepath.Dir(f), 0700)
 		os.WriteFile(f, []byte("// changed test implementation"), 0600)

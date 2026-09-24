@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://rebaze.local/preflight/schemas/profile-v1.json",
-  "title": "Preflight fixed invoicex frontend profile v1",
+  "title": "Preflight frontend/Vitest example profile v1",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -25,7 +25,7 @@
     },
     "id": {
       "type": "string",
-      "const": "invoicex-frontend"
+      "const": "frontend-vitest"
     },
     "sourcePrefixes": {
       "type": "array",
@@ -59,7 +59,7 @@
     },
     "testWorkspace": {
       "type": "string",
-      "const": "@clarula/einfache-erechnung-frontend"
+      "const": "@example/frontend"
     },
     "requiredOverrides": {
       "type": "object",

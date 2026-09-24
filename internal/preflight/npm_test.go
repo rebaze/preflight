@@ -89,17 +89,17 @@ func npmFixture(t *testing.T) (string, map[string]any, Profile) {
 	t.Helper()
 	dir := t.TempDir()
 	base := filepath.Join(dir, "applications/frontend")
-	os.MkdirAll(filepath.Join(base, "apps/einfache-erechnung"), 0700)
-	p, e := LoadProfile("../../profiles/invoicex-frontend.json")
+	os.MkdirAll(filepath.Join(base, "apps/web"), 0700)
+	p, e := LoadProfile("../../profiles/frontend-vitest.json")
 	if e != nil {
 		t.Fatal(e)
 	}
 	root := map[string]any{"workspaces": []string{"apps/*"}, "overrides": p.RequiredOverrides}
 	b, _ := json.Marshal(root)
 	os.WriteFile(filepath.Join(base, "package.json"), b, 0600)
-	os.WriteFile(filepath.Join(base, "apps/einfache-erechnung/package.json"), []byte(`{"name":"@clarula/einfache-erechnung-frontend"}`), 0600)
+	os.WriteFile(filepath.Join(base, "apps/web/package.json"), []byte(`{"name":"@example/frontend"}`), 0600)
 	sri := "sha512-" + base64.StdEncoding.EncodeToString(make([]byte, 64))
-	lock := map[string]any{"lockfileVersion": 3, "packages": map[string]any{"": map[string]any{}, "apps/einfache-erechnung": map[string]any{}, "node_modules/@clarula/einfache-erechnung-frontend": map[string]any{"link": true, "resolved": "apps/einfache-erechnung"}, "node_modules/@parcel/watcher-wasm": map[string]any{"version": "2.6.0", "resolved": "https://registry.npmjs.org/@parcel/watcher-wasm/-/watcher-wasm-2.6.0.tgz", "integrity": sri, "bundleDependencies": []string{"napi-wasm"}}, "node_modules/@parcel/watcher-wasm/node_modules/napi-wasm": map[string]any{"version": "1.1.0", "inBundle": true}, "node_modules/brace-expansion": map[string]any{"version": "5.0.9", "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.9.tgz", "integrity": sri}, "node_modules/js-yaml": map[string]any{"version": "4.3.1", "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-4.3.1.tgz", "integrity": sri}}}
+	lock := map[string]any{"lockfileVersion": 3, "packages": map[string]any{"": map[string]any{}, "apps/web": map[string]any{}, "node_modules/@example/frontend": map[string]any{"link": true, "resolved": "apps/web"}, "node_modules/@parcel/watcher-wasm": map[string]any{"version": "2.6.0", "resolved": "https://registry.npmjs.org/@parcel/watcher-wasm/-/watcher-wasm-2.6.0.tgz", "integrity": sri, "bundleDependencies": []string{"napi-wasm"}}, "node_modules/@parcel/watcher-wasm/node_modules/napi-wasm": map[string]any{"version": "1.1.0", "inBundle": true}, "node_modules/brace-expansion": map[string]any{"version": "5.0.9", "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-5.0.9.tgz", "integrity": sri}, "node_modules/js-yaml": map[string]any{"version": "4.3.1", "resolved": "https://registry.npmjs.org/js-yaml/-/js-yaml-4.3.1.tgz", "integrity": sri}}}
 	return dir, lock, p
 }
 func npmCollectFixture(t *testing.T, dir string, l map[string]any, p Profile) NPMFacts {
@@ -155,7 +155,7 @@ func TestBundledDependencyRequiresParent(t *testing.T) {
 }
 func TestWorkspaceLinkCannotEscape(t *testing.T) {
 	dir, l, p := npmFixture(t)
-	l["packages"].(map[string]any)["node_modules/@clarula/einfache-erechnung-frontend"].(map[string]any)["resolved"] = "../../outside"
+	l["packages"].(map[string]any)["node_modules/@example/frontend"].(map[string]any)["resolved"] = "../../outside"
 	if !hasViolation(npmEvaluateFixture(t, npmCollectFixture(t, dir, l, p), p), "npm.dependencies") {
 		t.Fatal("escaping link accepted")
 	}

@@ -1,6 +1,6 @@
 # Current architecture
 
-Updated 2026-09-24. This describes implemented behavior; [roadmap](roadmap.md) describes proposals. [Design section 17](design.md#17-invoicex-prototype-implementation-plan) is the original prototype contract.
+Updated 2026-09-24. This describes implemented behavior; [roadmap](roadmap.md) describes proposals. [Design section 17](design.md#17-frontend-implementation-plan) is the original implementation contract.
 
 ## Responsibilities
 

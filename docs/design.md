@@ -1,28 +1,30 @@
-# Preflight design and prototype contract
+# Preflight design and implementation contract
 
 Created: 2026-09-21; imported into this repository: 2026-09-24.
 
-Status: Prototype implemented and verified on 2026-09-23, with the real baseline failure preserved.
+Status: Initial implementation completed and verified on 2026-09-23, with the real baseline failure preserved.
+
+Public documentation uses neutral source/workspace names and omits identifying source paths and revisions. Historical outcomes remain unchanged. The current example profile is `frontend-vitest`, with workspace `@example/frontend` at `applications/frontend/apps/web`; historical names are not compatibility aliases. Earlier initialized state remains separate and requires explicit fresh initialization/preparation to use the renamed profile and runner.
 
 Owner: Toni / rebaze. Working name: **rebaze Preflight**, CLI `preflight`. Distribution: GitHub and Homebrew preparation; license: Apache-2.0 (selected 2026-09-24).
 
 2026-09-24 distribution update: the owner selected `github.com/rebaze/preflight` and requested GitHub CI/release preparation following Rio. [Release design](release-design.md) records that separate distribution boundary. The CLI's local-feedback authority and the original pilot scope remain unchanged; the owner selected Apache-2.0 to match Rio; the first version remains an explicit owner decision.
 
-This repository now owns this design. It was transferred from the original rebaze design record, `2026-09-21-release-control-preflight-design.md`; that sibling checkout is not a dependency. Section 17 takes precedence over earlier exploration for the implemented prototype. Its task checklist records the original implementation contract, not unfinished work. See [implementation status](implementation-progress.md), [current architecture](architecture.md), [actual pilot results](pilot-results.md) and [next work](roadmap.md). Historical absolute paths and tool observations below identify the original pilot; use the portable commands in [development](development.md) for new work. The roadmap is proposed work, not permission to widen execution boundaries.
+This repository now owns this design. It was transferred from the original rebaze design record, `2026-09-21-release-control-preflight-design.md`; that sibling checkout is not a dependency. Section 17 takes precedence over earlier exploration for the implemented project. Its task checklist records the original implementation contract, not unfinished work. See [implementation status](implementation-progress.md), [current architecture](architecture.md), [actual pilot results](pilot-results.md) and [next work](roadmap.md). Historical tool observations describe the original verification run; use the portable commands in [development](development.md) for new work. The roadmap is proposed work, not permission to widen execution boundaries.
 
 ## 1. Purpose and authority
 
-This is the repository-owned design record for the concept discussed on 2026-09-21. It preserves the problem, scope, control semantics, research, decisions and original prototype contract. Record future approved design changes here rather than maintaining competing specifications in another checkout.
+This is the repository-owned design record for the concept discussed on 2026-09-21. It preserves the problem, scope, control semantics, research, decisions and original implementation contract. Record future approved design changes here rather than maintaining competing specifications in another checkout.
 
-Toni selected the first use case: **developers and coding agents checking a change before opening a PR**. On 2026-09-23 he selected `/Users/tonit/devel/invoicex/invoicex` as the pilot and requested a prototype plan with the proposed defaults plus a final implementation prompt. Section 17 resolves the first implementation slice; it takes precedence over earlier exploratory options for that slice. Wider lifecycle capabilities remain proposals.
+Toni selected the first use case: **developers and coding agents checking a change before opening a PR**. A read-only reference frontend was selected on 2026-09-23. Its identity and private locations are omitted from this public design record. Section 17 resolves the first implementation slice; it takes precedence over earlier exploratory options for that slice. Wider lifecycle capabilities remain proposals.
 
 The question the software answers is:
 
 > Given what I intend to change or have changed, which requirements apply, what can I verify now, and what still needs attention before I open the PR?
 
-The wider aim is fewer avoidable failures discovered at release, while preserving effective enforcement. Reduced failures, delivery gains and market demand remain hypotheses to validate.
+The aim is fewer avoidable failures discovered at release, while preserving effective enforcement. The roadmap focuses on making local checks easier to understand and run.
 
-This document does not change rebaze's website, consulting scope, rio's advertised capabilities or the ARC exploration (future release-operation work, outside this prototype). It does not change Gravitas methodology or sign-off contracts. It contains no customer data or engagement evidence.
+This document does not change rebaze's website, consulting scope, rio's advertised capabilities or the ARC exploration (future release-operation work, outside this project). It does not change Gravitas methodology or sign-off contracts. It contains no customer data or engagement evidence.
 
 ## 2. Problem and central design principle
 
@@ -69,7 +71,7 @@ An agent can help draft rules or fixes. Its natural-language conclusion is not a
 - A conservative full-check mode; no speculative dependency graph is required for the first version.
 - Test fixtures that compare developer and agent use against the same report contract.
 
-### Explicitly outside the MVP
+### Explicitly outside the initial scope
 
 - Release authorization, deployment execution, autonomous exceptions or autonomous remediation.
 - A new scanner, functional-test generation service or general-purpose test-coverage oracle.
@@ -142,7 +144,7 @@ Each control definition contains:
 
 Keep package metadata separate from rule implementation. A YAML/JSON descriptor can reference existing Rego rules and allowlisted check adapters. This is a metadata contract, not a proposed new programming language. The exact schema is an implementation decision to validate with the pilot.
 
-The first package can live in Git. Pin it to immutable content, record its digest and update it through review. OCI distribution and signed packages can follow when needed; do not build a registry service for the MVP. A digest identifies content but does not establish who authorized it.
+The first package can live in Git. Pin it to immutable content, record its digest and update it through review. OCI distribution and signed packages can follow when needed; do not build a registry service for the initial scope. A digest identifies content but does not establish who authorized it.
 
 Project-specific parameters may tighten or configure controls through the trusted package. They must not implicitly allow a worktree to exclude mandatory controls. Proposed policy changes can be explained as changes; their evaluation never replaces the governing baseline during that same unapproved change.
 
@@ -210,11 +212,11 @@ Separate evidence collection and command execution from policy evaluation. Suppl
 
 ### Execution and data handling
 
-Repository scripts and dependency installers execute code. Naming a runner in a policy does not make that code safe. The MVP requires an explicitly configured executor with defined filesystem and network access, timeouts and output limits. It must not silently fall back to unrestricted execution when the configured isolation is unavailable.
+Repository scripts and dependency installers execute code. Naming a runner in a policy does not make that code safe. The initial scope requires an explicitly configured executor with defined filesystem and network access, timeouts and output limits. It must not silently fall back to unrestricted execution when the configured isolation is unavailable.
 
 Use an isolated execution environment without production credentials, host control sockets or privileged access. Supply only declared inputs and required development access. Changes to invoked scripts are part of the inspected change. A pilot that cannot run under the selected execution profile must report that limitation rather than manufacture a pass.
 
-Keep reports in customer-owned/local storage. Collect the minimum necessary evidence and redact known sensitive values from diagnostic output. Raw command logs are untrusted content: agents must consume structured findings without treating log text as instructions. No automatic report upload is part of the MVP.
+Keep reports in customer-owned/local storage. Collect the minimum necessary evidence and redact known sensitive values from diagnostic output. Raw command logs are untrusted content: agents must consume structured findings without treating log text as instructions. No automatic report upload is part of the initial scope.
 
 ## 9. Trust boundaries and policy integrity
 
@@ -229,26 +231,26 @@ Keep reports in customer-owned/local storage. Collect the minimum necessary evid
 | A diff selector misses indirect effects | Conservative fallback runs the full applicable set; selection rules have their own tests. |
 | The caller claims a weaker stage or context | Local mode is explicitly advisory. Later enforcement chooses its context and mandatory controls independently. |
 
-Local users control their machines and can bypass the CLI. The MVP does not claim tamperproof local enforcement. Policy baselines prevent accidental or agent-driven self-relaxation inside the supported workflow; trusted CI/forge/deployment enforcement is needed to resist bypass at authoritative transitions.
+Local users control their machines and can bypass the CLI. The initial scope does not claim tamperproof local enforcement. Policy baselines prevent accidental or agent-driven self-relaxation inside the supported workflow; trusted CI/forge/deployment enforcement is needed to resist bypass at authoritative transitions.
 
 Signatures authenticate an issuer and protect integrity; they do not prove that an inadequate check detected the right risks. Protecting policy files also does not prove the correctness of the tests they invoke.
 
-## 10. Control catalog and MVP selection
+## 10. Control catalog and initial scope selection
 
 | Family | Early use | Later obligation | Initial scope |
 |---|---|---|---|
-| Existing tests and validations | Identify and run the configured suite. | Trusted results for the submitted revision/artifact. | MVP: one named suite and supported result format. |
+| Existing tests and validations | Identify and run the configured suite. | Trusted results for the submitted revision/artifact. | initial scope: one named suite and supported result format. |
 | Dependency policy | Evaluate resolved dependency metadata and configured constraints. | Inspect built contents and sufficiently current findings. | Pilot: npm source/integrity and existing override constraints in section 17; vulnerability/license adapters deferred. |
-| CI/control integrity | Detect removal or weakening of required checks and triggers. | Enforce approved policy/workflow changes. | MVP: one CI configuration format and explicit required-check rules. |
+| CI/control integrity | Detect removal or weakening of required checks and triggers. | Enforce approved policy/workflow changes. | initial scope: one CI configuration format and explicit required-check rules. |
 | Configuration constraints | Validate build, deployment or infrastructure files. | Confirm deployed configuration and environment context. | Subsequent pack. |
-| Reviews and decisions | Identify the responsible reviewer and reason. | Obtain authenticated decisions covering the current subject. | MVP may report review obligations; approval collection is later. |
+| Reviews and decisions | Identify the responsible reviewer and reason. | Obtain authenticated decisions covering the current subject. | initial scope may report review obligations; approval collection is later. |
 | Artifact/evidence association | Detect configurations that rebuild after testing or lose identity. | Verify evidence for the actual artifact digest. | Later artifact integration. |
 | Exceptions | Explain applicability and approaching expiry. | Verify issuer, scope, expiry and revocation. | Define the model now; authorized waiver integration later. |
-| Deployment/recovery readiness | Surface required configuration and arrangements. | Evaluate actual destination and current operational conditions. | Outside pre-PR MVP. |
+| Deployment/recovery readiness | Surface required configuration and arrangements. | Evaluate actual destination and current operational conditions. | Outside pre-PR initial scope. |
 
-For the dependency MVP, configure a meaningful rule from the actual pilot. Section 17 selects npm source/integrity requirements and preservation of existing compatibility overrides. This is a dependency-control experiment, not a vulnerability or license assessment. Treat missing inventory or unresolved classification explicitly. Neither a lockfile nor an SBOM is automatically a complete inventory of the final artifact. No universal severity threshold is imposed by the tool.
+For the dependency initial scope, configure a meaningful rule from the actual pilot. Section 17 selects npm source/integrity requirements and preservation of existing compatibility overrides. This checks dependency declarations and compatibility constraints; vulnerability and license assessments remain outside its scope. Treat missing inventory or unresolved classification explicitly. Neither a lockfile nor an SBOM is automatically a complete inventory of the final artifact. No universal severity threshold is imposed by the tool.
 
-The third MVP control detects a configured required CI job/check being removed or its selected triggering conditions being weakened. It is not a claim to statically prove arbitrary pipeline semantics. Unsupported configurations must be reported rather than interpreted optimistically.
+The third initial scope control detects a configured required CI job/check being removed or its selected triggering conditions being weakened. It is not a claim to statically prove arbitrary pipeline semantics. Unsupported configurations must be reported rather than interpreted optimistically.
 
 The initial control set intentionally reuses existing checks. Defining billing expectations, writing functional tests and deciding business acceptance remain with the appropriate project owners unless separately agreed work explicitly covers them.
 
@@ -263,7 +265,7 @@ Primary documentation reviewed on 2026-09-21; no comparative implementation benc
 | [Kyverno](https://kyverno.io/docs/guides/applying-policies/) | Evaluates policies in pipelines and at admission; supports broader JSON evaluation through documented interfaces. | Reuse for a Kubernetes-oriented customer; compare before adding overlapping configuration policies. |
 | [Conforma](https://conforma.dev/docs/cli/ec_validate_image.html) | Verifies artifact signatures and attestations, and also [evaluates arbitrary JSON/YAML inputs](https://conforma.dev/docs/cli/ec_validate_input.html). Supports policy inspection and multiple report formats. | Evaluate as a foundation for pre-PR input evaluation as well as later artifact verification; do not assume it only works after build. |
 | [in-toto Witness](https://witness.dev/docs/docs/concepts/policy/) | Signed policies describe trusted producers, required attestations and evaluation rules. | Investigate for evidence collection and verification beyond local feedback. |
-| [CUE](https://cuelang.org/docs/concept/how-cue-enables-configuration/) | Shared constraints support early configuration validation and later configuration generation. | Alternative for configuration-heavy needs; do not add a second engine to the MVP. |
+| [CUE](https://cuelang.org/docs/concept/how-cue-enables-configuration/) | Shared constraints support early configuration validation and later configuration generation. | Alternative for configuration-heavy needs; do not add a second engine to the initial scope. |
 | [gittuf](https://gittuf.dev/documentation/developers/design) | Independently verifiable repository policy and authenticated policy metadata. | Relevant research for governance; not required to demonstrate the local workflow. |
 
 Three approaches were considered:
@@ -272,7 +274,7 @@ Three approaches were considered:
 2. **A thin lifecycle layer over an existing evaluator:** proposed direction. Own applicability, scheduling, remaining obligations, evidence context and readable/structured explanations; reuse scanners and evaluators.
 3. **A release-operating agent:** substantially broader authority and orchestration problem. Keep as ARC exploration.
 
-The first implementation experiment should test whether approach 2 provides value beyond approach 1. Availability of the concept is not proof of a market gap. Section 17 selects Go, external Conftest and a standalone local experiment for the pilot; those choices do not settle long-term product packaging.
+Preflight uses approach 2: a small Go CLI around external Conftest, with shared findings and isolated evidence production. Section 17 records the implementation contract; usability and integration improvements are tracked in the roadmap.
 
 ### 11.1. What is already solved
 
@@ -299,7 +301,7 @@ The potential product owns the path from a proposed change to a justified local 
 
 These are integration and workflow hypotheses, not claims that OPA, Conftest or Conforma cannot implement the underlying logic. Project scripts could assemble them. A separate product must demonstrably reduce repeated integration work, inconsistent semantics or maintenance burden across projects.
 
-The three proposed MVP checks by themselves do not establish differentiation. Keep them as fixtures, but exercise discovery, evidence collection, a subsequent edit, invalidation and re-evaluation around them. Compare against well-configured existing tools, not an empty baseline.
+The three proposed initial scope checks by themselves do not establish differentiation. Keep them as fixtures, but exercise discovery, evidence collection, a subsequent edit, invalidation and re-evaluation around them. Compare against well-configured existing tools, not an empty baseline.
 
 ### 11.3. Concrete comparison case
 
@@ -352,9 +354,9 @@ Neither rio nor a rebaze engagement should be a technical prerequisite for using
 
 Use fixtures for pass, violation, missing data, uncertainty and attempted weakening. Also test the control definitions themselves. Do not test merely that the implementation reproduces its own formatting.
 
-## 14. Validation experiment and success criteria
+## 14. Verification workflow and success criteria
 
-Select one real development repository suitable for a non-production pilot. Configure the three MVP controls. Exercise the same representative changes through a developer workflow and a coding-agent workflow, including intentional failures and fixes.
+Select one real development repository suitable for a non-production pilot. Configure the three initial scope controls. Exercise the same representative changes through a developer workflow and a coding-agent workflow, including intentional failures and fixes.
 
 Record:
 
@@ -372,16 +374,16 @@ Success requires correct handling of the acceptance cases and useful feedback fr
 | Item | Status |
 |---|---|
 | First user: developer/coding agent before PR | Selected by Toni. |
-| Pilot repository | Selected by Toni on 2026-09-23: `/Users/tonit/devel/invoicex/invoicex`. |
+| Reference repository | Selected on 2026-09-23; source identity retained privately. |
 | Collect this concept in one Markdown document | Requested by Toni. |
-| CLI plus common human/JSON report | Accepted for prototype planning on 2026-09-23. |
-| Thin layer over an existing evaluator | Prototype direction; compare with simple tool packaging. |
-| Three-control, one-repository MVP | Accepted for prototype planning; frontend slice specified in section 17. |
+| CLI plus common human/JSON report | Accepted for implementation planning on 2026-09-23. |
+| Thin layer over an existing evaluator | Use Conftest for policy evaluation and keep the CLI focused. |
+| Three-control, one-repository initial scope | Accepted for implementation planning; frontend slice specified in section 17. |
 | Trusted baseline distinct from proposed worktree policy | Required design invariant. |
 | Local feedback distinct from release authority | Required design invariant. |
 | MCP, dashboard, autonomous remediation and deployment | Deferred. |
-| Name `rebaze Preflight`, CLI `preflight` | Proposed by the assistant; not yet confirmed by Toni. |
-| Public product name, license, distribution and support | Open business decisions; not needed to assess local usefulness. |
+| Name `rebaze Preflight`, CLI `preflight` | The maintained project and CLI name. |
+| License and distribution | Apache-2.0; GitHub releases and Homebrew automation. Long-term support remains an owner decision. |
 
 ### Questions parked for later answers
 
@@ -390,53 +392,53 @@ Toni explicitly deferred these answers on 2026-09-21 to continue discussing diff
 | ID | Question | Why it matters | Answer/status |
 |---|---|---|---|
 | Q1 | Which repository should the first version validate? What language, dependency ecosystem, test tools and CI system does it use? | Selects the concrete input formats, adapters and pilot fixtures. | Answered by Toni 2026-09-23. Inspection selected the npm frontend/EER test slice of the Kotlin/Nuxt monorepo; see section 17. |
-| Q2 | What implementation language and packaging should we use? Should we invoke Conftest/Conforma, embed OPA, or extend an existing project? | Determines reuse, distribution and maintenance responsibilities. | Go CLI and Conftest-first defaults accepted for planning on 2026-09-23; external process adapter and standalone local experiment selected in section 17. |
+| Q2 | What implementation language and packaging should we use? Should we invoke Conftest/Conforma, embed OPA, or extend an existing project? | Determines reuse, distribution and maintenance responsibilities. | Go CLI and Conftest-first defaults accepted for planning on 2026-09-23; external process adapter and standalone local tool selected in section 17. |
 | Q3 | Which isolated execution environment must be supported, on which operating systems, with what filesystem and network access? | Makes repository-code execution and installation requirements concrete. | Planning default: macOS/Linux CLI, Docker Linux runner, separate no-script dependency bootstrap and offline code execution. Details in section 17. |
-| Q4 | What exact control-package, context, runner-result and JSON-report schemas should the first version support? | Turns the conceptual model into implementable, versioned contracts. | Prototype version-1 contracts fixed in section 17; not a promised stable public API. |
-| Q5 | What are the precise first three rules: required suite/result format, dependency finding or license policy and freshness, and protected CI jobs/triggers? | Establishes observable pass/fail cases without inventing customer requirements. | EER Vitest/JUnit; npm source/integrity plus existing overrides; conservative protected CI projection. Experimental feedback only. |
-| Q6 | Who approves the governing policy, where is the trusted baseline stored, how is it pinned/updated, and how are policy-change proposals reviewed? | Prevents the worktree from silently defining its own acceptance criteria. | Local operator explicitly initializes external state from pinned baseline/profile/policy. No automatic trust update or forge enforcement in prototype. |
-| Q7 | Does the workflow justify a standalone tool, an upstream extension or a supported package of existing tools? Is `rebaze Preflight` the preferred name if it is separate? | Establishes product scope and avoids treating the proposed name as a commitment to build. | Standalone local prototype for comparison; public product/brand and long-term ownership remain open. Working CLI: `preflight`. |
+| Q4 | What exact control-package, context, runner-result and JSON-report schemas should the first version support? | Turns the conceptual model into implementable, versioned contracts. | Version-1 contracts fixed in section 17; not a promised stable public API. |
+| Q5 | What are the precise first three rules: required suite/result format, dependency finding or license policy and freshness, and protected CI jobs/triggers? | Establishes observable pass/fail cases without inventing customer requirements. | EER Vitest/JUnit; npm source/integrity plus existing overrides; conservative protected CI projection. Local feedback only. |
+| Q6 | Who approves the governing policy, where is the trusted baseline stored, how is it pinned/updated, and how are policy-change proposals reviewed? | Prevents the worktree from silently defining its own acceptance criteria. | Local operator explicitly initializes external state from pinned baseline/profile/policy. No automatic trust update or forge enforcement in project. |
+| Q7 | Does the workflow justify a standalone tool, an upstream extension or a supported package of existing tools? Is `rebaze Preflight` the preferred name if it is separate? | Establishes product scope and avoids treating the proposed name as a commitment to build. | A small, maintained local CLI: `preflight`. Usability and integration work are tracked in the roadmap. |
 
 Planning-stage note: section 17 was the bounded implementation handoff; dependency installation and the real pilot run had not happened at planning time. They were subsequently completed, with results in this repository. Wider controls, public product packaging and commercial commitments remain open.
 
 ## 16. Change record
 
 - **2026-09-24:** Transferred design ownership into the standalone repository; added current architecture, development instructions and roadmap. Original planning observations remain dated context.
-- **2026-09-23 (implementation):** Completed the six-task prototype workflow. Synthetic real-Vitest demo passed; real EER suites failed to load missing generated Nuxt tsconfig. See the local pilot results for evidence.
+- **2026-09-23 (implementation):** Completed the six-task project workflow. Synthetic real-Vitest demo passed; real EER suites failed to load missing generated Nuxt tsconfig. See the local pilot results for evidence.
 
-- **2026-09-21:** Collected the lifecycle-control discussion and selected pre-PR use case into this draft. Preserved early-feedback versus authoritative-enforcement boundaries, existing-tool research, proposed architecture and MVP, and remaining decisions.
+- **2026-09-21:** Collected the lifecycle-control discussion and selected pre-PR use case into this draft. Preserved early-feedback versus authoritative-enforcement boundaries, existing-tool research, proposed architecture and initial scope, and remaining decisions.
 - **2026-09-21:** Recorded the proposed Preflight name and parked implementation questions for Toni's later answers. Expanded the comparison to include Conftest's pre-commit/documentation support and Conforma's arbitrary-input evaluation; differentiation remains a workflow hypothesis to test.
-- **2026-09-23:** Toni selected invoicex and requested a prototype plan and agent prompt. Read-only inspection found an existing Pi quality-check planner and fingerprint cache. Added the bounded frontend pilot, concrete controls, execution boundaries, contracts, task plan and handoff in section 17. No pilot files were changed or test results claimed.
+- **2026-09-23:** A reference frontend was selected for read-only verification and an implementation plan. Read-only inspection found an existing Pi quality-check planner and fingerprint cache. Added the bounded frontend pilot, concrete controls, execution boundaries, contracts, task plan and handoff in section 17. No pilot files were changed or test results claimed.
 
-## 17. Invoicex prototype implementation plan
+## 17. Frontend implementation plan
 
-> Original prototype implementation contract, completed on 2026-09-23. Retained for acceptance criteria and rationale; unchecked boxes below are historical plan notation, not the current backlog. Use the local AGENTS.md and development guide for maintenance. No global skill/plugin installation is required. This is a local prototype, not production CI integration.
+> Original implementation contract, completed on 2026-09-23. Retained for acceptance criteria and rationale; unchecked boxes below are historical plan notation, not the current backlog. Use the local AGENTS.md and development guide for maintenance. No global skill/plugin installation is required. This section describes local checking; distribution automation is documented separately.
 
-**Goal:** Build a Go CLI that evaluates the selected invoicex frontend change with three controls, provides identical human/agent findings, detects stale evidence, and compares the experience with existing tools.
+**Goal:** Build a Go CLI that evaluates the selected frontend change with three controls, provides identical human/agent findings, detects stale evidence, and compares the experience with existing tools.
 
 **Architecture:** Go owns snapshot context, a pinned local profile, explicit evidence collection, orchestration and reporting. Conftest evaluates supplied JSON/YAML with Rego; it does not execute repository tools. Docker executes the pilot tests against a disposable snapshot, never the original worktree.
 
-**Tech stack:** Go 1.27.1, standard library; external Conftest with a recorded binary digest; Docker Linux containers; Node 24.18.0 and npm 11.17.0 for the pilot; existing Vitest 4.1.10 and npm lockfile v3. Conftest parses workflow YAML, so the Go prototype needs no YAML or policy-engine dependency.
+**Tech stack:** Go 1.27.1, standard library; external Conftest with a recorded binary digest; Docker Linux containers; Node 24.18.0 and npm 11.17.0 for the pilot; existing Vitest 4.1.10 and npm lockfile v3. Conftest parses workflow YAML, so the Go project needs no YAML or policy-engine dependency.
 
 ### 17.1. Locations, scope and inspected evidence
 
 - Implement the standalone local project at `/Users/tonit/devel/rebaze/preflight`, module `rebaze.local/preflight`. The directory did not exist at inspection. If it exists at execution time, inspect and preserve its contents before proceeding; do not replace another project.
-- Pilot source is `/Users/tonit/devel/invoicex/invoicex`, observed on `main` at `ed91ed4dcb21d363497308f7f3f31d54d9a2fc7d`.
+- The reference source was read-only; its baseline and HEAD matched. Identifying source details are retained privately.
 - Read its `AGENTS.md`; it documents the active `applications/` layout. Several untracked legacy/local directories already exist, including `application/` and `website/`. Do not migrate, delete, stage or execute those directories.
-- Application slice: `applications/frontend/apps/einfache-erechnung/`; dependency workspace: `applications/frontend/`, including its sibling packages/apps because the lockfile is shared. Workflow: `.github/workflows/ci.yml`.
-- Observed `.node-version`: `24.18.0`; root `packageManager`: `npm@11.17.0`; workspace `@clarula/einfache-erechnung-frontend` runs `vitest run` and has eight `test/*.test.ts` files.
+- Application slice: `applications/frontend/apps/web/`; dependency workspace: `applications/frontend/`, including its sibling packages/apps because the lockfile is shared. Workflow: `.github/workflows/ci.yml`.
+- Observed `.node-version`: `24.18.0`; root `packageManager`: `npm@11.17.0`; workspace `@example/frontend` runs `vitest run` and has eight `test/*.test.ts` files.
 - Root frontend `postinstall` applies compatibility patches and runs a Node test. Treat those as explicit offline runner steps, not permission to execute all dependency lifecycle scripts.
-- The existing CI frontend job is `frontend-eer-run`; its test command is `npm run test --workspace @clarula/einfache-erechnung-frontend`. The final gate is `build-and-test`, display name `Build & Test`, with `if: always()`. Workflow comments deliberately reject a top-level path filter because the required status must be emitted on PRs to main. Remote branch-protection settings were not inspected.
-- Existing `.pi/extensions/quality-checks/{planning,index,check-execution}.ts` already select checks, associate successes with fingerprints and report advisories. Its changed-file collector reads staged, unstaged and untracked files; the prototype also explicitly compares committed branch changes with a merge base. Compare these actual implementations; do not claim to invent invalidation or check planning.
+- The existing CI frontend job is `frontend-eer-run`; its test command is `npm run test --workspace @example/frontend`. The final gate is `build-and-test`, display name `Build & Test`, with `if: always()`. Workflow comments deliberately reject a top-level path filter because the required status must be emitted on PRs to main. Remote branch-protection settings were not inspected.
+- Existing `.pi/extensions/quality-checks/{planning,index,check-execution}.ts` already select checks, associate successes with fingerprints and report advisories. Its changed-file collector reads staged, unstaged and untracked files; the project also explicitly compares committed branch changes with a merge base. Compare these actual implementations; do not claim to invent invalidation or check planning.
 - Host tools observed: Go 1.27.1, Docker 29.8.0 with Linux/aarch64 daemon. `/opt/homebrew/Cellar/conftest/0.70.1/bin/conftest` reports `Conftest: dev`, OPA 1.20.2. SHA-256: `b2f75ccf2575da4543ecec646194ae2f5a476fdf810681b04d01042b8e73ff18`. Treat the digest as the local tool pin, not proof of an official 0.70.1 release.
 
-Planning read files and tool versions only. It did not install dependencies, pull/build images, run invoicex tests, inspect secrets, verify remote CI configuration or change the pilot.
+Planning read files and tool versions only. It did not install dependencies, pull/build images, run reference-application tests, inspect secrets, verify remote CI configuration or change the pilot.
 
 ### 17.2. Global constraints
 
 - Preserve the source checkout. Any intentionally failing demonstration changes belong in disposable local copies. Never submit changes, enquiries, invoices, deployments or hosted LLM requests.
-- No pilot source, lockfile contents, customer documents, environment files or raw test output in the prototype Git history. Fixtures are synthetic. Local run material stays outside the source tree and is ignored.
-- Do not replace the Pi extension, change branch protection or add workflows to invoicex. No automatic Git commit, push, remote repository creation or publication is part of this handoff.
+- No pilot source, lockfile contents, customer documents, environment files or raw test output in the project Git history. Fixtures are synthetic. Local run material stays outside the source tree and is ignored.
+- Do not replace the Pi extension, change branch protection or add workflows to the reference checkout. No automatic Git commit, push, remote repository creation or publication is part of this handoff.
 - No backend, E2E, browser, visual, native-image, Terraform, database or hosted-LLM execution. Report those boundaries honestly; a successful frontend pilot is not whole-repository readiness.
 - No source-repository hooks, configuration or shell aliases determine the governing policy or execution commands. Use explicit argv arrays, no command-string interpolation.
 - Run tests against an immutable captured input projection. The source checkout is never mounted writable or used as a process working directory for repository code.
@@ -499,18 +501,18 @@ Docker procedure:
 ```sh
 node scripts/apply-dependency-compatibility-patches.mjs
 node --test scripts/dependency-compatibility.test.mjs
-npm run test --workspace @clarula/einfache-erechnung-frontend -- --reporter=junit --outputFile=/out/vitest.xml
+npm run test --workspace @example/frontend -- --reporter=junit --outputFile=/out/vitest.xml
 ```
 
 Require the candidate app test script to remain `vitest run` before invoking it; a modified script produces a control failure and is not executed as an approved runner. Compatibility scripts are captured repository code and execute only in the offline isolation above. Ensure all subprocesses fail the runner on a nonzero result. Nothing inherits production or host secrets. Initialization does not imply permission for unrestricted host execution.
 
 5. Parse only bounded fresh output from that run; no stale result file may satisfy a new execution. Cap captured logs at 1 MiB and structured reports at 20 MiB; exceeding limits is an error. Bootstrap timeout is 600 seconds. Collect JUnit testcase counts without double-counting nested suite totals. A zero-exit/missing report is missing evidence; malformed XML is an error; valid failed tests are failures.
 
-Docker unavailability is an explicit prerequisite failure. Keep the static-policy evaluation and synthetic tests runnable without Docker. There is no fallback to running invoicex commands on the host. Repeated runs may retain a tool-owned dependency cache, but isolate each writable test run and key preparation by all dependency manifests, lockfile, npm configuration and runtime identities. Never share writable state with the source checkout.
+Docker unavailability is an explicit prerequisite failure. Keep the static-policy evaluation and synthetic tests runnable without Docker. There is no fallback to running reference-application commands on the host. Repeated runs may retain a tool-owned dependency cache, but isolate each writable test run and key preparation by all dependency manifests, lockfile, npm configuration and runtime identities. Never share writable state with the source checkout.
 
 ### 17.6. Version-1 contracts and file ownership
 
-Create these files in the new prototype; implementation may split a long file inside the same responsibility, but do not add unrelated layers:
+Create these files in the new project; implementation may split a long file inside the same responsibility, but do not add unrelated layers:
 
 ```text
 go.mod
@@ -523,7 +525,7 @@ internal/preflight/conftest.go, conftest_test.go
 internal/preflight/runner.go, runner_test.go
 internal/preflight/report.go, report_test.go
 internal/preflight/app.go, app_test.go
-profiles/invoicex-frontend.json
+profiles/frontend-vitest.json
 policy/main.rego, policy/main_test.rego
 schemas/profile-v1.json, schemas/report-v1.json
 runtime/Dockerfile, runtime/run-tests.sh
@@ -567,7 +569,7 @@ Use `violation` rules returning `msg` plus metadata `controlId`, `reasonCode`, `
 
 #### Task 1: Contracts, CLI boundary and pinned profile
 
-Files: `go.mod`, `cmd/preflight/main.go`, `model*`, `profile*`, `report*`, `profiles/invoicex-frontend.json`, both schemas, `.gitignore`.
+Files: `go.mod`, `cmd/preflight/main.go`, `model*`, `profile*`, `report*`, `profiles/frontend-vitest.json`, both schemas, `.gitignore`.
 
 - [ ] Write table-driven model tests for the exit precedence, JSON-only stdout, invalid status, and missing mandatory report fields. Include this case:
 
@@ -633,19 +635,19 @@ Files: `integration/pilot_test.go`, `docs/pilot-results.md`, `README.md`; no pil
 
 ### 17.8. Handoff commands and completion criteria
 
-After implementation, commands from the prototype root should look like:
+After implementation, commands from the project root should look like:
 
 ```sh
 go build -o bin/preflight ./cmd/preflight
-bin/preflight init --repo /Users/tonit/devel/invoicex/invoicex --baseline ed91ed4dcb21d363497308f7f3f31d54d9a2fc7d --profile profiles/invoicex-frontend.json --policy-dir policy --state-dir /tmp/preflight-invoicex-pilot --conftest /opt/homebrew/Cellar/conftest/0.70.1/bin/conftest
-bin/preflight explain --state-dir /tmp/preflight-invoicex-pilot --format text
-bin/preflight prepare --state-dir /tmp/preflight-invoicex-pilot --allow-downloads
-bin/preflight check --state-dir /tmp/preflight-invoicex-pilot --all --format json --output /tmp/preflight-invoicex-pilot/report.json
-bin/preflight status --state-dir /tmp/preflight-invoicex-pilot --report /tmp/preflight-invoicex-pilot/report.json --format text
+bin/preflight init --repo "$PREFLIGHT_REPO" --baseline "$PREFLIGHT_BASELINE" --profile profiles/frontend-vitest.json --policy-dir policy --state-dir /private/preflight-state --conftest /opt/homebrew/Cellar/conftest/0.70.1/bin/conftest
+bin/preflight explain --state-dir /private/preflight-state --format text
+bin/preflight prepare --state-dir /private/preflight-state --allow-downloads
+bin/preflight check --state-dir /private/preflight-state --all --format json --output /private/preflight-state/report.json
+bin/preflight status --state-dir /private/preflight-state --report /private/preflight-state/report.json --format text
 ```
 
-The `/tmp` state path is illustrative; use a unique empty directory per fresh onboarding rather than deleting existing state. Initialization resolves and pins the evaluator file actually present; if it differs from the inspected digest, explain the difference and verify its behavior/provenance before explicitly selecting it. Do not claim an unverified replacement is the same pin.
+The private state path is illustrative; use a unique empty directory per fresh onboarding rather than deleting existing state. Initialization resolves and pins the evaluator file actually present; if it differs from the inspected digest, explain the difference and verify its behavior/provenance before explicitly selecting it. Do not claim an unverified replacement is the same pin.
 
-Completion means all three controls, identity/invalidation behavior, protected baseline and common output work against synthetic fixtures and the real selected frontend snapshot. The pilot report may legitimately contain baseline failures or scope-review findings. A successful implementation correctly reports those; it does not require weakening policies or changing invoicex to appear clean.
+Completion means all three controls, identity/invalidation behavior, protected baseline and common output work against synthetic fixtures and the real selected frontend snapshot. The pilot report may legitimately contain baseline failures or scope-review findings. A successful implementation correctly reports those; it does not require weakening policies or changing the reference checkout to appear clean.
 
 Public reference documentation used to shape the integration: [Conftest outputs](https://www.conftest.dev/output/), [configuration precedence and combined input](https://www.conftest.dev/options/), [Vitest reporters](https://vitest.dev/guide/reporters.html), [npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/). Tool versions and actual reporter structure must be confirmed against the pinned executable and pilot installation during implementation; the documentation is not a claim that pilot tests already passed.

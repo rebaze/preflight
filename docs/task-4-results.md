@@ -1,6 +1,6 @@
 # Isolated runner verification
 
-Date: 2026-09-23. Synthetic fixtures only; no invoicex source changes or host execution of repository scripts.
+Date: 2026-09-23. Synthetic fixtures only; no external application source changes or host execution of repository scripts.
 
 The runner uses Node 24.18.0 and npm 11.17.0. Explicit preparation resolved the official `node:24.18.0-bookworm-slim` image to `node@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d` on arm64. The built runner image is `sha256:8b20521bb87c0faff185daa61be542bdf5ef2a45948fc62f547945df6effafe1`. These are observed local identities, not a claim of signed release provenance.
 

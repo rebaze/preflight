@@ -18,7 +18,7 @@ import (
 
 const frontendRoot = "applications/frontend"
 const workflowPath = ".github/workflows/ci.yml"
-const testsPrefix = "applications/frontend/apps/einfache-erechnung/test/"
+const testsPrefix = "applications/frontend/apps/web/test/"
 
 type pinnedState struct {
 	SchemaVersion   int               `json:"schemaVersion"`

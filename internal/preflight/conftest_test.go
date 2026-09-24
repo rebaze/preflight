@@ -170,7 +170,7 @@ func TestConftestSuccessfulEvaluationDoesNotDuplicateCollectorFindings(t *testin
 }
 func TestCheckRetainsPrerequisiteFailureAlongsideInvalidWorkflow(t *testing.T) {
 	repo, state := initFixture(t)
-	if e := os.Remove(filepath.Join(repo, "applications/frontend/apps/einfache-erechnung/test/example.test.ts")); e != nil {
+	if e := os.Remove(filepath.Join(repo, "applications/frontend/apps/web/test/example.test.ts")); e != nil {
 		t.Fatal(e)
 	}
 	if e := os.WriteFile(filepath.Join(repo, ".github/workflows/ci.yml"), []byte("jobs: [\n"), 0600); e != nil {

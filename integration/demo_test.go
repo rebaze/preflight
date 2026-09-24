@@ -122,15 +122,15 @@ func TestSyntheticCLIWorkflow(t *testing.T) {
 	}
 	run(project, "go", "build", "-o", binary, "./cmd/preflight")
 	write("applications/frontend/package.json", `{"name":"preflight-synthetic","private":true,"version":"1.0.0","packageManager":"npm@11.17.0","workspaces":["apps/*"],"devDependencies":{"vitest":"4.1.10","brace-expansion":"5.0.9","js-yaml":"4.3.1"},"overrides":{"brace-expansion":"5.0.9","js-yaml":"4.3.1"}}`)
-	write("applications/frontend/apps/einfache-erechnung/package.json", `{"name":"@clarula/einfache-erechnung-frontend","private":true,"version":"1.0.0","type":"module","scripts":{"test":"vitest run"}}`)
+	write("applications/frontend/apps/web/package.json", `{"name":"@example/frontend","private":true,"version":"1.0.0","type":"module","scripts":{"test":"vitest run"}}`)
 	write("applications/frontend/.node-version", "24.18.0\n")
 	write("applications/frontend/.npmrc", "save-exact=true\nfund=false\naudit=false\nregistry=https://registry.npmjs.org\n")
 	// At this point the mount contains only manifests and safe npm configuration.
 	// Keep the generated lockfile writable by the host on rootful Linux Docker.
 	run(project, "docker", demoManifestArgs(front, image)...)
 	source := "export const answer = 42;\n"
-	write("applications/frontend/apps/einfache-erechnung/answer.js", source)
-	write("applications/frontend/apps/einfache-erechnung/test/answer.test.ts", "import { test, expect } from 'vitest';\nimport { answer } from '../answer.js';\ntest('synthetic answer remains correct', () => expect(answer).toBe(42));\n")
+	write("applications/frontend/apps/web/answer.js", source)
+	write("applications/frontend/apps/web/test/answer.test.ts", "import { test, expect } from 'vitest';\nimport { answer } from '../answer.js';\ntest('synthetic answer remains correct', () => expect(answer).toBe(42));\n")
 	write("applications/frontend/scripts/apply-dependency-compatibility-patches.mjs", "// Synthetic fixture has no application compatibility patch.\n")
 	write("applications/frontend/scripts/dependency-compatibility.test.mjs", "import test from 'node:test'; import assert from 'node:assert/strict'; test('synthetic compatibility', () => assert.equal(1, 1));\n")
 	ci := `name: Synthetic frontend
@@ -138,7 +138,7 @@ on: {pull_request: {branches: [main]}}
 permissions: {contents: read}
 jobs:
   changes: {runs-on: ubuntu-latest, steps: [{run: "echo synthetic"}]}
-  frontend-eer-run: {runs-on: ubuntu-latest, needs: changes, steps: [{run: "npm run test --workspace @clarula/einfache-erechnung-frontend"}]}
+  frontend-eer-run: {runs-on: ubuntu-latest, needs: changes, steps: [{run: "npm run test --workspace @example/frontend"}]}
   frontend-operator-run: {runs-on: ubuntu-latest, needs: changes, steps: [{run: "echo synthetic"}]}
   build-and-test: {name: "Build & Test", if: "always()", runs-on: ubuntu-latest, needs: [changes, frontend-eer-run, frontend-operator-run], steps: [{run: "echo synthetic"}]}
 `
@@ -194,7 +194,7 @@ jobs:
 		}
 		t.Fatalf("missing %s/%s: %+v", control, status, r.Findings)
 	}
-	cli("init", 0, "init", "--repo", repo, "--baseline", baseline, "--profile", filepath.Join(project, "profiles/invoicex-frontend.json"), "--policy-dir", filepath.Join(project, "policy"), "--state-dir", state, "--conftest", conftest, "--format", "json")
+	cli("init", 0, "init", "--repo", repo, "--baseline", baseline, "--profile", filepath.Join(project, "profiles/frontend-vitest.json"), "--policy-dir", filepath.Join(project, "policy"), "--state-dir", state, "--conftest", conftest, "--format", "json")
 	cli("explain", 0, "explain", "--state-dir", state, "--format", "json")
 	cli("prepare", 0, "prepare", "--state-dir", state, "--allow-downloads", "--format", "json")
 	check := func(name string, exit int) pf.Report {
@@ -212,9 +212,9 @@ jobs:
 		t.Fatal(e)
 	}
 	os.WriteFile(filepath.Join(dir, "baseline-pass.txt"), text.Bytes(), 0600)
-	write("applications/frontend/apps/einfache-erechnung/answer.js", "export const answer = 41;\n")
+	write("applications/frontend/apps/web/answer.js", "export const answer = 41;\n")
 	finding(check("assertion-failure", 1), "eer.tests", "fail")
-	write("applications/frontend/apps/einfache-erechnung/answer.js", source)
+	write("applications/frontend/apps/web/answer.js", source)
 	finding(check("restored-pass", 0), "eer.tests", "pass")
 	lockPath := filepath.Join(front, "package-lock.json")
 	lock, e := os.ReadFile(lockPath)
@@ -238,7 +238,7 @@ jobs:
 	write(".github/workflows/ci.yml", ci)
 	renewed := check("restored-policy-pass", 0)
 	finding(renewed, "eer.tests", "pass")
-	write("applications/frontend/apps/einfache-erechnung/answer.js", source+"// Further source edit after a passing report.\n")
+	write("applications/frontend/apps/web/answer.js", source+"// Further source edit after a passing report.\n")
 	stale := cli("stale-status", 2, "status", "--state-dir", state, "--report", filepath.Join(state, "restored-policy-pass-report.json"), "--format", "json")
 	if stale.Current {
 		t.Fatal("edited snapshot incorrectly current")

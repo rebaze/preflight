@@ -202,13 +202,13 @@ func (p Profile) Validate() error {
 	if p.SchemaVersion != 1 {
 		return fmt.Errorf("unsupported profile schema version %d", p.SchemaVersion)
 	}
-	if p.ID != "invoicex-frontend" {
+	if p.ID != "frontend-vitest" {
 		return fmt.Errorf("unsupported profile %q", p.ID)
 	}
 	if p.NodeVersion != "24.18.0" || p.NPMVersion != "11.17.0" {
 		return fmt.Errorf("profile requires Node 24.18.0 and npm 11.17.0")
 	}
-	if p.TestWorkspace != "@clarula/einfache-erechnung-frontend" {
+	if p.TestWorkspace != "@example/frontend" {
 		return fmt.Errorf("unsupported test workspace")
 	}
 	expected := map[string][]string{"sourcePrefixes": {"applications/frontend/"}, "sourceFiles": {".github/workflows/ci.yml"}, "requiredJobs": {"changes", "frontend-eer-run", "frontend-operator-run", "build-and-test"}, "protectedWorkflowKeys": {"on", "permissions"}, "deferredControls": {"artifact.verification"}}

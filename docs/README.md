@@ -1,12 +1,12 @@
 # Project context
 
-Everything needed to maintain the prototype is in this repository. Machine-local paths in dated reports identify prior runs; they are not required files in a fresh checkout.
+Everything needed to maintain the project is in this repository. Machine-local paths in dated reports identify prior runs; they are not required files in a fresh checkout.
 
 | Read | Purpose |
 | --- | --- |
 | [Project README](../README.md) | What Preflight does, command usage and current limitations |
 | [Agent instructions](../AGENTS.md) | Working boundaries and file routing |
-| [Design](design.md) | Product intent, decisions, research and original six-task prototype contract; section 17 resolves exploratory alternatives |
+| [Design](design.md) | Product intent, decisions, research and original six-task implementation contract; section 17 resolves exploratory alternatives |
 | [Architecture](architecture.md) | Current components, state lifecycle and trust boundaries |
 | [Development](development.md) | Reproducible local verification without the real pilot checkout |
 | [Release operations](releases.md) | GitHub CI, packaging, signing, Homebrew setup and first-release prerequisites |
@@ -19,4 +19,4 @@ Everything needed to maintain the prototype is in this repository. Machine-local
 | [Synthetic demo](task-5-demo.md) | Executed real-Vitest scenarios; use development instructions to recreate |
 | [Example JSON](examples/report.json) / [text](examples/report.txt) | Synthetic renderings of one common report |
 
-`task-1-results.md`, `task-3-results.md` and `task-4-results.md` retain targeted implementation evidence. They are historical records, not installation guides. Prototype success does not mean the application tests pass or that a product-market decision has been made.
+`task-1-results.md`, `task-3-results.md` and `task-4-results.md` retain targeted implementation evidence. They are historical records, not installation guides. A working checking tool does not imply that the inspected application passes its tests.

@@ -48,7 +48,7 @@ def render(tag, checksums, current=None):
         "    EOS", "  end", "",
         "  test do",
         '    assert_match "preflight #{version}", shell_output("#{bin}/preflight version")',
-        '    assert_path_exists pkgshare/"profiles/invoicex-frontend.json"',
+        '    assert_path_exists pkgshare/"profiles/frontend-vitest.json"',
         '    assert_path_exists pkgshare/"policy/main.rego"', "  end", "end", "",
     ]
     return "\n".join(lines)
