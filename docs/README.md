@@ -20,3 +20,12 @@ Everything needed to maintain the project is in this repository. Machine-local p
 | [Example JSON](examples/report.json) / [text](examples/report.txt) | Synthetic renderings of one common report |
 
 `task-1-results.md`, `task-3-results.md` and `task-4-results.md` retain targeted implementation evidence. They are historical records, not installation guides. A working checking tool does not imply that the inspected application passes its tests.
+
+## Coding-harness companion
+
+- [Skill-first onboarding](../README.md#install-and-invoke-the-skill)
+- [Installable Codex plugin and compatibility](plugin.md)
+- [Discovery, GitHub and comparison contract](discovery.md)
+- [Synthetic and actual harness evaluations](../evaluation/README.md)
+- [Prepared marketplace listing](marketplace-listing.md)
+- [Issue 4 implementation progress](plans/issue-4.md)

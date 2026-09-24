@@ -1,12 +1,19 @@
 {
   "name": "preflight",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "description": "Sourced project expectations and revision-aware evidence for coding changes.",
-  "author": { "name": "rebaze", "url": "https://github.com/rebaze" },
+  "author": {
+    "name": "rebaze",
+    "url": "https://github.com/rebaze"
+  },
   "homepage": "https://github.com/rebaze/preflight",
   "repository": "https://github.com/rebaze/preflight",
   "license": "Apache-2.0",
-  "keywords": ["coding", "requirements", "evidence"],
+  "keywords": [
+    "coding",
+    "requirements",
+    "evidence"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Preflight",
@@ -14,8 +21,13 @@
     "longDescription": "A small, focused coding companion that explains relevant project expectations, observed evidence and useful next actions using a local Go CLI. Discovery does not execute project code.",
     "developerName": "rebaze",
     "category": "Developer Tools",
-    "capabilities": ["Read"],
+    "capabilities": [
+      "Read"
+    ],
     "websiteURL": "https://github.com/rebaze/preflight",
-    "defaultPrompt": ["Use $preflight before I change this code.", "Use $preflight before I hand off this change."]
+    "defaultPrompt": [
+      "Use $preflight before I change this code.",
+      "Use $preflight before I hand off this change."
+    ]
   }
 }

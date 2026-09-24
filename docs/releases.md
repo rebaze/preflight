@@ -71,3 +71,22 @@ make security
 `make packaging` requires actionlint, shellcheck and GoReleaser 2.18.2. It builds snapshot archives without signing, publishing or touching Homebrew, checks their contents and executes the native packaged CLI. `make security` downloads/verifies the separate scanner module and queries the current vulnerability database. Offline publication tests exercise failure ordering using synthetic services; real OIDC signing and GitHub publication are verified only by a tag-triggered run.
 
 For consumer verification, see [GitHub's artifact-attestation verification documentation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/verifying-the-provenance-of-binaries). A release archive can be checked with `gh attestation verify ARCHIVE --repo rebaze/preflight`, additionally constraining `--source-digest EXPECTED_COMMIT_SHA`, `--source-ref refs/tags/VERSION` and `--cert-identity https://github.com/rebaze/preflight/.github/workflows/release.yaml@refs/tags/VERSION` for the selected release. See also [GitHub's immutable-release semantics](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
+
+## Embedded skill and plugin candidate
+
+The public `preflight` plugin ships **inside each of the same four CLI archives**. There is no fifth plugin release asset. `checksums.txt`, checksum signing, archive provenance/SBOM attestations, publication inventories and Homebrew platform selection retain their exact four-archive boundary. The existing archive attestations cover the embedded plugin bytes along with the CLI and policy files.
+
+Each archive now includes:
+
+- `share/preflight/plugins/preflight/plugin.json` and `.codex-plugin/plugin.json`.
+- The complete public `skills/preflight/` tree, including nested references, scripts and agent metadata, plus its license.
+- Documentation, staged implementation plans and synthetic evaluation records under `docs/` and `evaluation/`, so the onboarding record links remain available in the archive. Synthetic evaluation Python scripts are included as optional reproduction material; development commands may require a source checkout and are never run automatically.
+- `share/preflight/.agents/plugins/marketplace.json`, named `preflight`, whose local source resolves to `./plugins/preflight` from the marketplace root.
+
+Homebrew installs both the normal supporting directories and the hidden `.agents` marketplace. The installed marketplace root is `$(brew --prefix)/share/preflight`. Installing or upgrading these files does not automatically register a plugin, run hooks or update trusted policy state. Follow the explicit [plugin installation instructions](plugin.md) to register the selected version with Codex.
+
+`tools/check-packages.py` checks all four archives against the public plugin source bytes, including every nested skill file. It rejects missing or unexpected plugin files, inconsistent portable/Codex metadata, incorrect marketplace paths, unsafe archive paths, symlinks, hardlinks, special files and privileged modes. It reads members without extracting member-controlled paths. The native smoke test checks the packaged version and `capabilities` protocol, then inspects an empty directory and requires honest partial discovery without modifying it. This validates packaging and CLI behavior; fresh-harness skill evaluations are separate evidence.
+
+For a candidate, commit the intended source before running `make packaging`, so the binary's commit identity describes the packaged source. Retain the four snapshot archives and checksums privately for fresh-harness installation testing. Snapshot packaging neither signs nor publishes a release. Actual marketplace submission, version tagging and release publication remain explicit owner actions after staged review and verification.
+
+The unpublished candidate is not a release attestation: local snapshot archives are unsigned, their checksum file covers only the local build, and actual OIDC signatures/provenance/SBOM publication remain the existing tag-triggered release workflow. Do not represent package smoke tests or installation measurements as verification of a published signed release. The owner must merge reviewed stages, select a tag, publish through the existing guarded workflow and approve any marketplace submission separately.

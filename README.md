@@ -4,32 +4,57 @@
 [![Release](https://github.com/rebaze/preflight/actions/workflows/release.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/release.yaml)
 [![GitHub Release](https://img.shields.io/github/v/release/rebaze/preflight?include_prereleases)](https://github.com/rebaze/preflight/releases)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-[![Go](https://img.shields.io/github/go-mod/go-version/rebaze/preflight)](go.mod)
+[![Go](https://img.shields.io/github/go-mod/go-version/rebaze/preflight)](https://github.com/rebaze/preflight/blob/main/go.mod)
 [![CodeQL](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rebaze/preflight/badge)](https://scorecard.dev/viewer/?uri=github.com/rebaze/preflight)
 
-Preflight is a small, focused Go CLI that helps developers and coding agents check requirements before opening a pull request. It captures the Git workspace, evaluates an explicitly selected policy with Conftest, runs frontend tests in Docker, and reports findings as text or JSON. Its results provide local feedback; release decisions remain with the review and release process.
+Preflight is a small, focused companion for coding changes. Invoke its Codex skill with your intended change to learn which sourced expectations matter, what the evidence covers, and the next useful action. The independently usable Go CLI gathers bounded facts and performs supported deterministic checks. Results are local feedback, never release authorization.
 
-## Start with the Preflight skill
+## Install and invoke the skill
 
-Preflight now offers read-only discovery in ordinary repositories, independent of its bounded frontend execution profile. Install the [Codex plugin candidate](docs/plugin.md), then invoke `$preflight` with your intended change. The skill identifies a relevant sourced expectation, what remains unchecked and a next action. It needs no Conftest, Docker or project dependency installation for local discovery.
+The plugin candidate is **0.1.0-rc.2**, requiring CLI skill protocol **1** and discovery schema **preflight.discovery/v1**. The first public release remains pending. Use the supplied candidate archive, or reproduce one from an exact reviewed commit using [candidate installation and release instructions](docs/plugin.md). No arbitrary latest download or global hook is installed.
 
-Standalone discovery:
+After extracting the matching macOS/Linux archive into a durable directory:
 
 ```sh
-go build -o bin/preflight ./cmd/preflight
-bin/preflight inspect --repo /path/to/project --format json
-bin/preflight inspect --repo /path/to/project --github --format json
-# Use an existing private parent directory outside all Git checkouts.
-bin/preflight inspect --repo /path/to/project --output /private/preflight/before.json
-# After editing:
-bin/preflight inspect --repo /path/to/project --compare /private/preflight/before.json
-# --repo defaults to the current directory; --base REF is optional comparison context.
+PREFLIGHT_PACKAGE=/absolute/path/to/extracted/preflight
+export PATH="$PREFLIGHT_PACKAGE:$PATH"
+preflight capabilities --format json
+codex plugin marketplace add "$PREFLIGHT_PACKAGE/share/preflight"
+codex plugin add preflight@preflight
+codex --cd /absolute/path/to/your-project
 ```
 
-Use `--github` for explicit read-only GitHub gates/results through existing `gh` access; `--pr NUMBER` selects a PR and its base. Required checks and existing results remain distinct, and remote results do not cover local edits.
+In the fresh Codex session:
 
-An exit of 2 means useful partial discovery; 3 means an invocation/collection error. Neither an exit of 0 nor a documented expectation means project tests passed. See the [discovery contract and boundaries](docs/discovery.md).
+> $preflight I plan to remove a response field. What matters before editing?
+
+The skill uses conversation intent and current instructions. In the bundled synthetic Go example it points to the compatibility requirement at `CONTRIBUTING.md:3`, explains that tests have not run, and suggests checking the response contract before removing the field. In an empty repository it reports the limited evidence honestly. It does not invent a gate to make the result interesting.
+
+Local discovery needs no initialization, Conftest, Docker or application dependencies. Git supplies revision context; without it, useful partial document discovery remains available. Explicit GitHub inspection uses existing authenticated `gh` access. See [supported coverage and data boundaries](docs/discovery.md), [actual agent evaluations](evaluation/README.md) and [the public skill](https://github.com/rebaze/preflight/blob/main/skills/preflight/SKILL.md).
+
+## Recheck after editing
+
+Choose an existing private parent outside all Git checkouts; each saved observation must be a new file:
+
+```sh
+PREFLIGHT_OBSERVATIONS=$(mktemp -d)
+preflight inspect --repo /path/to/project --output "$PREFLIGHT_OBSERVATIONS/before.json"
+# After the intended edit:
+preflight inspect --repo /path/to/project --compare "$PREFLIGHT_OBSERVATIONS/before.json"
+```
+
+Or give that observation path to `$preflight` before handoff. It explains changed inputs/requirements, new or resolved findings, stale evidence and supported structural CI changes. A failure without comparable evidence keeps an unknown cause.
+
+## Standalone discovery
+
+```sh
+preflight inspect                         # current directory
+preflight inspect --base main --format json
+preflight inspect --github --pr 123 --format json
+```
+
+`--base` changes comparison context, never trusted policy. GitHub checks actually required, CI configured in files and existing remote results are separate facts. Remote results do not cover local edits. Discovery exit 0 means the requested bounded scan completed, 2 means useful partial coverage and 3 means an invocation/collection error; none means tests passed. The skill consumes useful partial results.
 
 ## Current scope
 
@@ -37,7 +62,7 @@ Preflight checks required test evidence, npm dependency declarations, and protec
 
 Start with the [documentation map](docs/README.md), [design and intent](docs/design.md), [architecture](docs/architecture.md), and [prioritized roadmap](docs/roadmap.md). The near-term delivery sequence is [issue #4](https://github.com/rebaze/preflight/issues/4): local discovery, GitHub gates, before/after observations, bounded investigations and measured plugin onboarding.
 
-## Install and prerequisites
+## Build and bounded-check prerequisites
 
 The first release is pending. Until it is published, build from this checkout:
 
@@ -137,7 +162,7 @@ The default tests use synthetic repositories and controlled subprocess fixtures.
 
 ## Develop this repository independently
 
-Read [AGENTS.md](AGENTS.md) for agent instructions and [development](docs/development.md) for reproducible checks. The project-local [verification skill](.agents/skills/preflight-verification/SKILL.md) routes between ordinary checks, Docker reporter tests, the separate real-Vitest demo and real pilot work. It is plain Markdown; no global skill/plugin installation is required.
+Read [AGENTS.md](https://github.com/rebaze/preflight/blob/main/AGENTS.md) for agent instructions and [development](docs/development.md) for reproducible checks. The project-local [verification skill](https://github.com/rebaze/preflight/blob/main/.agents/skills/preflight-verification/SKILL.md) routes between ordinary checks, Docker reporter tests, the separate real-Vitest demo and real pilot work. It is plain Markdown; no global skill/plugin installation is required.
 
 Normal tests require only this repository, Go, Git and Conftest. They choose `PREFLIGHT_CONFTEST` when set, otherwise Conftest on PATH. The full synthetic demo requires an explicitly supplied `PREFLIGHT_DEMO_IMAGE` from the preceding Docker bootstrap run; follow the development guide rather than copying an old machine's image digest. Both synthetic scenarios are self-contained.
 

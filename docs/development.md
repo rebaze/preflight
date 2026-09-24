@@ -84,3 +84,9 @@ Before committing, review `git status --short --untracked-files=all`, ignored pa
 ## Neutral example profile
 
 The bundled profile is `profiles/frontend-vitest.json`, and the fixture workspace is `@example/frontend` at `applications/frontend/apps/web`. Runtime scripts and compiled definitions use the same names. Existing state using earlier identifiers is retained as historical evidence; initialize a new state directory explicitly for the current profile and run preparation again. No real application checkout is renamed or edited by these changes.
+
+## Discovery, plugin and harness evaluation
+
+The ordinary Go suite includes independent discovery, strict contracts, GitHub API fixtures, comparisons and structural CI regressions; no project code or network dependency installation occurs. `make check` also runs the standard-library Python package and investigation/compatibility tests. `make packaging` verifies the public skill and catalog inside each of the four archives and runs native `capabilities` and empty-directory discovery smoke tests.
+
+Actual harness evaluations require existing Codex access and are separate from CI. See [evaluation instructions](../evaluation/README.md), [stage 1 results](../evaluation/stage-1-results.md) and [stage 4 results](../evaluation/stage-4-results.md). Raw observations, model events and source snapshots belong outside Git. Real-repository GitHub inspection is opt-in: `PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`, limited to rebaze/preflight and GET requests. Stacked PR bases do not match the existing CI workflow's main-base filter; local test evidence is not described as a GitHub check pass.

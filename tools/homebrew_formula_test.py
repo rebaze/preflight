@@ -25,6 +25,9 @@ class FormulaTest(unittest.TestCase):
             self.assertIn(name.replace("1.2.3", "#{version}"), formula)
             self.assertIn(sha, formula)
         self.assertIn('pkgshare.install Dir["share/preflight/*"]', formula)
+        self.assertIn('pkgshare.install "share/preflight/.agents"', formula)
+        self.assertIn('Plugin marketplace: #{pkgshare}/.agents/plugins/marketplace.json', formula)
+        self.assertIn('plugins/preflight/skills/preflight/SKILL.md', formula)
         self.assertIn('depends_on "conftest"', formula)
         self.assertIn('bin.install "preflight"', formula)
 

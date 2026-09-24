@@ -392,7 +392,7 @@ func collectDiscoveryGitHub(ctx context.Context, repository, localHead, branch, 
 		g.collectProtection(ctx, fetch, prefix)
 	}
 	if g.Head != "" {
-		g.collectResults(ctx, fetch, g.HeadRepository, g.Head, "head")
+		g.collectResults(ctx, fetch, g.Repository, g.Head, "head")
 	}
 	if g.MergeCandidate != "" && g.MergeCandidate != g.Head {
 		g.collectResults(ctx, fetch, repository, g.MergeCandidate, "merge_candidate")
@@ -457,12 +457,34 @@ func (g *DiscoveryGitHub) collectRules(ctx context.Context, fetch githubFetch, p
 	} else {
 		g.cover("rulesets", "complete", "Effective active rules observed; bypass eligibility is not evaluated", "https://api.github.com/"+path)
 	}
-	for index, rule := range rules {
+	// API ordering is not a requirement identity. Repeated authoritative keys
+	// receive content identities and explicit incomplete coverage; keep every
+	// distinct declaration so a conflicting duplicate cannot erase a known gate.
+	counts := map[string]int{}
+	for _, rule := range rules {
+		counts[githubRuleIdentity(rule)]++
+	}
+	seenRules, reportedDuplicates := map[string]bool{}, map[string]bool{}
+	for _, rule := range rules {
 		if rule.ID <= 0 || rule.Type == "" || rule.Source == "" || rule.SourceType == "" {
 			g.cover("rulesets.identity", "error", "Rule identity or source is incomplete", "https://api.github.com/"+path)
 			continue
 		}
-		id := fmt.Sprintf("ruleset:%d:%s:%d", rule.ID, rule.Type, index)
+		id := githubRuleIdentity(rule)
+		if counts[id] > 1 {
+			if !reportedDuplicates[id] {
+				g.cover("rulesets.duplicates", "ambiguous", "Repeated rule identity; all distinct declarations retained, effective requirements need review", "https://api.github.com/"+path)
+				reportedDuplicates[id] = true
+			}
+			var canonical any
+			_ = json.Unmarshal(rule.Parameters, &canonical)
+			encoded, _ := json.Marshal(canonical)
+			id += ":" + inspectHash(string(encoded))
+		}
+		if seenRules[id] {
+			continue
+		}
+		seenRules[id] = true
 		r := DiscoveryGitHubRule{ID: id, Type: rule.Type, Source: "https://api.github.com/" + path, SourceType: rule.SourceType + ":" + rule.Source, RulesetID: rule.ID, ObservedAt: g.ObservedAt}
 		var params githubRuleParameters
 		switch rule.Type {
@@ -663,7 +685,7 @@ func (g *DiscoveryGitHub) matchRequirements() {
 		latest := map[string]DiscoveryGitHubResult{}
 		unidentifiedProducer := false
 		for _, r := range g.Results {
-			if r.Revision != g.EvidenceRevision || r.Name != req.Context {
+			if r.Repository != g.Repository || r.Revision != g.EvidenceRevision || r.Name != req.Context {
 				continue
 			}
 			if githubResultNumber(r.ID) <= 0 {
@@ -851,7 +873,7 @@ func ValidateDiscoveryGitHub(g *DiscoveryGitHub) error {
 		seen := map[string]bool{}
 		for _, id := range m.ResultIDs {
 			r, ok := results[id]
-			if !ok || seen[id] || r.Revision != m.Revision || r.Name != req.Context || req.Producer == "app" && r.AppID != req.AppID {
+			if !ok || seen[id] || r.Repository != g.Repository || r.Revision != m.Revision || r.Name != req.Context || req.Producer == "app" && r.AppID != req.AppID {
 				return fail("match identity")
 			}
 			seen[id] = true
@@ -879,4 +901,8 @@ func ValidateDiscoveryGitHub(g *DiscoveryGitHub) error {
 		return fail("matches contradict recorded facts")
 	}
 	return nil
+}
+
+func githubRuleIdentity(rule githubRule) string {
+	return fmt.Sprintf("ruleset:%s:%s:%d:%s", rule.SourceType, rule.Source, rule.ID, rule.Type)
 }

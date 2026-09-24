@@ -92,6 +92,7 @@ jobs:
       - name: Test publication and Homebrew helpers offline
         run: |
           python3 -m unittest discover -s tools -p '*_test.py'
+          python3 -m unittest discover -s evaluation -p 'test_*.py'
           shellcheck .github/actions/setup-conftest/install.sh
       - run: goreleaser check
       - name: Build all snapshot archives without publishing

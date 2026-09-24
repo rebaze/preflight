@@ -53,3 +53,28 @@ preflight inspect --repo /absolute/private/preflight-fixtures/empty --format jso
 ```
 
 An empty or unsupported project may return useful partial output with exit 2. Do not discard it because a shell pipeline expected success.
+
+## Final candidate measurements
+
+The extended generator provides five marked timing scenarios across Go, nested JavaScript, Rust and documentation-only layouts, plus empty, hostile text, conflicting guidance, unsupported tests, partial comparison and investigation cases. Pass `--cli` to also create a saved-observation stale case; only disposable synthetic files are intentionally changed during setup.
+
+For installation evidence, use an already locally available **native CLI archive** built from the reviewed candidate commit. The evaluator extracts it, checks CLI capabilities, puts that CLI on the child PATH and installs the embedded marketplace into a new private Codex home. The timer begins before extraction:
+
+```sh
+python3 evaluation/install_candidate.py \
+  --archive /absolute/path/to/native-preflight.tar.gz \
+  --destination /absolute/private/preflight-final-install
+python3 evaluation/create_fixtures.py /absolute/private/preflight-final-fixtures \
+  --cli /absolute/private/preflight-final-install/extracted/preflight
+python3 evaluation/run_skill.py \
+  --fixtures /absolute/private/preflight-final-fixtures \
+  --installation /absolute/private/preflight-final-install \
+  --marketplace /absolute/private/preflight-final-install/extracted/share/preflight \
+  --cli /absolute/private/preflight-final-install/extracted/preflight \
+  --output /absolute/private/preflight-final-runs \
+  --reuse-current-auth --model gpt-6-astra --reasoning-effort high --timed-only
+```
+
+Record the entire installation-start to first useful-response elapsed time, including fixture setup or any pauses in between. Archive acquisition/build and establishment of the existing harness authentication precede this measurement and must be disclosed separately; this is an agent onboarding observation, not a human download/install study. A fresh unauthenticated home remains a distinct prerequisite case. Candidate snapshots are not signed release artifacts merely because installation works.
+
+Use repeatable `--scenario NAME` flags to run the additional cases. `--persist-session` retains a fresh private native-agent session when thread lookup requires storage. The observed `--disable multi_agent` attempt did not remove tools in this environment, so `--disable-delegation` does not itself prove tool absence. The `investigation-serial` prompt explicitly prohibits delegation. Review native tool traces, source identities, missing evidence and source-backed next actions separately from model claims. `run_skill.py` requires Python 3.9 or newer; basic Preflight discovery does not require Python.

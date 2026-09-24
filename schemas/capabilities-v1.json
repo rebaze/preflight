@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Preflight skill compatibility v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "commit", "discoverySchema", "skillProtocol", "features"],
+  "properties": {
+    "schema": {"const": "preflight.capabilities/v1"},
+    "version": {"type": "string", "minLength": 1},
+    "commit": {"type": "string", "minLength": 1},
+    "discoverySchema": {"const": "preflight.discovery/v1"},
+    "skillProtocol": {"const": 1},
+    "features": {"type": "array", "uniqueItems": true, "items": {"enum": ["inspect", "github", "compare"]}}
+  }
+}

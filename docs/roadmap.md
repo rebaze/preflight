@@ -55,3 +55,5 @@ Issue 4 stage 2 implementation adds explicit read-only GitHub gates/results with
 Issue 4 stage 3 implements explicit before/after observations, stale evidence and constrained structural CI explanations. General YAML/shell interpretation, automatic bisect/rerun and arbitrary ecosystem execution remain outside scope. Stage 4 investigations and stage 5 measured distribution follow.
 
 Issue 4 stage 4 adds optional bounded investigation packets, serial fallback and citation/identity reconciliation. Actual native-tool and fallback observations are recorded separately from deterministic tests. Final candidate packaging and onboarding metrics remain stage 5.
+
+Issue 4 stage 5 packages the versioned plugin candidate inside the existing four CLI archives and adds explicit CLI compatibility. Final acceptance depends on recorded installation and actual fresh-harness measurements, including all misses; deterministic fixtures alone do not establish human usability. Publication/tagging/marketplace submission remain owner actions.
