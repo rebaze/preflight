@@ -116,3 +116,17 @@ func TestDiscoveryMaximumSizeIsExplicit(t *testing.T) {
 		t.Fatalf("oversized observation must fail at its explicit limit: %v", err)
 	}
 }
+
+func TestDiscoveryVerifiedClaimRequiresCapturedCitation(t *testing.T) {
+	d := NewDiscovery()
+	d.Subject.Current = true
+	d.Claims = []DiscoveryClaim{{ID: "invented", Origin: "observed", Verification: "verified", Summary: "An investigator claims the check passed", Sources: []DiscoveryReference{{Path: "missing.md", Digest: strings.Repeat("a", 64), Line: 1}}}}
+	FinalizeDiscovery(&d)
+	if ValidateDiscovery(d) == nil {
+		t.Fatal("unsupported verified opinion accepted")
+	}
+	d.Claims[0].Verification = "unverified"
+	if err := ValidateDiscovery(d); err != nil {
+		t.Fatal(err)
+	}
+}

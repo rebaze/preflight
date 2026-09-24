@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rebaze/preflight/schemas/investigation-v1",
+  "title": "Preflight bounded investigation packet v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "question", "identity", "status", "conclusion", "sources", "uncertainty", "nextAction"],
+  "properties": {
+    "schema": {"const": "preflight.investigation/v1"},
+    "question": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repositoryId", "worktreeId", "head", "inputDigest"],
+      "properties": {
+        "repositoryId": {"type": "string"}, "worktreeId": {"type": "string"},
+        "head": {"type": "string"}, "inputDigest": {"type": "string"}
+      }
+    },
+    "status": {"enum": ["hypothesis", "unresolved"]},
+    "conclusion": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "sources": {
+      "type": "array", "maxItems": 6,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["path", "digest", "line"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "line": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "uncertainty": {"type": "string", "minLength": 1, "maxLength": 2000},
+    "nextAction": {"type": "string", "minLength": 1, "maxLength": 1000}
+  }
+}
