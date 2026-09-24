@@ -78,6 +78,16 @@
             2,
             3
           ]
+        },
+        "github": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DiscoveryGitHub"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -349,6 +359,353 @@
           "type": "string"
         },
         "message": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryGitHub": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "observed_at",
+        "target_branch",
+        "target_source",
+        "pull_request",
+        "head",
+        "head_repository",
+        "merge_candidate",
+        "evidence_revision",
+        "evidence_subject",
+        "local_coverage",
+        "rules",
+        "requirements",
+        "results",
+        "matches",
+        "coverage"
+      ],
+      "properties": {
+        "repository": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string"
+        },
+        "target_branch": {
+          "type": "string"
+        },
+        "target_source": {
+          "type": "string",
+          "enum": [
+            "",
+            "default_branch",
+            "comparison_base",
+            "pull_request_base"
+          ]
+        },
+        "pull_request": {
+          "type": "integer"
+        },
+        "head": {
+          "type": "string"
+        },
+        "head_repository": {
+          "type": "string"
+        },
+        "merge_candidate": {
+          "type": "string"
+        },
+        "evidence_revision": {
+          "type": "string"
+        },
+        "evidence_subject": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "head",
+            "merge_candidate"
+          ]
+        },
+        "local_coverage": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "stale_local_edits",
+            "revision_mismatch",
+            "clean_head_only",
+            "incomplete_local_identity"
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryGitHubRule"
+          }
+        },
+        "requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryGitHubRequirement"
+          }
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryGitHubResult"
+          }
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryGitHubMatch"
+          }
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryGitHubCoverage"
+          }
+        }
+      }
+    },
+    "DiscoveryGitHubCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resource",
+        "status",
+        "detail",
+        "source",
+        "observed_at"
+      ],
+      "properties": {
+        "resource": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "unavailable",
+            "unsupported",
+            "error",
+            "denied",
+            "inaccessible",
+            "limited",
+            "ambiguous",
+            "unknown"
+          ]
+        },
+        "detail": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryGitHubRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "source",
+        "source_type",
+        "ruleset_id",
+        "supported",
+        "review_count",
+        "code_owner_review",
+        "dismiss_stale_reviews",
+        "last_push_approval",
+        "strict_checks",
+        "observed_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "source_type": {
+          "type": "string"
+        },
+        "ruleset_id": {
+          "type": "integer"
+        },
+        "supported": {
+          "type": "boolean"
+        },
+        "review_count": {
+          "type": "integer"
+        },
+        "code_owner_review": {
+          "type": "boolean"
+        },
+        "dismiss_stale_reviews": {
+          "type": "boolean"
+        },
+        "last_push_approval": {
+          "type": "boolean"
+        },
+        "strict_checks": {
+          "type": "boolean"
+        },
+        "observed_at": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryGitHubRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "rule_id",
+        "context",
+        "app_id",
+        "producer",
+        "source",
+        "observed_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rule_id": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "integer"
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "any",
+            "app"
+          ]
+        },
+        "source": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryGitHubResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "revision",
+        "repository",
+        "app_id",
+        "app_slug",
+        "creator",
+        "state",
+        "conclusion",
+        "completed_at",
+        "updated_at",
+        "source",
+        "observed_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "check_run",
+            "commit_status"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "repository": {
+          "type": "string"
+        },
+        "app_id": {
+          "type": "integer"
+        },
+        "app_slug": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "conclusion": {
+          "type": "string"
+        },
+        "completed_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "observed_at": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryGitHubMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirement_id",
+        "revision",
+        "status",
+        "result_ids",
+        "detail"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "matched",
+            "missing",
+            "failed",
+            "unknown",
+            "stale",
+            "pending"
+          ]
+        },
+        "result_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "detail": {
           "type": "string"
         }
       }
