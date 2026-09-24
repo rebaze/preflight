@@ -56,10 +56,14 @@ The complete EER test file baseline must remain present. Process success alone i
 
 A private synthetic policy contract probe runs before candidate evaluation with the same evaluator/package. It requires recognizable violations from each expected control, preventing unrelated empty rules from becoming invented passes. Probe results never enter candidate findings. Actual Conftest nested metadata and its YAML `on`/`true` key representation are normalized. Raw npm/CI decisions remain in Rego; collector missing/error and later obligations remain explicit Go results.
 
-No successful-test cache exists. Only dependency preparation is reusable; each execution gets fresh writable volumes. Cleanup only targets tool-owned named containers/volumes. There is no automatic trusted-baseline update, exception approval, remote branch-protection inspection or release authorization.
+No successful-test cache exists. Only dependency preparation is reusable; each execution gets fresh writable volumes. Cleanup only targets tool-owned named containers/volumes. There is no automatic trusted-baseline update, exception approval or release authorization.
 
 ## Distribution pipeline
 
 The module is `github.com/rebaze/preflight`. GitHub Actions builds the CLI separately from all pilot execution. Release archives include version-matched policy/profile/runtime/schema files; the CLI continues to require explicit paths and initialization trust. Build metadata is CLI display information and does not change the report schema or evaluator/runtime identity.
 
 Tag-triggered releases depend on the reusable CI workflow, then build four macOS/Linux archives through GoReleaser. Inventory v2 records the source SHA. The guard verifies source-bound provenance/SBOM attestations and the checksum signature, checks the remote tag's peeled commit and draft asset digests, publishes, then verifies immutable state and downloaded locked bytes. It detects a concurrent publication-time mutation as a possible public incident and withholds Homebrew; it cannot atomically prevent another privileged writer from changing a draft. The documented single-writer policy and immutable releases are part of the distribution boundary. The optional Homebrew job independently verifies all four archives and their source-bound provenance before obtaining a tap-scoped GitHub App token. The source SBOM describes the tool's source scan, not a pilot application's dependencies or runtime container. See [release design](release-design.md) and [operations](releases.md).
+
+## Harness discovery (issue 4, stage 1)
+
+`inspect_model.go` defines the independent strict discovery contract; `inspect_local.go` collects bounded read-only Git/source facts; `cmd/preflight/inspect.go` owns discovery flags and exits. The public `skills/preflight/` skill uses conversation intent and cited facts to explain next actions. It is separate from the repository-maintenance skill. [Discovery](discovery.md) specifies identities, content boundaries and partial results. No model call exists in Go, and inspection never initializes policy state.

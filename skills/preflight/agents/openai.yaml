@@ -1,0 +1,4 @@
+interface:
+  display_name: "Preflight"
+  short_description: "Sourced expectations before editing or handing off"
+  default_prompt: "Use $preflight to explain the expectations and evidence relevant to my intended change."

@@ -15,6 +15,7 @@ import (
 const usage = `rebaze Preflight: local frontend feedback, not release authorization.
 
 preflight version
+preflight inspect [--repo PATH] [--base REF] [--format text|json]
 preflight init --repo PATH --baseline SHA --profile FILE --policy-dir DIR --state-dir DIR --conftest FILE
 preflight explain --state-dir DIR [--base REF] --format text|json
 preflight prepare --state-dir DIR [--base REF] --allow-downloads
@@ -37,6 +38,9 @@ func run(args []string, out, diagnostic io.Writer) int {
 		return 0
 	}
 	mode := args[0]
+	if mode == "inspect" {
+		return runInspect(args[1:], out, diagnostic)
+	}
 	f := flag.NewFlagSet(mode, flag.ContinueOnError)
 	f.SetOutput(diagnostic)
 	state := f.String("state-dir", "", "private state outside source checkout")

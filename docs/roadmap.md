@@ -14,6 +14,10 @@ The checking workflow and three controls are implemented. Synthetic real-Vitest 
 
 The next operator session must not assume old `/tmp` reports, dependency volumes, the Homebrew path or image IDs still exist. [Development](development.md) reconstructs the synthetic workflow from this repository.
 
+## Approved near-term sequence — issue 4
+
+[Issue 4](https://github.com/rebaze/preflight/issues/4) authorizes five working increments. [Plan and durable progress](plans/issue-4.md) records implementation and verification. Stage 1 adds independent bounded local inspection and the public skill. Stages 2–5 add actual GitHub gates/results, saved comparisons, optional bounded investigations and installable measured onboarding. These capabilities extend discovery; arbitrary ecosystem execution, hosted models and release authority remain excluded. Older R1–R4 below remain separate proposed work.
+
 ## R1 — Make setup and results understandable
 
 Trigger: Toni ran `init` and could not tell whether its large output required project corrections. The current CLI prints the full explanation report, including repeated path lists and `deferred` labels.
@@ -42,6 +46,6 @@ Acceptance: document which parts were exercised versus read, preserve inconvenie
 
 ## Deliberately deferred
 
-Additional ecosystems/profiles, OCI policy distribution/signatures, remote enforcement, artifact attestations, exception authority, hosted service/UI, MCP/IDE integrations and release/deployment execution. The local-feedback authority boundary remains even if reporting improves.
+Additional ecosystems/profiles, OCI policy distribution/signatures, remote enforcement, artifact attestations, exception authority, hosted service/UI, other MCP/IDE integrations and release/deployment execution. The local-feedback authority boundary remains even if reporting improves.
 
 GitHub repository/module `github.com/rebaze/preflight` and GitHub Actions release preparation were selected by the owner on 2026-09-24. CI, signed/attested release packaging and optional Homebrew formula publication are prepared; see [release operations](releases.md) for credentials, activation and first-release status. This distributes the CLI and does not expand its authority or resolve R1–R4. The owner selected Apache-2.0 to match Rio. Long-term support remains an owner decision.
