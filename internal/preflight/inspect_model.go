@@ -10,6 +10,7 @@ import (
 )
 
 const DiscoverySchema = "preflight.discovery/v1"
+const DiscoveryMaxBytes = 16 << 20
 
 // Discovery is an observation, not a check report or authorization. Source
 // origin and verification are independent; no local test ran during discovery.
@@ -109,8 +110,8 @@ func discoveryExit(d Discovery) int {
 func FinalizeDiscovery(d *Discovery) { d.ExitCode = discoveryExit(*d) }
 func DecodeDiscovery(data []byte) (Discovery, error) {
 	var d Discovery
-	if len(data) > 4<<20 {
-		return d, fmt.Errorf("discovery exceeds 4 MiB")
+	if len(data) > DiscoveryMaxBytes {
+		return d, fmt.Errorf("discovery exceeds 16 MiB")
 	}
 	if err := DecodeStrict(data, &d); err != nil {
 		return d, err
