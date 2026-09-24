@@ -89,4 +89,14 @@ The bundled profile is `profiles/frontend-vitest.json`, and the fixture workspac
 
 The ordinary Go suite includes independent discovery, strict contracts, GitHub API fixtures, comparisons and structural CI regressions; no project code or network dependency installation occurs. `make check` also runs the standard-library Python package and investigation/compatibility tests. `make packaging` verifies the public skill and catalog inside each of the four archives and runs native `capabilities` and empty-directory discovery smoke tests.
 
-Actual harness evaluations require existing Codex access and are separate from CI. See [evaluation instructions](../evaluation/README.md), [stage 1 results](../evaluation/stage-1-results.md) and [stage 4 results](../evaluation/stage-4-results.md). Raw observations, model events and source snapshots belong outside Git. Real-repository GitHub inspection is opt-in: `PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`, limited to rebaze/preflight and GET requests. Stacked PR bases do not match the existing CI workflow's main-base filter; local test evidence is not described as a GitHub check pass.
+Actual harness evaluations require existing Codex access and are separate from CI. See [evaluation instructions](../evaluation/README.md), [stage 1 results](../evaluation/stage-1-results.md) and [stage 4 results](../evaluation/stage-4-results.md). Raw observations, model events and source snapshots belong outside Git. Real-repository GitHub inspection is opt-in: `PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`, limited to rebaze/preflight and GET requests. During initial stacked review, feature bases did not match the CI workflow's main-base filter. Integration retargets each PR to main, merges the preceding main revision into its branch and waits for fresh GitHub checks; earlier local evidence is not relabeled as a GitHub check pass.
+
+## Local tester page
+
+Serve the static guide without exposing a public service:
+
+```sh
+python3 -m http.server 8765 --bind 127.0.0.1 --directory docs
+```
+
+Open `http://127.0.0.1:8765/try-preflight.html`. Supply a built native archive and the project you want to inspect. The page only prepares copyable commands/prompts; it never runs them, sends project data, or persists feedback. Optional `archive` and `project` query parameters prefill validated absolute paths. The guide is also included in release archives.

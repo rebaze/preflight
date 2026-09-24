@@ -30,3 +30,5 @@ Everything needed to maintain the project is in this repository. Machine-local p
 - [Prepared marketplace listing](marketplace-listing.md)
 - [Issue 4 implementation progress](plans/issue-4.md)
 - [Exact unpublished candidate archive identities and reproduction](candidate.md)
+
+- [Guided final-tester onboarding](try-preflight.html)

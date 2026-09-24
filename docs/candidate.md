@@ -1,6 +1,12 @@
 # Candidate build records
 
-## Current rc.3 candidate
+## Current rc.4 tester candidate
+
+Plugin **0.1.0-rc.4** carries the pre-merge Copilot corrections and the standalone [tester onboarding page](try-preflight.html). It retains CLI skill protocol 1 and discovery v1. Build the four local archives from a clean reviewed checkout with `make packaging`; the CLI snapshot version includes that checkout's commit. Read `preflight capabilities --format json` and the generated `dist/checksums.txt` to identify the exact build you are testing. The onboarding page accepts the supplied native archive path and prepares installation commands.
+
+The review corrections cover incomplete worktree identity, complete citations, legacy producer identity, merge-candidate uncertainty, duplicate CI event mappings and strict compatibility metadata. The page's copy/path/timer controls were verified in a real browser. Earlier agent timing measurements below remain tied to rc.2/rc.3; no human rc.4 usability result is claimed. Local snapshots remain unsigned. Tagging, signed publication and marketplace submission remain separate owner decisions.
+
+## Historical rc.3 candidate
 
 Built from clean source `ed870aadbcfb796c18039f267d2eeedc64f3872b`: plugin **0.1.0-rc.3**, CLI **0.0.0-SNAPSHOT-ed870aa**, skill protocol 1 and discovery v1. It adds the registered-path bootstrap guard after the rc.2 serial lookup miss. `make packaging` passed in 2.773 seconds using the already-installed toolchain/build cache; all four archives and native smoke checks passed. Fresh-harness results are recorded separately in [stage 5 evaluation](../evaluation/stage-5-results.md).
 
