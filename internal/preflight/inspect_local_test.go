@@ -204,3 +204,80 @@ func TestInspectLocalSHA256RepositoryAndIgnoredSources(t *testing.T) {
 		}
 	}
 }
+
+func TestInspectExcludedTrackedWorktreeIsUnknown(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	snapshotWrite(t, repo, "private.txt", "do not disclose")
+	snapshotGit(t, repo, "add", "private.txt")
+	snapshotGit(t, repo, "commit", "-m", "private fixture")
+	snapshotWrite(t, repo, "private.txt", "changed private content")
+	d := InspectLocal(context.Background(), repo, "")
+	if d.Subject.Current {
+		t.Fatal("excluded tracked bytes cannot establish current worktree identity")
+	}
+	found := false
+	for _, c := range d.Coverage {
+		if c.Collector == "worktree_cleanliness" && c.Status == "partial" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("worktree cleanliness uncertainty not explicit")
+	}
+	if err := os.Remove(filepath.Join(repo, "private.txt")); err != nil {
+		t.Fatal(err)
+	}
+	d = InspectLocal(context.Background(), repo, "")
+	if !d.Subject.Dirty {
+		t.Fatal("known deletion of excluded tracked file lost")
+	}
+	for _, s := range d.Sources {
+		if s.Path == "private.txt" {
+			t.Fatal("private contents disclosed")
+		}
+	}
+}
+func TestInspectUnsupportedTrackedWorktreeIsUnknown(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	p := filepath.Join(repo, "applications/frontend/base.txt")
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("missing", p); err != nil {
+		t.Fatal(err)
+	}
+	d := InspectLocal(context.Background(), repo, "")
+	if d.Subject.Current {
+		t.Fatal("unsupported source cannot establish current worktree identity")
+	}
+	found := false
+	for _, c := range d.Coverage {
+		if c.Collector == "worktree_cleanliness" && c.Status == "partial" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("unsupported tracked state not explicit")
+	}
+}
+
+func TestInspectLocalComparisonTipChangesIdentity(t *testing.T) {
+	repo, baseline, _ := snapshotFixture(t)
+	snapshotGit(t, repo, "switch", "-c", "topic")
+	snapshotWrite(t, repo, "topic.txt", "topic")
+	snapshotGit(t, repo, "add", "topic.txt")
+	snapshotGit(t, repo, "commit", "-m", "topic")
+	before := InspectLocal(context.Background(), repo, "main")
+	// Advance the other branch with the baseline tree, without checking it out.
+	// Checkout can change raw permission bits and accidentally mask this bug.
+	tree := snapshotGit(t, repo, "rev-parse", baseline+"^{tree}")
+	next := snapshotGit(t, repo, "commit-tree", strings.TrimSpace(tree), "-p", baseline, "-m", "advance comparison")
+	snapshotGit(t, repo, "update-ref", "refs/heads/main", strings.TrimSpace(next))
+	after := InspectLocal(context.Background(), repo, "main")
+	if before.Subject.MergeBase != after.Subject.MergeBase || before.Subject.BaseCommit == after.Subject.BaseCommit || before.Subject.Head != after.Subject.Head || before.Subject.IndexDigest != after.Subject.IndexDigest {
+		t.Fatal("invalid fixture")
+	}
+	if before.Subject.InputDigest == after.Subject.InputDigest {
+		t.Fatal("comparison tip change invisible to freshness")
+	}
+}

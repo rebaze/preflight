@@ -246,13 +246,16 @@
       ],
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "digest": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
         },
         "line": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 1
         }
       }
     },

@@ -2,6 +2,7 @@ package preflight
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -191,7 +192,8 @@ func ValidateDiscovery(d Discovery) error {
 			return fmt.Errorf("verified claim requires a source")
 		}
 		for _, r := range c.Sources {
-			if r.Path == "" || r.Line < 0 {
+			digest, digestErr := hex.DecodeString(r.Digest)
+			if r.Path == "" || r.Line < 1 || digestErr != nil || len(digest) != 32 {
 				return fmt.Errorf("invalid claim source")
 			}
 		}
