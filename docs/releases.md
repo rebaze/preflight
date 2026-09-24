@@ -9,7 +9,7 @@ Preflight is hosted at [rebaze/preflight](https://github.com/rebaze/preflight). 
 | CI | PRs, main, manual runs, weekly scans, and reuse by release tags. Go race tests/vet, Conftest policy tests, formatting, module checks, govulncheck, offline publication tests, all four snapshot archives and a native package smoke test. |
 | Release | `v*` tags. Repeat CI, bind the triggering SHA and remote tag, build/sign/attest archives, verify draft bytes and asset metadata, publish, then verify immutable state and locked bytes before reporting success. |
 | Publish Homebrew | Stable immutable release with `PUBLISH_HOMEBREW=true`, or manual retry. Download/check all four archives and verify their provenance and source SHA before minting the tap token, generating the formula and pushing it. |
-| Verify Release App | Manual, read-only inspection of a token requesting Contents:write on the tap. Does not test branch-rule bypass by writing a branch. |
+| Verify Release App | Manual: mint a token explicitly requesting Contents:write, require its installation repository scope to be exactly the tap, and read tap contents. Does not test branch-rule bypass by writing a branch. |
 | Synthetic Docker and Vitest | Manual, opt-in networked dependency preparation followed by the existing offline synthetic container tests and real Vitest CLI demo. No customer checkout. |
 | CodeQL / Scorecard | Scheduled and main runs; CodeQL also analyzes PRs. |
 
