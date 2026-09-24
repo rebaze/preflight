@@ -10,11 +10,25 @@
 
 Preflight is a small, focused Go CLI that helps developers and coding agents check requirements before opening a pull request. It captures the Git workspace, evaluates an explicitly selected policy with Conftest, runs frontend tests in Docker, and reports findings as text or JSON. Its results provide local feedback; release decisions remain with the review and release process.
 
+## Start with the Preflight skill
+
+Preflight now offers read-only discovery in ordinary repositories, independent of its bounded frontend execution profile. Install the [Codex plugin candidate](docs/plugin.md), then invoke `$preflight` with your intended change. The skill identifies a relevant sourced expectation, what remains unchecked and a next action. It needs no Conftest, Docker or project dependency installation for local discovery.
+
+Standalone discovery:
+
+```sh
+go build -o bin/preflight ./cmd/preflight
+bin/preflight inspect --repo /path/to/project --format json
+# --repo defaults to the current directory; --base REF is optional comparison context.
+```
+
+An exit of 2 means useful partial discovery; 3 means an invocation/collection error. Neither an exit of 0 nor a documented expectation means project tests passed. See the [discovery contract and boundaries](docs/discovery.md).
+
 ## Current scope
 
 Preflight checks required test evidence, npm dependency declarations, and protected CI configuration. It includes a fixed frontend/Vitest example profile and a complete synthetic workflow. The profile defines an npm workspace layout; adapting another layout requires an explicit profile and runner change.
 
-Start with the [documentation map](docs/README.md), [design and intent](docs/design.md), [architecture](docs/architecture.md), and [prioritized roadmap](docs/roadmap.md). Immediate next work is clearer setup output and an explicit decision about the frontend configuration prerequisite. Those are proposed changes, not features already implemented.
+Start with the [documentation map](docs/README.md), [design and intent](docs/design.md), [architecture](docs/architecture.md), and [prioritized roadmap](docs/roadmap.md). The near-term delivery sequence is [issue #4](https://github.com/rebaze/preflight/issues/4): local discovery, GitHub gates, before/after observations, bounded investigations and measured plugin onboarding.
 
 ## Install and prerequisites
 
@@ -35,7 +49,7 @@ preflight version
 
 Homebrew installs supporting files under `$(brew --prefix)/share/preflight`; release archives contain them under `share/preflight`. Use those paths for `init --profile` and `--policy-dir` when running outside a source checkout. Select and trust them explicitly; installing or upgrading the tool does not update existing initialized policy state. See [release setup and operations](docs/releases.md) for remaining setup, artifact verification and publishing instructions.
 
-Building requires Go 1.27.1. Running requires Git and a local Conftest executable; preparation and tests also require Docker with a Linux daemon. The supported runtime is exactly Node 24.18.0 and npm 11.17.0. Runtime versions are never automatically substituted. Static evaluation and unit tests do not require Docker. The race-test command also requires CGO and a working C compiler; see [development prerequisites](docs/development.md#tools-and-local-selection).
+Building requires Go 1.27.1. Local discovery uses Git when available and remains partial without Git context. The initialized checking workflow requires Git and a local Conftest executable; preparation and tests also require Docker with a Linux daemon. The supported runtime is exactly Node 24.18.0 and npm 11.17.0. Runtime versions are never automatically substituted. Static evaluation and unit tests do not require Docker. The race-test command also requires CGO and a working C compiler; see [development prerequisites](docs/development.md#tools-and-local-selection).
 
 The profile and policy are local inputs explicitly trusted at initialization. The tested evaluator is `/opt/homebrew/Cellar/conftest/0.70.1/bin/conftest`, reporting `Conftest: dev` and `OPA: 1.20.2`, SHA256 `b2f75ccf2575da4543ecec646194ae2f5a476fdf810681b04d01042b8e73ff18`. This is an observed binary pin, not an assertion about its release provenance.
 

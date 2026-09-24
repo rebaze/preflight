@@ -1,0 +1,360 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/rebaze/preflight/schemas/discovery-v1.json",
+  "title": "Preflight discovery v1",
+  "$ref": "#/$defs/Discovery",
+  "$defs": {
+    "Discovery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "authority",
+        "observedAt",
+        "subject",
+        "inputs",
+        "sources",
+        "changes",
+        "claims",
+        "coverage",
+        "diagnostics",
+        "exitCode"
+      ],
+      "properties": {
+        "schema": {
+          "type": "string",
+          "const": "preflight.discovery/v1"
+        },
+        "authority": {
+          "type": "string",
+          "const": "local-feedback"
+        },
+        "observedAt": {
+          "type": "string"
+        },
+        "subject": {
+          "$ref": "#/$defs/DiscoverySubject"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryInput"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoverySource"
+          }
+        },
+        "changes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryChange"
+          }
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryClaim"
+          }
+        },
+        "coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryCoverage"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryDiagnostic"
+          }
+        },
+        "exitCode": {
+          "type": "integer",
+          "enum": [
+            0,
+            2,
+            3
+          ]
+        }
+      }
+    },
+    "DiscoverySubject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repoRoot",
+        "repositoryId",
+        "worktreeId",
+        "head",
+        "branch",
+        "baseRef",
+        "baseCommit",
+        "mergeBase",
+        "indexDigest",
+        "inputDigest",
+        "dirty",
+        "current"
+      ],
+      "properties": {
+        "repoRoot": {
+          "type": "string"
+        },
+        "repositoryId": {
+          "type": "string"
+        },
+        "worktreeId": {
+          "type": "string"
+        },
+        "head": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "baseRef": {
+          "type": "string"
+        },
+        "baseCommit": {
+          "type": "string"
+        },
+        "mergeBase": {
+          "type": "string"
+        },
+        "indexDigest": {
+          "type": "string"
+        },
+        "inputDigest": {
+          "type": "string"
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "current": {
+          "type": "boolean"
+        }
+      }
+    },
+    "DiscoveryInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "kind",
+        "digest",
+        "mode"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "integer"
+        }
+      }
+    },
+    "DiscoverySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "kind",
+        "digest",
+        "content",
+        "startLine",
+        "endLine",
+        "mode"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "startLine": {
+          "type": "integer"
+        },
+        "endLine": {
+          "type": "integer"
+        },
+        "mode": {
+          "type": "integer"
+        }
+      }
+    },
+    "DiscoveryChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "layer",
+        "status",
+        "before",
+        "after"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "layer": {
+          "type": "string",
+          "enum": [
+            "committed",
+            "staged",
+            "unstaged",
+            "untracked"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "added",
+            "modified",
+            "deleted"
+          ]
+        },
+        "before": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "digest",
+        "line"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "DiscoveryClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "origin",
+        "verification",
+        "summary",
+        "sources"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string",
+          "enum": [
+            "documented",
+            "configured",
+            "inferred",
+            "observed"
+          ]
+        },
+        "verification": {
+          "type": "string",
+          "enum": [
+            "unverified",
+            "verified",
+            "unknown",
+            "stale"
+          ]
+        },
+        "summary": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryReference"
+          }
+        }
+      }
+    },
+    "DiscoveryCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "collector",
+        "status",
+        "detail"
+      ],
+      "properties": {
+        "collector": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "complete",
+            "partial",
+            "unavailable",
+            "not_requested"
+          ]
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "severity",
+        "path",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "warning",
+            "error"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
