@@ -20,9 +20,14 @@ jobs:
           owner: rebaze
           repositories: homebrew-tap
           permission-contents: write
-      - name: Inspect tap access without writing to the tap
+      - name: Verify installation scope without writing to the tap
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh api repos/rebaze/homebrew-tap --jq '{full_name, default_branch, permissions}'
-          gh api repos/rebaze/homebrew-tap --jq '.permissions.push' | grep -qx true
+          # Minting above explicitly requests contents:write. GitHub rejects
+          # permissions not granted to the installation. Repository user-role
+          # booleans such as permissions.push do not describe this token grant.
+          gh api --paginate --slurp installation/repositories \
+            --jq '[.[].repositories[].full_name] == ["rebaze/homebrew-tap"]' | grep -qx true
+          gh api repos/rebaze/homebrew-tap/contents --jq 'length'
+          echo 'Tap-only installation scope and readable contents verified; contents:write was requested at minting.'

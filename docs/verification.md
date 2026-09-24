@@ -96,3 +96,9 @@ Regression tests first demonstrated acceptance of moved tags, wrong-commit attes
 - Enabled GitHub immutable releases on `rebaze/preflight` and read back `enabled: true`, `enforced_by_owner: false`. No release/tag was created; no branch/tag rules or organization policy changed.
 
 These tests use explicit offline service doubles for the race and publication cases. Actual signing/publication and Homebrew installation still await a release. Immutability begins at publication; there is no claim of atomically preventing another privileged writer from changing a draft. The single-writer operating policy and incident response are documented in `releases.md`. Hosted validation for the new commit is tracked on PR #1; the earlier failed run remains in this record.
+
+## 2026-09-24 — Release App secret and live verification
+
+Stored `RELEASE_APP_PRIVATE_KEY` from the user-selected 1Password reference directly through stdin to GitHub's secret store. No plaintext key was printed or committed. The first manual verification run, [36010428624](https://github.com/rebaze/preflight/actions/runs/36010428624), successfully minted the tap-scoped token requesting Contents:write, but failed because the checker incorrectly treated repository user-role `permissions.push` as the installation token's permission grant. GitHub returned false user-role flags despite successful explicit token minting.
+
+The checker now relies on explicit permission selection at minting, verifies the installation token's repository list contains exactly `rebaze/homebrew-tap`, and reads the tap contents. This remains read-only and does not claim that branch rules permit a future push. actionlint and whitespace checks passed; live verification of the corrected workflow is recorded in its GitHub run.
