@@ -75,6 +75,8 @@ def reconcile(observation, packet):
     observed_sources = observation.get("sources")
     if not isinstance(subject, dict) or not isinstance(observed_sources, list):
         raise Invalid("observation missing identity or sources")
+    if type(observation.get("exitCode")) is not int:
+        raise Invalid("invalid observation exit code")
     reasons = []
     if subject.get("current") is not True or observation.get("exitCode") != 0:
         reasons.append("fresh observation has incomplete or stale coverage")

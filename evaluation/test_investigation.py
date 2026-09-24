@@ -62,6 +62,17 @@ class InvestigationTest(unittest.TestCase):
         self.observation["exitCode"] = 2
         self.assertEqual(MODULE.reconcile(self.observation, self.packet)[1], 2)
 
+    def test_noninteger_observation_exit_codes_are_rejected(self):
+        for code in (False, True, 0.0, 2.0, "0", None):
+            with self.subTest(exitCode=code):
+                observation = dict(self.observation, exitCode=code)
+                with self.assertRaises(MODULE.Invalid):
+                    MODULE.reconcile(observation, self.packet)
+        observation = dict(self.observation)
+        del observation["exitCode"]
+        with self.assertRaises(MODULE.Invalid):
+            MODULE.reconcile(observation, self.packet)
+
     def test_false_path_digest_or_line_cannot_be_supported(self):
         for change in ({"path": "missing.md"}, {"digest": "0" * 64}, {"line": 999}):
             with self.subTest(change=change):

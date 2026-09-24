@@ -152,3 +152,7 @@ The public skill defaults to no delegation; optional work has explicit question,
 Stage 4 actual agent evaluation: five recorded runs preserved source/index digests and tripwire absence. Ephemeral delegation failed once and used honest serial fallback. Two fresh persistent sessions have successful native spawn tool results, with the first sourced briefing before delegation and completion within the 60-second investigation window. First useful responses were 21.889–27.760 seconds; full times and the failed attempt are preserved in [stage 4 results](../evaluation/stage-4-results.md). Ten reconciliation tests and skill validation passed. These are agent observations, not human validation.
 
 Stage 4 final standard validation passed: `go test -race ./...`, `go vet ./...`, Conftest policy verification (2 passed), build, all ten Python investigation tests and public skill validation. No runner changes or container execution are claimed.
+
+## 2026-09-24 — pre-merge Copilot review, stage 4
+
+The packet helper now requires an exact integer observation exit code. Boolean/float/string/null/missing values cannot masquerade as complete discovery through Python equality. The regression failed before correction; all eleven investigation tests pass. This tightens malformed-input handling without turning any hypothesis into verified evidence.
