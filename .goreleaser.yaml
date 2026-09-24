@@ -35,13 +35,15 @@ archives:
         strip_parent: true
       - src: plugin.json
         dst: share/preflight/plugins/preflight
+        strip_parent: true
       - src: .codex-plugin/plugin.json
         dst: share/preflight/plugins/preflight/.codex-plugin
         strip_parent: true
-      - src: skills/preflight/**/*
-        dst: share/preflight/plugins/preflight
+      - src: skills/preflight/**
+        dst: share/preflight/plugins/preflight/skills/preflight
       - src: LICENSE
         dst: share/preflight/plugins/preflight
+        strip_parent: true
       - src: package/marketplace.json
         dst: share/preflight/.agents/plugins
         strip_parent: true
