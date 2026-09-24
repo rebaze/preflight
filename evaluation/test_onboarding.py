@@ -42,6 +42,16 @@ class OnboardingTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 MODULE.validate_capabilities(json.dumps(candidate))
 
+    def test_feature_vocabulary_and_array_shape_are_strict(self):
+        supported = ["inspect", "github", "compare"]
+        for features in (supported + ["execute-host"], supported + ["inspect"],
+                         supported + [42], supported + [{}], {key: True for key in supported},
+                         "inspect github compare", None):
+            with self.subTest(features=features), self.assertRaises(ValueError):
+                MODULE.validate_capabilities(json.dumps(dict(self.capabilities, features=features)))
+        reordered = dict(self.capabilities, features=list(reversed(supported)))
+        self.assertEqual(MODULE.validate_capabilities(json.dumps(reordered)), reordered)
+
     def test_unknown_duplicate_and_text_output(self):
         for raw in ('{"schema":"one","schema":"two"}', 'Preflight capabilities',
                     json.dumps(dict(self.capabilities, downloadLatest=True))):

@@ -16,7 +16,8 @@ CATALOG = "share/preflight/.agents/plugins/marketplace.json"
 REQUIRED = {"preflight", "README.md", "LICENSE", "NOTICE", "share/preflight/policy/main.rego",
             "share/preflight/profiles/frontend-vitest.json", "share/preflight/runtime/run-tests.sh",
             "share/preflight/schemas/report-v1.json", "share/preflight/schemas/discovery-v1.json",
-            "docs/development.md", "docs/plans/issue-4.md", "evaluation/README.md", CATALOG}
+            "share/preflight/schemas/capabilities-v1.json",
+            "docs/development.md", "docs/try-preflight.html", "docs/plans/issue-4.md", "evaluation/README.md", CATALOG}
 PLATFORMS = {(os, arch) for os in ("darwin", "linux") for arch in ("amd64", "arm64")}
 
 
@@ -109,12 +110,16 @@ def smoke_native(binary_bytes, version):
             raise ValueError("packaged version does not match archive name: " + result)
         subprocess.run([str(binary), "--help"], check=True, stdout=subprocess.DEVNULL, timeout=10)
         capabilities = strict_json(subprocess.check_output([str(binary), "capabilities", "--format", "json"], timeout=10))
+        features = capabilities.get("features")
         if (capabilities.get("schema") != "preflight.capabilities/v1"
                 or type(capabilities.get("skillProtocol")) is not int
                 or capabilities.get("skillProtocol") != 1
                 or capabilities.get("discoverySchema") != "preflight.discovery/v1"
                 or capabilities.get("version") != version
-                or not {"inspect", "github", "compare"}.issubset(capabilities.get("features", []))):
+                or not isinstance(features, list)
+                or any(not isinstance(feature, str) for feature in features)
+                or len(features) != len(set(features))
+                or set(features) != {"inspect", "github", "compare"}):
             raise ValueError("packaged CLI does not implement the plugin protocol")
         empty = Path(temp) / "empty"
         empty.mkdir()

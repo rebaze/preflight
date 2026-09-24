@@ -34,6 +34,7 @@ class PackageTest(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(data)
         self.files = {name: b"synthetic fixture" for name in self.module.REQUIRED}
+        self.files["share/preflight/schemas/capabilities-v1.json"] = b"synthetic schema"
         self.files.update(self.module.plugin_files(self.source))
         self.files[self.module.CATALOG] = (self.source / "package/marketplace.json").read_bytes()
 
@@ -67,6 +68,11 @@ class PackageTest(unittest.TestCase):
                 self.write_archives(lambda files: files.pop(self.module.PLUGIN_ROOT + suffix))
                 with self.assertRaises(ValueError):
                     self.check()
+
+    def test_missing_capabilities_schema_is_rejected(self):
+        self.write_archives(lambda files: files.pop("share/preflight/schemas/capabilities-v1.json"))
+        with self.assertRaisesRegex(ValueError, "capabilities-v1.json"):
+            self.check()
 
     def test_unexpected_plugin_file_and_changed_bytes_are_rejected(self):
         for mutation in (
@@ -148,6 +154,25 @@ class PackageTest(unittest.TestCase):
         overlay.parent.symlink_to(external, target_is_directory=True)
         with self.assertRaisesRegex(ValueError, "symlink"):
             self.module.plugin_files(self.source)
+
+    def test_native_smoke_rejects_invalid_feature_vocabulary_and_shape(self):
+        supported = ["inspect", "github", "compare"]
+        for features in (supported + ["execute-host"], supported + ["inspect"],
+                         supported + [42], supported + [{}], {key: True for key in supported},
+                         "inspect github compare", None, ["inspect"]):
+            with self.subTest(features=features):
+                capabilities = {"schema": "preflight.capabilities/v1", "skillProtocol": 1,
+                                "discoverySchema": "preflight.discovery/v1", "features": features,
+                                "version": "0.1.0-rc.2", "commit": "synthetic"}
+                with patch.object(self.module.subprocess, "check_output", side_effect=[
+                        "preflight 0.1.0-rc.2 (commit synthetic, built today)\n", json.dumps(capabilities).encode()]), \
+                        patch.object(self.module.subprocess, "run") as run:
+                    run.return_value.returncode = 2
+                    run.return_value.stdout = json.dumps({"schema": "preflight.discovery/v1", "exitCode": 2, "sources": []}).encode()
+                    with self.assertRaisesRegex(ValueError, "plugin protocol"):
+                        self.module.smoke_native(b"synthetic fixture", "0.1.0-rc.2")
+                    # Invalid compatibility must be rejected before discovery runs.
+                    self.assertEqual(run.call_count, 1)
 
     def test_native_smoke_checks_capabilities_and_empty_discovery(self):
         capabilities = {"schema": "preflight.capabilities/v1", "skillProtocol": 1,

@@ -10,9 +10,11 @@
 
 Preflight is a small, focused companion for coding changes. Invoke its Codex skill with your intended change to learn which sourced expectations matter, what the evidence covers, and the next useful action. The independently usable Go CLI gathers bounded facts and performs supported deterministic checks. Results are local feedback, never release authorization.
 
+Try the [guided tester page](docs/try-preflight.html) for installation, a real-change briefing, before/after comparison and optional local feedback. It runs locally and does not execute commands or send project data.
+
 ## Install and invoke the skill
 
-The plugin candidate is **0.1.0-rc.3**, requiring CLI skill protocol **1** and discovery schema **preflight.discovery/v1**. The first public release remains pending. Use the supplied candidate archive, or reproduce one from an exact reviewed commit using [candidate record](docs/candidate.md) and [installation instructions](docs/plugin.md). No arbitrary latest download or global hook is installed.
+The plugin candidate is **0.1.0-rc.4**, requiring CLI skill protocol **1** and discovery schema **preflight.discovery/v1**. The first public release remains pending. Use the supplied candidate archive, or reproduce one from an exact reviewed commit using [candidate record](docs/candidate.md) and [installation instructions](docs/plugin.md). No arbitrary latest download or global hook is installed.
 
 After extracting the matching macOS/Linux archive into a durable directory:
 

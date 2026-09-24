@@ -33,7 +33,7 @@ def validate_capabilities(raw):
     if any(not isinstance(capabilities[key], str) or not capabilities[key] for key in ("version", "commit")):
         raise ValueError("missing CLI version identity")
     features = capabilities["features"]
-    if not isinstance(features, list) or any(not isinstance(feature, str) for feature in features) or len(features) != len(set(features)) or not {"inspect", "github", "compare"}.issubset(features):
+    if not isinstance(features, list) or any(not isinstance(feature, str) for feature in features) or len(features) != len(set(features)) or set(features) != {"inspect", "github", "compare"}:
         raise ValueError("missing or invalid candidate features")
     return capabilities
 

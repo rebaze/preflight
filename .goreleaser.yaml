@@ -47,6 +47,9 @@ archives:
       - src: package/marketplace.json
         dst: share/preflight/.agents/plugins
         strip_parent: true
+      - src: docs/*.html
+        dst: docs
+        strip_parent: true
       - src: docs/*.md
         dst: docs
         strip_parent: true

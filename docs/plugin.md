@@ -2,7 +2,7 @@
 
 Preflight is a small, focused companion that explains relevant project expectations and evidence before a coding change. Install one public `preflight` skill and invoke it in your own project. The developer-maintenance skill under `.agents/skills/preflight-verification` serves a separate purpose.
 
-The plugin candidate is **0.1.0-rc.3**. Use the CLI bundled in the same reviewed archive. The first supported harness is Codex; installation was exercised with Codex CLI **0.156.1**. Discovery needs Git for revision context, but no profile initialization, Conftest, Docker or application dependency installation. Optional GitHub inspection uses existing authenticated `gh` access. The plugin adds no service, model API key, telemetry or automatic hook.
+The plugin candidate is **0.1.0-rc.4**. Use the CLI bundled in the same reviewed archive. The first supported harness is Codex; installation was exercised with Codex CLI **0.156.1**. Discovery needs Git for revision context, but no profile initialization, Conftest, Docker or application dependency installation. Optional GitHub inspection uses existing authenticated `gh` access. The plugin adds no service, model API key, telemetry or automatic hook.
 
 ## Install the reviewed candidate
 
@@ -12,7 +12,7 @@ Use the delivered archive's exact path; these commands do not download an arbitr
 
 ```sh
 PREFLIGHT_ARCHIVE=/absolute/path/to/the-reviewed-native-preflight.tar.gz
-PREFLIGHT_INSTALL="$HOME/.local/share/preflight/0.1.0-rc.3"
+PREFLIGHT_INSTALL="$HOME/.local/share/preflight/0.1.0-rc.4"
 mkdir -p "$PREFLIGHT_INSTALL"
 tar -xzf "$PREFLIGHT_ARCHIVE" -C "$PREFLIGHT_INSTALL"
 export PATH="$PREFLIGHT_INSTALL:$PATH"
