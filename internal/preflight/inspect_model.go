@@ -16,6 +16,7 @@ const DiscoveryMaxBytes = 16 << 20
 // Discovery is an observation, not a check report or authorization. Source
 // origin and verification are independent; no local test ran during discovery.
 type Discovery struct {
+	Comparison  *DiscoveryComparison  `json:"comparison,omitempty"`
 	GitHub      *DiscoveryGitHub      `json:"github,omitempty"`
 	Schema      string                `json:"schema"`
 	Authority   string                `json:"authority"`
@@ -155,10 +156,18 @@ func ValidateDiscovery(d Discovery) error {
 			return fmt.Errorf("invalid diagnostic")
 		}
 	}
+	inputsByPath := map[string]DiscoveryInput{}
+	for _, input := range d.Inputs {
+		inputsByPath[input.Path] = input
+	}
 	seen := map[string]bool{}
 	for _, s := range d.Sources {
 		if snapshotValidPath(s.Path) != nil || s.Kind == "" || s.Digest == "" || s.StartLine < 1 || s.EndLine < s.StartLine || seen[s.Path] {
 			return fmt.Errorf("invalid or duplicate source %q", s.Path)
+		}
+		input, ok := inputsByPath[s.Path]
+		if !ok || input.Kind != "file" || input.Digest != s.Digest || input.Mode != s.Mode {
+			return fmt.Errorf("source lacks matching captured file identity: %s", s.Path)
 		}
 		if s.Digest != inspectHash(s.Content) {
 			return fmt.Errorf("source content identity mismatch: %s", s.Path)
@@ -198,6 +207,11 @@ func ValidateDiscovery(d Discovery) error {
 			if r.Path == "" || r.Line < 1 || digestErr != nil || len(digest) != 32 {
 				return fmt.Errorf("invalid claim source")
 			}
+		}
+	}
+	if d.Comparison != nil {
+		if err := ValidateDiscoveryComparison(d.Comparison); err != nil {
+			return err
 		}
 	}
 	if d.GitHub != nil {
@@ -245,6 +259,9 @@ func WriteDiscovery(w io.Writer, d Discovery, format string) error {
 		for i, line := range strings.Split(strings.TrimSuffix(s.Content, "\n"), "\n") {
 			fmt.Fprintf(&b, "  %d: %s\n", s.StartLine+i, line)
 		}
+	}
+	if d.Comparison != nil {
+		writeDiscoveryComparisonText(&b, d.Comparison)
 	}
 	if d.GitHub != nil {
 		writeDiscoveryGitHubText(&b, d.GitHub)

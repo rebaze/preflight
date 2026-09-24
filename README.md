@@ -20,6 +20,10 @@ Standalone discovery:
 go build -o bin/preflight ./cmd/preflight
 bin/preflight inspect --repo /path/to/project --format json
 bin/preflight inspect --repo /path/to/project --github --format json
+# Use an existing private parent directory outside all Git checkouts.
+bin/preflight inspect --repo /path/to/project --output /private/preflight/before.json
+# After editing:
+bin/preflight inspect --repo /path/to/project --compare /private/preflight/before.json
 # --repo defaults to the current directory; --base REF is optional comparison context.
 ```
 

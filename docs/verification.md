@@ -135,6 +135,20 @@ Authorized real-repository reads used rebaze/preflight only. First observation a
 
 Stage 2 exact-commit verification: the isolated `a7b1b8c` worktree passed `go test -race ./...` (all packages), vet, Conftest (2 passed), and build. A concurrent working-tree suite earlier failed an unfinished stage 3 result-ID fixture; it is retained as a development failure, not reported as stage 2 passing evidence. Independent review then identified comparison-tip freshness and oversized-observation round-trip gaps; regression fixes and their final validation are recorded below.
 
+## 2026-09-24 — issue 4 stage 3 observations and explanations
+
+Private observation save/compare and structural workflow tests cover exclusive owner-readable output, checkout/Git/symlink rejection, strict loading, changed source/requirements, incompatible subjects, stale evidence and producer/revision-bound observed result intervals. A failure with no supported explanation retains an unknown cause. Initial transition fixture used a nonnumeric result ID after the GitHub validator was strengthened; that fixture failed and was corrected to the real normalized ID shape.
+
+`python3 evaluation/demo_compare.py bin/preflight` passed using a new disposable fixture: removing literal `pull_request` produced `pr_trigger_removed` plus stale prior evidence; restoring it produced a resolved structural finding; the original and changed observations remained present. No repository code or checks executed. Independent structural review found unsupported block/flow/indentation forms, duplicate names and replacement jobs could cause false removal claims; regression tests reproduced these and the parser now leaves unsupported/ambiguous forms unverified. This is synthetic structural evidence, not a claim of remote CI execution or human usability.
+
+Final stage 2 review-fix commit `0b10130` passed the full race suite, vet, Conftest (2 passed) and build in its isolated worktree. Stage 3 working increment then passed the full race suite (all three packages), vet, Conftest (2 passed), build and repeated public change/restoration demo. Discovery/evidence-only additions did not change the Docker runner; no new actual-container execution is claimed.
+
+Stage 3 integration review additionally reproduced a saved observation containing a workflow source without any corresponding captured input. That internally inconsistent source could otherwise produce a false verified deletion. Validation now requires every source to match a captured file's digest/mode; workflow coverage checks both directions. The bounded collector preserves those pairs when truncating, with a regression for long-path prefixes. Previously observed missing-source acceptance and pair-loss failures are preserved here; focused corrected tests and final suite establish the delivered behavior.
+
+## 2026-09-24 — pre-merge Copilot review, stage 3
+
+A regression reproduced duplicate event keys in a workflow `on` mapping producing known trigger semantics. The constrained parser now rejects duplicate event keys as ambiguous; no verified PR-trigger removal can be derived from that input. Focused structural regression tests passed after the fix.
+
 
 ## 2026-09-24 — issue 4 stage 2 Copilot review before integration
 

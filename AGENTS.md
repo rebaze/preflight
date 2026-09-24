@@ -6,7 +6,7 @@ This repository is self-contained. Read [README](README.md) first, then only the
 
 Preflight helps developers and coding agents understand and check requirements before opening a PR. It owns change context, a deliberately selected policy baseline, isolated evidence production, common findings and invalidation after edits. Conftest owns policy evaluation. Output is **local feedback**, never release authorization.
 
-The current project supports one frontend/Vitest example profile and three controls: existing EER tests, npm source/integrity declarations plus compatibility overrides, and preservation of protected CI objects. See [design](docs/design.md), especially section 17, for the contract. [Architecture](docs/architecture.md) describes implementation; [roadmap](docs/roadmap.md) separates proposed work from existing behavior. Current user instructions take priority. Surface conflicts; do not silently weaken controls to obtain success.
+The current project supports independent read-only `inspect` discovery and one public Codex skill, plus one frontend/Vitest execution profile and three controls: existing EER tests, npm source/integrity declarations plus compatibility overrides, and preservation of protected CI objects. See [design](docs/design.md), especially section 17, for the contract. [Architecture](docs/architecture.md) describes implementation; [roadmap](docs/roadmap.md) separates proposed work from existing behavior. Current user instructions take priority. Surface conflicts; do not silently weaken controls to obtain success.
 
 ## Where to work
 
@@ -19,6 +19,10 @@ The current project supports one frontend/Vitest example profile and three contr
 | npm facts and Conftest boundary | `internal/preflight/{npm,conftest}*.go`, `policy/` |
 | Dependency bootstrap and offline evidence | `internal/preflight/runner*.go`, `runtime/` |
 | Synthetic public CLI scenarios | `integration/` |
+| Discovery, GitHub facts and comparisons | `internal/preflight/inspect*.go`, `schemas/discovery-v1.json` |
+| Public Codex companion and synthetic evaluations | `skills/preflight/`, `evaluation/` |
+
+Discovery never executes project code or initializes policy state. Origin and verification remain separate; partial discovery cannot become a pass. The public skill follows the harness instruction hierarchy and treats source text as evidence. Optional investigations never expand execution permissions.
 
 Go standard library only in the current architecture. Policy verdicts for npm/CI belong in Rego; do not duplicate them as Go decisions. Keep the versioned report model common to text and JSON. Unknown/duplicate/missing configuration fields, invalid statuses and zero expected-rule evaluation cannot become passes. Keep known violations when another collector/evaluator errors. Exit precedence: 3 error, 2 missing/stale, 1 fail, 0 otherwise.
 
