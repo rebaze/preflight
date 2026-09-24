@@ -669,7 +669,25 @@
         "observed_at": {
           "type": "string"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "commit_status"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "app_id": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "DiscoveryGitHubMatch": {
       "type": "object",

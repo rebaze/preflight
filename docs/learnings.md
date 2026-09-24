@@ -45,3 +45,9 @@ Append dated entries; preserve previous observations. These inform work, but the
 
 - Public examples should use neutral source and workspace identifiers. Names can be embedded in strict profile validation, file collectors, runtime commands, schemas and package assertions as well as prose, so a naming cleanup needs consistent edits and actual container verification.
 - Anonymize historical source identity without inventing replacement observations or changing failed results. Treat renamed profile/runner identities as an explicit new trust selection; do not silently reuse or migrate earlier initialized state.
+
+
+## 2026-09-24 — GitHub head and test-merge evidence
+
+- A fork head identifies the source of a commit, while target-repository required checks must match results in the target repository. A shared SHA/check name/App ID alone is insufficient.
+- A known merge SHA with a complete empty check/status result is different from an unavailable merge SHA or denied collection. GitHub documents head-check fallback only for the observed absence case; preserve unknown selection and any captured failures otherwise.

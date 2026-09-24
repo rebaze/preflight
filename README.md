@@ -23,7 +23,7 @@ bin/preflight inspect --repo /path/to/project --github --format json
 # --repo defaults to the current directory; --base REF is optional comparison context.
 ```
 
-Use `--github` for explicit read-only GitHub gates/results through existing `gh` access; `--pr NUMBER` selects a PR and its base. Required checks and existing results remain distinct, and remote results do not cover local edits.
+Use `--github` for explicit read-only GitHub gates/results through existing `gh` access; `--pr NUMBER` selects a PR and its base. Required checks and existing results remain distinct, and remote results do not cover local edits. PR checks are read from the target repository, including fork PRs; unavailable merge-candidate identity remains unknown.
 
 An exit of 2 means useful partial discovery; 3 means an invocation/collection error. Neither an exit of 0 nor a documented expectation means project tests passed. See the [discovery contract and boundaries](docs/discovery.md).
 
