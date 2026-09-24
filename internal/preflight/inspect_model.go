@@ -207,6 +207,17 @@ func ValidateDiscovery(d Discovery) error {
 			if r.Path == "" || r.Line < 1 || digestErr != nil || len(digest) != 32 {
 				return fmt.Errorf("invalid claim source")
 			}
+			if c.Verification == "verified" {
+				found := false
+				for _, source := range d.Sources {
+					if source.Path == r.Path && source.Digest == r.Digest && r.Line >= source.StartLine && r.Line <= source.EndLine {
+						found = true
+					}
+				}
+				if !found || !d.Subject.Current {
+					return fmt.Errorf("verified claim requires a current captured citation")
+				}
+			}
 		}
 	}
 	if d.Comparison != nil {

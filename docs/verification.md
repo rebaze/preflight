@@ -145,6 +145,18 @@ Final stage 2 review-fix commit `0b10130` passed the full race suite, vet, Conft
 
 Stage 3 integration review additionally reproduced a saved observation containing a workflow source without any corresponding captured input. That internally inconsistent source could otherwise produce a false verified deletion. Validation now requires every source to match a captured file's digest/mode; workflow coverage checks both directions. The bounded collector preserves those pairs when truncating, with a regression for long-path prefixes. Previously observed missing-source acceptance and pair-loss failures are preserved here; focused corrected tests and final suite establish the delivered behavior.
 
+## 2026-09-24 — issue 4 stage 4 investigation boundary
+
+The public skill defaults to no delegation; optional work has explicit question, source and elapsed-time budgets with serial fallback. The bundled packet reconciler returns only unverified hypothesis/unresolved states and never changes observations or check results. Regression tests cover unsupported/contradictory statuses, duplicate/unknown fields, missing citations, stale identity, tampered content, source budgets and preserved failed evidence. Go validation additionally rejects a verified generic claim with an absent/stale captured citation (red then green). Actual native-harness and fallback timings, including a failed ephemeral child-thread attempt, are recorded in the evaluation results rather than inferred from unit tests.
+
+Stage 4 actual agent evaluation: five recorded runs preserved source/index digests and tripwire absence. Ephemeral delegation failed once and used honest serial fallback. Two fresh persistent sessions have successful native spawn tool results, with the first sourced briefing before delegation and completion within the 60-second investigation window. First useful responses were 21.889–27.760 seconds; full times and the failed attempt are preserved in [stage 4 results](../evaluation/stage-4-results.md). Ten reconciliation tests and skill validation passed. These are agent observations, not human validation.
+
+Stage 4 final standard validation passed: `go test -race ./...`, `go vet ./...`, Conftest policy verification (2 passed), build, all ten Python investigation tests and public skill validation. No runner changes or container execution are claimed.
+
+## 2026-09-24 — pre-merge Copilot review, stage 4
+
+The packet helper now requires an exact integer observation exit code. Boolean/float/string/null/missing values cannot masquerade as complete discovery through Python equality. The regression failed before correction; all eleven investigation tests pass. This tightens malformed-input handling without turning any hypothesis into verified evidence.
+
 ## 2026-09-24 — pre-merge Copilot review, stage 3
 
 A regression reproduced duplicate event keys in a workflow `on` mapping producing known trigger semantics. The constrained parser now rejects duplicate event keys as ambiguous; no verified PR-trigger removal can be derived from that input. Focused structural regression tests passed after the fix.

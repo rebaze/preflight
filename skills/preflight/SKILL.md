@@ -32,4 +32,6 @@ If the user provides a prior observation, append `--compare <path>` to a fresh i
 
 Explain the most relevant changed input or requirement, new/resolved finding, and evidence that is stale or unknown. Use `comparison.structural` for supported source-backed CI removals and `resolvedStructural` for actual restoration. Unsupported YAML or ambiguous check/job mappings need review. A remote failing result without a supported explanation has an unknown cause. Say “last observed passing” and “first observed failing” only when comparable structured evidence supplies those timestamps; never claim the issue originated when first seen. Reinspect before handoff and keep local edits separate from remote SHA evidence.
 
-Do not delegate by default. Basic inspection and the first briefing should stand alone.
+## Optional focused investigation
+
+Do not delegate by default. Basic inspection and the first briefing stand alone. For a requested deeper investigation, follow [bounded investigations](references/investigations.md): first useful briefing before deeper work, at most two one-question investigations, 60 seconds and six sources/64 KiB each. Use native read-only tools only when available and permitted, otherwise investigate serially under the same limits. Stop at the budget, preserve disagreement and reconcile citations with fresh source identity. Conclusions remain unverified hypotheses or unresolved questions; they cannot supply executed evidence, waive failures or change the governing baseline.
