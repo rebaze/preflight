@@ -16,7 +16,7 @@ The next operator session must not assume old `/tmp` reports, dependency volumes
 
 ## Approved near-term sequence — issue 4
 
-[Issue 4](https://github.com/rebaze/preflight/issues/4) authorizes five working increments. [Plan and durable progress](plans/issue-4.md) records implementation and verification. Stage 1 adds independent bounded local inspection and the public skill. Stages 2–5 add actual GitHub gates/results, saved comparisons, optional bounded investigations and installable measured onboarding. These capabilities extend discovery; arbitrary ecosystem execution, hosted models and release authority remain excluded. Older R1–R4 below remain separate proposed work.
+[Issue 4](https://github.com/rebaze/preflight/issues/4) authorizes five working increments. [Plan and durable progress](plans/issue-4.md) records implementation and verification. The five increments now implement independent local inspection/public skill, actual GitHub gates/results, saved comparisons, optional bounded investigations and installable measured onboarding; see the final delivery status below. These capabilities extend discovery; arbitrary ecosystem execution, hosted models and release authority remain excluded. Older R1–R4 below remain separate proposed work.
 
 ## R1 — Make setup and results understandable
 
@@ -57,3 +57,9 @@ Issue 4 stage 3 implements explicit before/after observations, stale evidence an
 Issue 4 stage 4 adds optional bounded investigation packets, serial fallback and citation/identity reconciliation. Actual native-tool and fallback observations are recorded separately from deterministic tests. Final candidate packaging and onboarding metrics remain stage 5.
 
 Issue 4 stage 5 packages the versioned plugin candidate inside the existing four CLI archives and adds explicit CLI compatibility. Final acceptance depends on recorded installation and actual fresh-harness measurements, including all misses; deterministic fixtures alone do not establish human usability. Publication/tagging/marketplace submission remain owner actions.
+
+## Issue 4 delivery status — 2026-09-24
+
+All five candidate increments are implemented in the stacked review sequence [#5](https://github.com/rebaze/preflight/pull/5), [#6](https://github.com/rebaze/preflight/pull/6), [#7](https://github.com/rebaze/preflight/pull/7), [#8](https://github.com/rebaze/preflight/pull/8), [#9](https://github.com/rebaze/preflight/pull/9). The final installable plugin is0.1.0-rc.3; [candidate identities](candidate.md) and [actual evaluation](../evaluation/stage-5-results.md) record the tested artifacts. Final timing target:5/5 within60seconds across4layouts; twelve actual final harness scenarios passed, with earlier misses preserved. These are agent evaluations, not human observations. Earlier stage-by-stage notes above are the delivery chronology, not remaining implementation items.
+
+Owner work: review and integrate the PR stack, choose a release tag, run guarded publication and explicitly approve any marketplace submission. No PR was merged or release/tag published by this implementation. The separate historical frontend prerequisite and roadmap R1–R4 remain outside this discovery/harness issue.

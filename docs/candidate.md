@@ -1,8 +1,32 @@
 # Candidate build records
 
+## Current rc.3 candidate
+
+Built from clean source `ed870aadbcfb796c18039f267d2eeedc64f3872b`: plugin **0.1.0-rc.3**, CLI **0.0.0-SNAPSHOT-ed870aa**, skill protocol 1 and discovery v1. It adds the registered-path bootstrap guard after the rc.2 serial lookup miss. `make packaging` passed in 2.773 seconds using the already-installed toolchain/build cache; all four archives and native smoke checks passed. Fresh-harness results are recorded separately in [stage 5 evaluation](../evaluation/stage-5-results.md).
+
+| Archive | SHA256 |
+| --- | --- |
+| `preflight_0.0.0-SNAPSHOT-ed870aa_darwin_amd64.tar.gz` | `765e2d7d5b4817a860faa9a04be541440b734aada90e27b2a117960a9c115831` |
+| `preflight_0.0.0-SNAPSHOT-ed870aa_darwin_arm64.tar.gz` | `047c42e4f9628d347ec532bf53355341f941ec1ed2a9048677edf0207a043036` |
+| `preflight_0.0.0-SNAPSHOT-ed870aa_linux_amd64.tar.gz` | `e85916cc26a8f80f9c9a90ef59db5766bded19b526b50f75fe13ad4d7632c299` |
+| `preflight_0.0.0-SNAPSHOT-ed870aa_linux_arm64.tar.gz` | `3178643a38dcb8d5c40fa5318e0705920bf6f074a5614943dca7a77c98c6ac63` |
+
+Use [the archive installation commands](plugin.md#install-the-reviewed-candidate). The binary and public plugin are both included; no source checkout or original conversation is needed at runtime. This is a local unsigned snapshot. Actual signatures, attestations and immutable publication remain the existing owner-triggered release workflow.
+
+To rebuild this exact source candidate with the documented tools already installed:
+
+```sh
+git clone https://github.com/rebaze/preflight.git preflight-candidate
+cd preflight-candidate
+git checkout --detach ed870aadbcfb796c18039f267d2eeedc64f3872b
+make packaging
+```
+
+Build-time metadata can change rebuilt archive bytes. Verify new local checksums; the table above identifies the actual measured files, not byte-reproducibility across future builds. No release tag was created.
+
 ## Historical rc.2 candidate
 
-This rc.2 record is preserved after its unassisted serial-investigation lookup missed the work budget. The registered-path lookup fix advances the plugin to rc.3; its actual build and evaluation are recorded separately once executed.
+This rc.2 record is preserved after its unassisted serial-investigation lookup missed the work budget. The registered-path lookup fix advances the plugin to rc.3; the current build record is above and actual evaluations remain version-specific.
 
 The unpublished rc.2 candidate was built from clean source commit `9662a51226b5e0023720f032b9623b69e1e9bc99` on 2026-09-24 using Go1.27.1 and GoReleaser2.18.2. Plugin version: **0.1.0-rc.2**. CLI version: **0.0.0-SNAPSHOT-9662a51**; skill protocol1, discovery `preflight.discovery/v1`. No version tag, release or marketplace submission was made.
 
