@@ -85,3 +85,15 @@ func TestDiscoveryMaximumSizeIsExplicit(t *testing.T) {
 		t.Fatalf("oversized observation must fail at its explicit limit: %v", err)
 	}
 }
+
+func TestDiscoveryRejectsIncompleteClaimReferences(t *testing.T) {
+	for _, ref := range []DiscoveryReference{{Path: "README.md", Line: 1}, {Path: "README.md", Digest: strings.Repeat("a", 64), Line: 0}, {Path: "README.md", Digest: "not-a-digest", Line: 1}} {
+		d := NewDiscovery()
+		d.Subject.Current = true
+		d.Claims = []DiscoveryClaim{{ID: "documented", Origin: "documented", Verification: "unverified", Summary: "Expectation", Sources: []DiscoveryReference{ref}}}
+		FinalizeDiscovery(&d)
+		if ValidateDiscovery(d) == nil {
+			t.Fatalf("accepted incomplete citation: %+v", ref)
+		}
+	}
+}
