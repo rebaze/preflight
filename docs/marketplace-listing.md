@@ -1,6 +1,6 @@
 # Preflight listing candidate
 
-Version: 0.1.0-rc.2. Publisher: rebaze. Category: Developer Tools. License: Apache-2.0. This is prepared listing material, not a submitted or approved marketplace listing.
+Version: 0.1.0-rc.3. Publisher: rebaze. Category: Developer Tools. License: Apache-2.0. This is prepared listing material, not a submitted or approved marketplace listing.
 
 **Display name:** Preflight
 

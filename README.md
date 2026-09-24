@@ -12,7 +12,7 @@ Preflight is a small, focused companion for coding changes. Invoke its Codex ski
 
 ## Install and invoke the skill
 
-The plugin candidate is **0.1.0-rc.2**, requiring CLI skill protocol **1** and discovery schema **preflight.discovery/v1**. The first public release remains pending. Use the supplied candidate archive, or reproduce one from an exact reviewed commit using [candidate installation and release instructions](docs/plugin.md). No arbitrary latest download or global hook is installed.
+The plugin candidate is **0.1.0-rc.3**, requiring CLI skill protocol **1** and discovery schema **preflight.discovery/v1**. The first public release remains pending. Use the supplied candidate archive, or reproduce one from an exact reviewed commit using [candidate record](docs/candidate.md) and [installation instructions](docs/plugin.md). No arbitrary latest download or global hook is installed.
 
 After extracting the matching macOS/Linux archive into a durable directory:
 
@@ -64,7 +64,7 @@ Start with the [documentation map](docs/README.md), [design and intent](docs/des
 
 ## Build and bounded-check prerequisites
 
-The first release is pending. Until it is published, build from this checkout:
+For development, build from an exact reviewed checkout (the first public release remains pending):
 
 ```sh
 go build -o bin/preflight ./cmd/preflight
