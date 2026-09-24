@@ -88,6 +88,16 @@
               "type": "null"
             }
           ]
+        },
+        "comparison": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DiscoveryComparison"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       }
     },
@@ -704,6 +714,329 @@
           "items": {
             "type": "string"
           }
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatible",
+        "reason",
+        "previousObservedAt",
+        "currentObservedAt",
+        "previousEvidenceStale",
+        "inputChanges",
+        "requirementChanges",
+        "newFindings",
+        "resolvedFindings",
+        "evidence",
+        "structural",
+        "resolvedStructural",
+        "notes"
+      ],
+      "properties": {
+        "compatible": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "previousObservedAt": {
+          "type": "string"
+        },
+        "currentObservedAt": {
+          "type": "string"
+        },
+        "previousEvidenceStale": {
+          "type": "boolean"
+        },
+        "inputChanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryInputChange"
+          }
+        },
+        "requirementChanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryValueChange"
+          }
+        },
+        "newFindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryFinding"
+          }
+        },
+        "resolvedFindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryFinding"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryEvidenceTransition"
+          }
+        },
+        "structural": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryCIExplanation"
+          }
+        },
+        "resolvedStructural": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DiscoveryCIExplanation"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "DiscoveryInputChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "change",
+        "beforeKind",
+        "afterKind",
+        "beforeDigest",
+        "afterDigest",
+        "beforeMode",
+        "afterMode"
+      ],
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "change": {
+          "type": "string",
+          "enum": [
+            "added",
+            "modified",
+            "removed",
+            "unknown"
+          ]
+        },
+        "beforeKind": {
+          "type": "string"
+        },
+        "afterKind": {
+          "type": "string"
+        },
+        "beforeDigest": {
+          "type": "string"
+        },
+        "afterDigest": {
+          "type": "string"
+        },
+        "beforeMode": {
+          "type": "integer"
+        },
+        "afterMode": {
+          "type": "integer"
+        }
+      }
+    },
+    "DiscoveryValueChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "change",
+        "before",
+        "after",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "claim",
+            "required_check",
+            "rule"
+          ]
+        },
+        "change": {
+          "type": "string",
+          "enum": [
+            "added",
+            "modified",
+            "removed",
+            "unknown"
+          ]
+        },
+        "before": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryFinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "status",
+        "summary",
+        "source"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryEvidenceTransition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requirementId",
+        "beforeStatus",
+        "afterStatus",
+        "beforeRevision",
+        "afterRevision",
+        "beforeObservedAt",
+        "afterObservedAt",
+        "comparable",
+        "lastObservedPassing",
+        "firstObservedFailing",
+        "detail"
+      ],
+      "properties": {
+        "requirementId": {
+          "type": "string"
+        },
+        "beforeStatus": {
+          "type": "string",
+          "enum": [
+            "passing",
+            "failing",
+            "unknown",
+            "stale",
+            "pending",
+            "missing"
+          ]
+        },
+        "afterStatus": {
+          "type": "string",
+          "enum": [
+            "passing",
+            "failing",
+            "unknown",
+            "stale",
+            "pending",
+            "missing"
+          ]
+        },
+        "beforeRevision": {
+          "type": "string"
+        },
+        "afterRevision": {
+          "type": "string"
+        },
+        "beforeObservedAt": {
+          "type": "string"
+        },
+        "afterObservedAt": {
+          "type": "string"
+        },
+        "comparable": {
+          "type": "boolean"
+        },
+        "lastObservedPassing": {
+          "type": "string"
+        },
+        "firstObservedFailing": {
+          "type": "string"
+        },
+        "detail": {
+          "type": "string"
+        }
+      }
+    },
+    "DiscoveryCIExplanation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "path",
+        "beforeLine",
+        "afterLine",
+        "before",
+        "after",
+        "requirementId",
+        "verification",
+        "detail"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "workflow_deleted",
+            "pr_trigger_removed",
+            "required_job_deleted",
+            "unsupported_structure"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "beforeLine": {
+          "type": "integer"
+        },
+        "afterLine": {
+          "type": "integer"
+        },
+        "before": {
+          "type": "string"
+        },
+        "after": {
+          "type": "string"
+        },
+        "requirementId": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string",
+          "enum": [
+            "verified",
+            "unverified"
+          ]
         },
         "detail": {
           "type": "string"

@@ -10,6 +10,29 @@ import (
 	"testing"
 )
 
+func TestInspectBoundRecordsPreservesSourceInputPairs(t *testing.T) {
+	d := NewDiscovery()
+	d.Subject.Current = true
+	for i := 0; i < 8000; i++ {
+		d.Inputs = append(d.Inputs, DiscoveryInput{Path: fmt.Sprintf("a/%05d/%s.txt", i, strings.Repeat("x", 120)), Kind: "file", Digest: strings.Repeat("a", 64), Mode: 0600})
+	}
+	content := "Preserve public response fields.\n"
+	source := DiscoverySource{Path: "z/CONTRIBUTING.md", Kind: "documentation", Content: content, Digest: inspectHash(content), StartLine: 1, EndLine: 1, Mode: 0600}
+	d.Sources = append(d.Sources, source)
+	d.Inputs = append(d.Inputs, DiscoveryInput{Path: source.Path, Kind: "file", Digest: source.Digest, Mode: source.Mode})
+	inspectBoundRecords(&d)
+	FinalizeDiscovery(&d)
+	if d.ExitCode != 2 {
+		t.Fatalf("omission must remain partial: %d", d.ExitCode)
+	}
+	if len(d.Sources) != 1 {
+		t.Fatal("bounded discovery unnecessarily discarded useful source")
+	}
+	if err := ValidateDiscovery(d); err != nil {
+		t.Fatalf("bounded source lost captured identity: %v", err)
+	}
+}
+
 func TestInspectLocalTracksLayersAndPreservesCheckout(t *testing.T) {
 	repo, head, _ := snapshotFixture(t)
 	snapshotWrite(t, repo, "CONTRIBUTING.md", "Preserve response fields.\nRun contract tests.\n")

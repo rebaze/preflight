@@ -15,7 +15,7 @@ import (
 const usage = `rebaze Preflight: local frontend feedback, not release authorization.
 
 preflight version
-preflight inspect [--repo PATH] [--base REF] [--format text|json]
+preflight inspect [--repo PATH] [--base REF] [--github] [--pr NUMBER] [--compare FILE] [--output FILE] [--format text|json]
 preflight init --repo PATH --baseline SHA --profile FILE --policy-dir DIR --state-dir DIR --conftest FILE
 preflight explain --state-dir DIR [--base REF] --format text|json
 preflight prepare --state-dir DIR [--base REF] --allow-downloads

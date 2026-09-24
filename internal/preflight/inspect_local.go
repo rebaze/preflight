@@ -457,7 +457,38 @@ func inspectBoundRecords(d *Discovery) {
 	budget -= used
 	d.Changes, used, changesLimited = inspectRecordPrefix(d.Changes, budget/2)
 	budget -= used
-	d.Inputs, _, inputsLimited = inspectRecordPrefix(d.Inputs, budget)
+	// Retain identities for disclosed documents first. Independent prefixes can
+	// otherwise leave a later document without the input identity that supports it.
+	sourcePaths := map[string]bool{}
+	for _, source := range d.Sources {
+		sourcePaths[source.Path] = true
+	}
+	prioritized := make([]DiscoveryInput, 0, len(d.Inputs))
+	for _, input := range d.Inputs {
+		if sourcePaths[input.Path] {
+			prioritized = append(prioritized, input)
+		}
+	}
+	for _, input := range d.Inputs {
+		if !sourcePaths[input.Path] {
+			prioritized = append(prioritized, input)
+		}
+	}
+	d.Inputs, _, inputsLimited = inspectRecordPrefix(prioritized, budget)
+	sort.Slice(d.Inputs, func(i, j int) bool { return d.Inputs[i].Path < d.Inputs[j].Path })
+	retainedInputs := map[string]bool{}
+	for _, input := range d.Inputs {
+		retainedInputs[input.Path] = true
+	}
+	sources := d.Sources[:0]
+	for _, source := range d.Sources {
+		if retainedInputs[source.Path] {
+			sources = append(sources, source)
+		} else {
+			sourcesLimited = true
+		}
+	}
+	d.Sources = sources
 	if sourcesLimited || changesLimited || inputsLimited {
 		d.Subject.Current = false
 		inspectDiagnostic(d, "observation_limit", "Serialized local facts exceed the 1.5 MiB budget; useful source, change and input prefixes were retained. Omitted identities and expectations remain unknown.", "", false)
