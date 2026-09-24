@@ -26,3 +26,10 @@ Append dated entries; preserve previous observations. These inform work, but the
 
 - Toni explicitly authorized the initial commit after the standalone handoff. Publication and remote setup remain separate actions.
 - Ignore rules cover Go build/test binaries, coverage/profiling outputs, local Go workspace files, private run directories, logs, dependencies, environment/key material and editor files. Repository-local skills and synthetic report examples remain eligible for version control.
+
+## 2026-09-24 — Release preparation
+
+- A Preflight binary alone is insufficient for first-time initialization: release archives and Homebrew installation must carry the matching profile and policy files while retaining explicit trust selection.
+- GoReleaser's archive glob handling must be verified against actual archive contents. The first recursive-looking docs glob selected only nested examples; explicit root/example mappings plus an archive smoke check caught and fixed the omission.
+- Python unittest discovery requires importable test module names. Keep test filenames with underscores even when the executable helper uses a hyphenated filename.
+- Homebrew App verification and release publication are separate: a successful release cannot supply a missing tap key, and token permissions do not prove that branch rules permit direct pushes. Keep a verified, no-rebuild tap retry path.

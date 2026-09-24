@@ -55,3 +55,25 @@ Independent read-only handoff review found and rechecked the host-ownership fix,
 ## 2026-09-24 — Initial commit checks
 
 Before the user-authorized initial commit, reran `go test -race ./...`, `go vet ./...`, `conftest verify --policy policy` and the CLI build: all passed (Go test results reused the valid cache; Rego reported 2 passing tests). Checked 31 representative generated/private paths are ignored and 12 representative source, skill, schema and synthetic-example paths remain eligible. Staged whitespace checks passed. No new Docker or real-pilot run was needed for the ignore-rule/documentation changes; prior execution evidence remains above. No remote or publication action is included.
+
+## 2026-09-24 — GitHub release automation preparation
+
+Prepared GitHub Actions using Rio commit `56741f32e5ba0d2ad8bd01833c0b9c54fdbf9542` as a read-only reference. The selected module is now `github.com/rebaze/preflight`; CLI changes add version metadata only. No pilot runner/policy/runtime pins changed.
+
+Local macOS/arm64 results:
+
+- `go test -race ./...`, `go vet ./...`, `conftest verify --policy policy`, build: passed; 2 Rego tests. This first run selected the existing Homebrew Conftest reporting `dev`, OPA 1.20.2.
+- `python3 -m unittest discover -s tools -p '*_test.py'`: 20 tests passed, including publication refusal on changed/missing assets, invalid verification, incomplete platform inventory, existing drafts and Homebrew prerelease/downgrade rejection. Synthetic service doubles do not authenticate real signatures.
+- actionlint, shellcheck, `goreleaser check`: passed. GoReleaser 2.18.2 built all four macOS/Linux amd64/arm64 snapshot archives; the archive checker verified checksums, supporting files and the native packaged CLI/version.
+- The initial archive check failed because the documentation glob omitted top-level documents. Explicit documentation/example globs fixed the packaging; the same archive check passed afterwards.
+- Generated Homebrew formula: Ruby syntax passed. This is not a completed Homebrew installation from a published release.
+- Pinned govulncheck module: tidy/verification passed; no vulnerabilities found in the application or scanner at this run's database state.
+- Local Markdown file links and Git whitespace checks passed.
+
+No new real pilot or Docker/Vitest run was required for these distribution changes. A manual synthetic workflow is prepared. Real OIDC signing, release upload verification and tap publication require a selected version tag and configured credentials and have not been claimed as executed. The historical real-pilot failure above remains unchanged.
+
+The CI setup script was also executed locally against the official Conftest 0.70.1 Darwin arm64 archive. Archive SHA256 `b8eae5ce6c7c3a768a9b9c6c12b0c01f8fc065a99267c94646d309c479b218dd` verified; extracted executable SHA256 `a2971ccc84390569b202a853a1aa75f0923590bb8f1a0a673324f17c98f3aeed`, reporting Conftest 0.70.1 / OPA 1.20.2. The full Go race suite and both Rego tests passed with this explicitly selected evaluator as well.
+
+Independent read-only review found no important correctness issues. It additionally evaluated the generated formula with Homebrew Ruby and installed a synthetic binary plus policy/profile/runtime/schema directories into a temporary prefix successfully. It confirmed the GitHub CLI attestation JSON and CycloneDX predicate shapes against official implementation sources. Real published-archive installation, GitHub OIDC, release upload and tap push remain unexecuted.
+
+The owner subsequently selected Apache-2.0. Added the license, Rio attribution notice, README badge and Homebrew license field; rebuilt and inspected all four archives to require both LICENSE and NOTICE. All 20 helper tests and the updated package checks passed.

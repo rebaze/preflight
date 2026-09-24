@@ -1,5 +1,13 @@
 # rebaze Preflight prototype
 
+[![CI](https://github.com/rebaze/preflight/actions/workflows/ci.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/ci.yaml)
+[![Release](https://github.com/rebaze/preflight/actions/workflows/release.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/release.yaml)
+[![GitHub Release](https://img.shields.io/github/v/release/rebaze/preflight?include_prereleases)](https://github.com/rebaze/preflight/releases)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/github/go-mod/go-version/rebaze/preflight)](go.mod)
+[![CodeQL](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rebaze/preflight/badge)](https://scorecard.dev/viewer/?uri=github.com/rebaze/preflight)
+
 A local Go CLI for one invoicex frontend release path. Preflight captures the actual Git workspace, evaluates a deliberately pinned policy using external Conftest, runs existing frontend tests in Docker, and reports the same findings as text or JSON. It issues local feedback, never a release permit.
 
 ## Status and direction
@@ -8,14 +16,26 @@ The first prototype is implemented. The synthetic real-Vitest workflow passes; t
 
 Start with the [documentation map](docs/README.md), [design and intent](docs/design.md), [architecture](docs/architecture.md), and [prioritized roadmap](docs/roadmap.md). Immediate next work is clearer setup output and an explicit decision about the frontend configuration prerequisite. Those are proposed changes, not features already implemented.
 
-## Build and prerequisites
+## Install and prerequisites
+
+The first release is pending. Until it is published, build from this checkout:
 
 ```sh
 go build -o bin/preflight ./cmd/preflight
 bin/preflight --help
+bin/preflight version
 ```
 
-Go 1.27.1; Git; a local Conftest executable; Docker with a Linux daemon for preparation and tests. The supported runtime is exactly Node 24.18.0 and npm 11.17.0. Runtime versions are never automatically substituted. Static evaluation and unit tests do not require Docker. The race-test command also requires CGO and a working C compiler; see [development prerequisites](docs/development.md#tools-and-local-selection).
+Release automation builds macOS and Linux archives for amd64 and arm64, containing the CLI and version-matched policy/profile files. After the first stable release and tap setup, Homebrew installation will be:
+
+```sh
+brew install rebaze/tap/preflight
+preflight version
+```
+
+Homebrew installs supporting files under `$(brew --prefix)/share/preflight`; release archives contain them under `share/preflight`. Use those paths for `init --profile` and `--policy-dir` when running outside a source checkout. Select and trust them explicitly; installing or upgrading the tool does not update existing initialized policy state. See [release setup and operations](docs/releases.md) for remaining setup, artifact verification and publishing instructions.
+
+Building requires Go 1.27.1. Running requires Git and a local Conftest executable; preparation and tests also require Docker with a Linux daemon. The supported runtime is exactly Node 24.18.0 and npm 11.17.0. Runtime versions are never automatically substituted. Static evaluation and unit tests do not require Docker. The race-test command also requires CGO and a working C compiler; see [development prerequisites](docs/development.md#tools-and-local-selection).
 
 The profile and policy are local inputs explicitly trusted at initialization. The tested evaluator is `/opt/homebrew/Cellar/conftest/0.70.1/bin/conftest`, reporting `Conftest: dev` and `OPA: 1.20.2`, SHA256 `b2f75ccf2575da4543ecec646194ae2f5a476fdf810681b04d01042b8e73ff18`. This is an observed binary pin, not an assertion about its release provenance.
 
@@ -98,4 +118,4 @@ Read [AGENTS.md](AGENTS.md) for agent instructions and [development](docs/develo
 
 Normal tests require only this repository, Go, Git and Conftest. They choose `PREFLIGHT_CONFTEST` when set, otherwise Conftest on PATH. The full synthetic demo requires an explicitly supplied `PREFLIGHT_DEMO_IMAGE` from the preceding Docker bootstrap run; follow the development guide rather than copying an old machine's image digest. No invoicex checkout is needed for either synthetic scenario.
 
-The current Go module is `rebaze.local/preflight`. A public module path, license, remote provider and distribution/support policy have not been selected. The repository contains no credentials, real pilot source or private logs. Historical reports retain machine-local evidence references, which may expire. Commits and publication remain explicit owner actions.
+The Go module is `github.com/rebaze/preflight`. GitHub Actions and release packaging are configured; the first release and long-term support policy remain owner decisions. Preflight is licensed under [Apache-2.0](LICENSE). The repository contains no credentials, real pilot source or private logs. Historical reports retain machine-local evidence references, which may expire. Version tags and publication remain explicit owner actions.

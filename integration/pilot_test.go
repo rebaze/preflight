@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	pf "rebaze.local/preflight/internal/preflight"
+	pf "github.com/rebaze/preflight/internal/preflight"
 	"strings"
 	"testing"
 )

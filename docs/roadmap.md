@@ -44,4 +44,4 @@ Acceptance: document which parts were exercised versus read, preserve inconvenie
 
 Additional ecosystems/profiles, OCI policy distribution/signatures, remote enforcement, artifact attestations, exception authority, hosted service/UI, MCP/IDE integrations and release/deployment execution. The local-feedback authority boundary remains even if reporting improves.
 
-Public product naming, license, repository namespace, distribution/support and forge/CI provider are owner decisions. Keep module `rebaze.local/preflight` until an actual module/distribution destination is chosen. Do not infer an open-source license or hosting destination from permission to prepare this repository.
+GitHub repository/module `github.com/rebaze/preflight` and GitHub Actions release preparation were selected by the owner on 2026-09-24. CI, signed/attested release packaging and optional Homebrew formula publication are prepared; see [release operations](releases.md) for credentials, activation and first-release status. This distributes the CLI and does not expand its authority or resolve R1–R4. The owner selected Apache-2.0 to match Rio. Long-term support remains an owner decision.
