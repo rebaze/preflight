@@ -11,7 +11,8 @@ Design: [release-design.md](release-design.md). Execute inline; owner requested 
 - [x] Add checksum-pinned Conftest setup, reusable CI, four-platform GoReleaser archives, release and optional tap jobs, App verification, CodeQL, Scorecard and Dependabot. Validate with actionlint, shellcheck, GoReleaser and a snapshot release.
 - [x] Update README badges/install steps, release operations, architecture, development and roadmap; append actual verification evidence. Record credentials/settings that cannot be supplied locally.
 - [x] Run standard checks, packaging smoke tests, offline publication and formula tests; independently review the complete diff.
-- [ ] Commit and push the branch, open a PR and inspect GitHub CI. The initial signing attempt failed; the owner approved retrying the configured 1Password signer.
+- [x] Commit and push the branch, open [PR #1](https://github.com/rebaze/preflight/pull/1) and inspect GitHub CI. The signed commit succeeded after the owner approved the 1Password prompt.
+- [ ] Confirm hosted CI after fixing the import-order failure caught by its formatting check.
 
 ## Review focus
 

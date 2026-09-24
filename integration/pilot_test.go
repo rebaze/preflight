@@ -3,10 +3,10 @@ package integration
 import (
 	"bytes"
 	"encoding/json"
+	pf "github.com/rebaze/preflight/internal/preflight"
 	"os"
 	"os/exec"
 	"path/filepath"
-	pf "github.com/rebaze/preflight/internal/preflight"
 	"strings"
 	"testing"
 )
