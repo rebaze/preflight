@@ -8,9 +8,10 @@ on:
 permissions:
   contents: read
 
-# Only one writer for a tag; a failed run must never replace a release.
+# Serialize this repository's release workflow. Other writers must respect
+# the documented single-writer policy; concurrency is not an access control.
 concurrency:
-  group: release-${{ github.ref }}
+  group: preflight-release-publication
   cancel-in-progress: false
 
 jobs:
@@ -30,6 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -45,6 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 -c 'import os,re; assert re.fullmatch(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?", os.environ["TAG"]), "invalid release tag"'
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           git merge-base --is-ancestor HEAD origin/main
 
       - name: Install Syft
@@ -83,7 +86,7 @@ jobs:
         run: |
           python3 tools/release-publish.py stage \
             --dist dist --stage release-assets --inventory release-inventory.json \
-            --tag "$TAG" --repo "$GITHUB_REPOSITORY"
+            --tag "$TAG" --repo "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
 
       - name: Attest build provenance for release archives
         id: attest-provenance
@@ -103,7 +106,7 @@ jobs:
             release-assets/*.zip
           sbom-path: release-assets/preflight-${{ github.ref_name }}-source.cdx.json
 
-      - name: Verify staged assets and publish
+      - name: Verify draft, publish and verify immutable result
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -123,7 +126,7 @@ jobs:
           awk 1 "$PROVENANCE_BUNDLE" "$SBOM_BUNDLE" > release-attestations.jsonl
           python3 tools/release-publish.py publish \
             --stage release-assets --inventory release-inventory.json \
-            --bundle release-attestations.jsonl --tag "$TAG" --repo "$GITHUB_REPOSITORY"
+            --bundle release-attestations.jsonl --tag "$TAG" --repo "$GITHUB_REPOSITORY" --commit "$GITHUB_SHA"
 
       - name: Retain verified assets for downstream jobs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

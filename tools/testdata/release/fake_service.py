@@ -22,6 +22,17 @@ def value(flag):
     return args[args.index(flag) + 1]
 
 
+def metadata():
+    remote = root / "remote"
+    assets = [{"id": i + 1, "name": path.name, "state": "uploaded",
+               "digest": "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()}
+              for i, path in enumerate(sorted(remote.iterdir()))]
+    published = (root / "published").exists()
+    return {"id": 123, "draft": not published, "immutable": published and not os.environ.get("FAKE_MUTABLE"),
+            "tag_name": (root / "tag").read_text(), "assets": assets,
+            "prerelease": "-" in (root / "tag").read_text()}
+
+
 if tool == "goreleaser":
     if not any(arg.startswith("--skip=") and "publish" in arg.split("=", 1)[1].split(",")
                for arg in args):
@@ -40,6 +51,8 @@ elif tool == "gh" and args[:2] == ["attestation", "verify"]:
         fail("requires synthetic fixture bundle")
     if bundle["subjects"].get(artifact.name) != hashlib.sha256(artifact.read_bytes()).hexdigest():
         fail("attestation digest mismatch")
+    if "--source-digest" in args and value("--source-digest") != bundle.get("commit"):
+        fail("attestation source commit mismatch")
     predicate = value("--predicate-type")
     failure = os.environ.get("FAKE_FAIL")
     if (failure == "provenance" and "slsa.dev" in predicate) or (
@@ -66,6 +79,27 @@ elif tool == "gh" and args[:2] == ["release", "create"]:
 elif tool == "gh" and args[:2] == ["release", "download"]:
     for path in (root / "remote").iterdir():
         shutil.copyfile(path, Path(value("--dir")) / path.name)
+    if os.environ.get("FAKE_AFTER_DOWNLOAD") and not (root / "published").exists():
+        next((root / "remote").glob("*.tar.gz")).write_bytes(b"changed after verification download\n")
+elif tool == "gh" and args[0] == "api" and "/git/ref/tags/" in args[1]:
+    count_file = root / "tag_reads"
+    count = int(count_file.read_text()) + 1 if count_file.exists() else 1
+    count_file.write_text(str(count))
+    sha = os.environ["FAKE_COMMIT"]
+    if count >= int(os.environ.get("FAKE_TAG_MOVE_AT", "999")):
+        sha = "b" * 40
+    if os.environ.get("FAKE_ANNOTATED"):
+        print(json.dumps({"object": {"type": "tag", "sha": "c" * 40}}))
+    else:
+        print(json.dumps({"object": {"type": "commit", "sha": sha}}))
+elif tool == "gh" and args[0] == "api" and "/git/tags/" in args[1]:
+    if args[1].endswith("c" * 40):
+        obj = {"type": "tag", "sha": "d" * 40}
+    else:
+        obj = {"type": "commit", "sha": os.environ["FAKE_COMMIT"]}
+    print(json.dumps({"object": obj}))
+elif tool == "gh" and args[0] == "api" and "/releases/tags/" in args[1]:
+    print(json.dumps(metadata()))
 elif tool == "gh" and args[0] == "api" and "--paginate" in args:
     if os.environ.get("FAKE_FAIL") == "lookup":
         fail("release lookup failed")
@@ -78,8 +112,11 @@ elif tool == "gh" and args[0] == "api" and "--paginate" in args:
 elif tool == "gh" and args[0] == "api" and "--method" in args:
     if value("--method") != "PATCH" or "draft=false" not in args or not args[1].endswith("/123"):
         fail("only ID-bound final publication is supported")
-    (root / "published").write_text("published after verification\n")
+    if os.environ.get("FAKE_DURING_PUBLISH"):
+        next((root / "remote").glob("*.tar.gz")).write_bytes(b"changed during publication\n")
+    (root / "published").write_text("publication was attempted\n")
+    print(json.dumps(metadata()))
 elif tool == "gh" and args[0] == "api" and args[1].endswith("/123"):
-    print(json.dumps({"id": 123, "draft": True, "tag_name": (root / "tag").read_text()}))
+    print(json.dumps(metadata()))
 else:
     fail("unexpected command: " + repr([tool] + args))

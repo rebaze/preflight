@@ -39,23 +39,15 @@ jobs:
         run: |
           test "$ENABLED" = true || { echo 'Set PUBLISH_HOMEBREW=true after verifying the release App.' >&2; exit 1; }
           test -n "$APP_ID" || { echo 'Set RELEASE_APP_ID.' >&2; exit 1; }
-      - name: Download and verify published checksums
+      - name: Verify immutable release and all published archives
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
-          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease > release.json
-          python3 -c 'import json; r=json.load(open("release.json")); assert not r["isDraft"] and not r["isPrerelease"], "requires a published stable release"'
-          mkdir downloaded
-          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --dir downloaded \
-            --pattern checksums.txt --pattern "preflight-${TAG}.intoto.jsonl"
-          gh attestation verify downloaded/checksums.txt \
-            --bundle "downloaded/preflight-${TAG}.intoto.jsonl" \
-            --repo "$GITHUB_REPOSITORY" --source-ref "refs/tags/$TAG" \
-            --cert-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yaml@refs/tags/${TAG}" \
-            --predicate-type https://slsa.dev/provenance/v1
+          python3 tools/verify-homebrew.py --repo "$GITHUB_REPOSITORY" --tag "$TAG" \
+            --commit "$(git rev-parse HEAD)" --directory downloaded
           python3 tools/homebrew-formula.py --tag "$TAG" --checksums downloaded/checksums.txt > preflight.rb
           ruby -c preflight.rb
       - name: Mint tap-scoped App token

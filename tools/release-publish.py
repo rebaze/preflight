@@ -6,30 +6,18 @@ The inventory is a local consistency boundary, not a signature or an approval.
 """
 
 import argparse
-import hashlib
 import json
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
+
+from release_common import digest, run, validate_identity, verify_release, verify_tag
 
 PROVENANCE = "https://slsa.dev/provenance/v1"
 SBOM = "https://cyclonedx.org/bom"
 ISSUER = "https://token.actions.githubusercontent.com"
-
-
-def digest(path):
-    if path.is_symlink() or not path.is_file():
-        raise ValueError(str(path) + " must be a regular file")
-    if path.stat().st_size == 0:
-        raise ValueError(str(path) + " is empty")
-    result = hashlib.sha256()
-    with path.open("rb") as stream:
-        for block in iter(lambda: stream.read(1024 * 1024), b""):
-            result.update(block)
-    return result.hexdigest()
 
 
 def archive(name):
@@ -42,8 +30,9 @@ def required(tag):
 
 
 def validate_inventory(data, args):
-    if (not isinstance(data, dict) or data.get("version") != 1
-            or data.get("tag") != args.tag or data.get("repo") != args.repo):
+    if (not isinstance(data, dict) or data.get("version") != 2
+            or data.get("tag") != args.tag or data.get("repo") != args.repo
+            or data.get("commit") != args.commit):
         raise ValueError("unsupported or mismatched release inventory")
     files = data.get("files")
     if not isinstance(files, dict) or not required(args.tag).issubset(files):
@@ -89,7 +78,7 @@ def stage(args):
         raise ValueError("stage or inventory already exists; use a fresh run directory")
     names = required(args.tag) | {p.name for p in args.dist.iterdir() if archive(p.name)}
     files = {name: digest(args.dist / name) for name in sorted(names)}
-    data = dict(version=1, repo=args.repo, tag=args.tag, files=files)
+    data = dict(version=2, repo=args.repo, tag=args.tag, commit=args.commit, files=files)
     validate_inventory(data, args)
     check_checksums(args.dist, files)
     args.stage.mkdir(parents=True)
@@ -101,15 +90,6 @@ def stage(args):
         json.dump(data, stream, indent=2, sort_keys=True)
         stream.write("\n")
     print("STAGED: " + str(len(files)) + " files; SHA-256 inventory recorded", flush=True)
-
-
-def run(command, capture=False):
-    try:
-        result = subprocess.run([str(arg) for arg in command], check=True,
-                                stdout=subprocess.PIPE if capture else None, text=True)
-        return result.stdout
-    except subprocess.CalledProcessError as error:
-        raise ValueError("command failed: " + " ".join(str(arg) for arg in command[:3])) from error
 
 
 def releases_for_tag(args):
@@ -136,6 +116,7 @@ def publish(args):
     check_files(args.stage, files)
     check_checksums(args.stage, files)
     bundle_sha = digest(args.bundle)
+    verify_tag(args.repo, args.tag, args.commit)
     if releases_for_tag(args):
         raise ValueError("release or draft already exists for " + args.tag + "; refusing to replace it")
     identity = "https://github.com/" + args.repo + "/.github/workflows/release.yaml@refs/tags/" + args.tag
@@ -158,6 +139,7 @@ def publish(args):
                     command = ["gh", "attestation", "verify", snapshot / name,
                                "--bundle", snapshot / bundle_name, "--repo", args.repo,
                                "--cert-identity", identity, "--source-ref", "refs/tags/" + args.tag,
+                               "--source-digest", args.commit,
                                "--predicate-type", predicate]
                     if predicate == SBOM:
                         verified = json.loads(run(command + ["--format", "json"], capture=True))
@@ -176,6 +158,7 @@ def publish(args):
         # Check again after verification, immediately before creating a new draft.
         if releases_for_tag(args):
             raise ValueError("release or draft already exists for " + args.tag)
+        verify_tag(args.repo, args.tag, args.commit)
         assets = {name: sha for name, sha in expected.items() if name != "CHANGELOG.md"}
         command = ["gh", "release", "create", args.tag, "--repo", args.repo,
                    "--verify-tag", "--draft", "--title", args.tag,
@@ -196,12 +179,27 @@ def publish(args):
              "--dir", downloaded])
         check_files(downloaded, assets)
         check_files(snapshot, expected)
+        verify_tag(args.repo, args.tag, args.commit)
         current = json.loads(run(["gh", "api", release_api], capture=True))
-        if (current.get("draft") is not True or current.get("tag_name") != args.tag
-                or current.get("id") != created[0]["id"]):
-            raise ValueError("draft identity or state changed before publication")
-        run(["gh", "api", release_api, "--method", "PATCH", "-F", "draft=false"])
-        print("PUBLISHED: " + args.tag + " with the verified asset bytes", flush=True)
+        verify_release(current, created[0]["id"], args.tag, assets, published=False)
+        # GitHub has no documented compare-and-swap operation over draft assets.
+        # Rechecking before PATCH narrows the race; only the locked result is stable.
+        # Any failure after the request is an incident, not a claim we prevented exposure.
+        try:
+            published = json.loads(run(["gh", "api", release_api, "--method", "PATCH",
+                                        "-F", "draft=false"], capture=True))
+            verify_release(published, created[0]["id"], args.tag, assets, published=True)
+            verify_tag(args.repo, args.tag, args.commit)
+            locked = Path(temporary) / "published"
+            locked.mkdir()
+            run(["gh", "release", "download", args.tag, "--repo", args.repo, "--dir", locked])
+            check_files(locked, assets)
+            final = json.loads(run(["gh", "api", release_api], capture=True))
+            verify_release(final, created[0]["id"], args.tag, assets, published=True)
+        except (OSError, ValueError, TypeError) as error:
+            raise ValueError("INCIDENT: publication was attempted and the release may already be public; "
+                             "Homebrew is withheld. Inspect the release manually. " + str(error)) from error
+        print("PUBLISHED: " + args.tag + "; immutable release bytes and source commit verified", flush=True)
 
 
 def main():
@@ -213,14 +211,12 @@ def main():
             command.add_argument("--" + name, type=Path, required=True)
         command.add_argument("--tag", required=True)
         command.add_argument("--repo", required=True)
+        command.add_argument("--commit", required=True)
         command.add_argument("--" + ("dist" if operation == "stage" else "bundle"),
                              type=Path, required=True)
     args = parser.parse_args()
     try:
-        if not re.fullmatch(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z]+(?:[.-][0-9A-Za-z]+)*)?", args.tag):
-            raise ValueError("invalid release tag")
-        if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", args.repo):
-            raise ValueError("invalid GitHub repository")
+        validate_identity(args.repo, args.tag, args.commit)
         if args.inventory.resolve().parent == args.stage.resolve():
             raise ValueError("keep inventory outside the staged asset directory")
         (stage if args.operation == "stage" else publish)(args)

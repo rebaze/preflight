@@ -7,8 +7,8 @@ Preflight is hosted at [rebaze/preflight](https://github.com/rebaze/preflight). 
 | Workflow | Trigger and purpose |
 | --- | --- |
 | CI | PRs, main, manual runs, weekly scans, and reuse by release tags. Go race tests/vet, Conftest policy tests, formatting, module checks, govulncheck, offline publication tests, all four snapshot archives and a native package smoke test. |
-| Release | `v*` tags. Repeat CI, require valid version/main ancestry, build archives, sign checksums, produce source CycloneDX SBOM, attest and verify exact assets, verify the uploaded draft, publish. |
-| Publish Homebrew | Stable release with `PUBLISH_HOMEBREW=true`, or manual retry for an existing stable release. Verify checksum provenance, generate a formula and commit it to the tap. |
+| Release | `v*` tags. Repeat CI, bind the triggering SHA and remote tag, build/sign/attest archives, verify draft bytes and asset metadata, publish, then verify immutable state and locked bytes before reporting success. |
+| Publish Homebrew | Stable immutable release with `PUBLISH_HOMEBREW=true`, or manual retry. Download/check all four archives and verify their provenance and source SHA before minting the tap token, generating the formula and pushing it. |
 | Verify Release App | Manual, read-only inspection of a token requesting Contents:write on the tap. Does not test branch-rule bypass by writing a branch. |
 | Synthetic Docker and Vitest | Manual, opt-in networked dependency preparation followed by the existing offline synthetic container tests and real Vitest CLI demo. No customer checkout. |
 | CodeQL / Scorecard | Scheduled and main runs; CodeQL also analyzes PRs. |
@@ -27,7 +27,17 @@ Inspected 2026-09-24: Actions is enabled, default workflow token permission is r
 4. **License selected:** Apache-2.0, explicitly chosen by the owner to match Rio. The repository and release archives include `LICENSE` and `NOTICE`; the Homebrew formula declares Apache-2.0.
 5. **First version:** choose a tag only after the automation is merged and its checks pass. Start with a prerelease such as `v0.1.0-rc.1` to exercise real signing/publication without updating Homebrew. A stable `v0.1.0` subsequently creates the formula when enabled. No tag is created by the preparation task.
 
-Recommended repository settings are owner decisions: require the CI test, packaging and vulnerability checks plus review on main; restrict who can create/move release tags; consider GitHub immutable releases. This work does not change branch/tag protection or organization rules. Code-scanning availability and OIDC signing still need their first actual hosted runs.
+Immutable releases were enabled and read back on `rebaze/preflight` on 2026-09-24 while addressing PR #1. Keep that setting enabled: the release and Homebrew helpers require an immutable published result. The administration-only settings endpoint is checked during repository setup; the release job does not receive an administration credential and verifies the actual published object's `immutable` field instead. Disabling the setting can therefore cause an incident after publication, not an early setup refusal.
+
+Recommended remaining settings: require the CI test, packaging and vulnerability checks plus review on main, and restrict who can create/move release tags. This work does not change branch/tag protection or organization rules. CodeQL has passed on the PR; real OIDC signing and release publication still await the first tag.
+
+## Concurrent-writer boundary
+
+Use this workflow as the sole automated writer of Preflight release assets. Do not edit its drafts manually while it runs. Any additional release automation must share concurrency group `preflight-release-publication`. GitHub concurrency coordinates cooperating workflows; it does not block another workflow, a collaborator or an administrator from changing a draft.
+
+The API offers no documented atomic operation that publishes only if a draft's asset hashes still match. The helper compares the current remote asset names/states/digests immediately before publication and verifies the immutable result and downloaded locked bytes afterward. A mutation observed before publication leaves a draft. A mutation during publication, unexpected mutable result, or uncertain publication response produces `INCIDENT`, fails the workflow, and prevents automatic Homebrew publication. The release may already be public. Immutability prevents subsequent modification; it does not prevent the earlier race or authorize a claim that bad bytes were never exposed.
+
+For an incident, inspect the release/tag and investigate the other writer. Do not blindly retry, rewrite assets, move tags or downgrade the checks. Corrected assets need a new version. Manual Homebrew retries independently reject mutable releases, altered archives and wrong-commit attestations.
 
 The `GITHUB_TOKEN` handles this repository's releases and attestations, with write permissions restricted to the release job. It does not need a personal access token. The release App is used only for the tap.
 
@@ -48,7 +58,7 @@ The `GITHUB_TOKEN` handles this repository's releases and attestations, with wri
 
 The release guard refuses an existing release **or draft** for a tag. If a failed run left a draft, inspect it and resolve it explicitly before retrying; the automation never deletes or replaces it. Do not move already-published tags. Prefer a new version for corrected assets.
 
-If only tap publication failed or was disabled, fix its setup and run **Publish Homebrew** with the existing stable tag. It downloads the published checksums, verifies their provenance against the exact release workflow/tag and refuses a downgrade. It never rebuilds a release. A successful App permission inspection does not prove branch protection permits its eventual push.
+If only tap publication failed or was disabled, fix its setup and run **Publish Homebrew** with the existing stable tag. It requires an immutable release, downloads all four archives and verifies checksums and provenance against the exact release workflow, tag and checked-out source SHA before the App token is minted. It refuses a downgrade and never rebuilds a release. A successful App permission inspection does not prove branch protection permits its eventual push.
 
 ## Local verification
 
@@ -60,4 +70,4 @@ make security
 
 `make packaging` requires actionlint, shellcheck and GoReleaser 2.18.2. It builds snapshot archives without signing, publishing or touching Homebrew, checks their contents and executes the native packaged CLI. `make security` downloads/verifies the separate scanner module and queries the current vulnerability database. Offline publication tests exercise failure ordering using synthetic services; real OIDC signing and GitHub publication are verified only by a tag-triggered run.
 
-For consumer verification, see [GitHub's artifact-attestation verification documentation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/verifying-the-provenance-of-binaries). A release archive can be checked with `gh attestation verify ARCHIVE --repo rebaze/preflight`, additionally constraining `--source-ref refs/tags/VERSION` and `--cert-identity https://github.com/rebaze/preflight/.github/workflows/release.yaml@refs/tags/VERSION` for the selected release.
+For consumer verification, see [GitHub's artifact-attestation verification documentation](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/verifying-the-provenance-of-binaries). A release archive can be checked with `gh attestation verify ARCHIVE --repo rebaze/preflight`, additionally constraining `--source-digest EXPECTED_COMMIT_SHA`, `--source-ref refs/tags/VERSION` and `--cert-identity https://github.com/rebaze/preflight/.github/workflows/release.yaml@refs/tags/VERSION` for the selected release. See also [GitHub's immutable-release semantics](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).

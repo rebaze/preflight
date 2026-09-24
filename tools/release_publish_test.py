@@ -29,7 +29,8 @@ class ReleaseTest(unittest.TestCase):
 
     def command(self, operation, **extra_env):
         args = [sys.executable, str(SCRIPT), operation, "--stage", str(self.stage),
-                "--inventory", str(self.inventory), "--tag", self.tag, "--repo", self.repo]
+                "--inventory", str(self.inventory), "--tag", self.tag, "--repo", self.repo,
+                "--commit", self.commit]
         if operation == "stage":
             args += ["--dist", str(self.dist)]
         else:
@@ -120,7 +121,7 @@ class ReleaseTest(unittest.TestCase):
         data["version"] = 999
         self.inventory.write_text(json.dumps(data))
         self.assert_blocked(self.command("publish"), "inventory")
-        data["version"] = 1
+        data["version"] = 2
         data["tag"] = "v9.9.9"
         self.inventory.write_text(json.dumps(data))
         self.assert_blocked(self.command("publish"), "inventory")
@@ -168,6 +169,63 @@ class ReleaseTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         events = (self.root / "events.jsonl").read_text()
         self.assertIn('"--prerelease"', events)
+
+    def test_inventory_is_bound_to_triggering_commit(self):
+        self.prepare()
+        self.commit = "b" * 40
+        self.assert_blocked(self.command("publish"), "inventory")
+
+    def test_lightweight_and_nested_annotated_tags_resolve_to_expected_commit(self):
+        self.prepare()
+        result = self.command("publish", FAKE_ANNOTATED="1")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_moved_tag_is_rejected_at_start(self):
+        self.prepare()
+        self.assert_blocked(self.command("publish", FAKE_TAG_MOVE_AT="1"), "commit")
+
+    def test_moved_tag_is_rejected_before_draft(self):
+        self.prepare()
+        self.assert_blocked(self.command("publish", FAKE_TAG_MOVE_AT="2"), "commit")
+
+    def test_moved_tag_is_rejected_before_publication(self):
+        self.prepare()
+        self.assert_blocked(self.command("publish", FAKE_TAG_MOVE_AT="3"), "commit")
+
+    def test_tag_change_during_publication_is_reported_as_public_incident(self):
+        self.prepare()
+        result = self.command("publish", FAKE_TAG_MOVE_AT="4")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("INCIDENT", result.stderr)
+        self.assertIn("commit", result.stderr)
+        self.assertNotIn("PUBLISHED:", result.stdout)
+        self.assertTrue((self.root / "published").exists())
+
+    def test_attestations_from_another_commit_are_rejected(self):
+        self.prepare()
+        data = json.loads(self.bundle.read_text())
+        data["commit"] = "b" * 40
+        self.bundle.write_text(json.dumps(data))
+        self.assert_blocked(self.command("publish"), "failed")
+
+    def test_remote_change_after_download_is_rejected_before_publication(self):
+        self.prepare()
+        self.assert_blocked(self.command("publish", FAKE_AFTER_DOWNLOAD="1"), "asset")
+
+    def test_change_during_publication_is_reported_as_public_incident(self):
+        self.prepare()
+        result = self.command("publish", FAKE_DURING_PUBLISH="1")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("INCIDENT", result.stderr)
+        self.assertNotIn("PUBLISHED:", result.stdout)
+        self.assertTrue((self.root / "published").exists(), "cannot claim the exposure was prevented")
+
+    def test_mutable_result_never_reports_success(self):
+        self.prepare()
+        result = self.command("publish", FAKE_MUTABLE="1")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("INCIDENT", result.stderr)
+        self.assertNotIn("PUBLISHED:", result.stdout)
 
 
 if __name__ == "__main__":

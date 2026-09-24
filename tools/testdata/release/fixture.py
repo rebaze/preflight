@@ -20,6 +20,7 @@ def create(root):
     self.bundle = self.root / "bundle.jsonl"
     self.tag = "v1.2.3"
     self.repo = "rebaze/preflight"
+    self.commit = "a" * 40
     self.archive = "preflight_1.2.3_linux_amd64.tar.gz"
     archives = [f"preflight_1.2.3_{os}_{arch}.tar.gz"
                 for os in ("darwin", "linux") for arch in ("amd64", "arm64")]
@@ -35,7 +36,7 @@ def create(root):
         name: hashlib.sha256((self.dist / name).read_bytes()).hexdigest()
         for name in (*archives, "checksums.txt")
     }
-    self.bundle.write_text(json.dumps({"fixtureOnly": True, "subjects": subjects,
+    self.bundle.write_text(json.dumps({"fixtureOnly": True, "subjects": subjects, "commit": self.commit,
                                       "predicate": json.loads((self.dist / self.sbom).read_text())}))
     self.bin = self.root / "bin"
     self.bin.mkdir()
@@ -45,5 +46,6 @@ def create(root):
                         + shlex.quote(str(SERVICE)) + " " + name + ' "$@"\n')
         path.chmod(0o755)
     self.env = dict(os.environ, PATH=str(self.bin) + os.pathsep + os.environ["PATH"],
-                    FAKE_RELEASE_ROOT=str(self.root), GITHUB_REPOSITORY=self.repo)
+                    FAKE_RELEASE_ROOT=str(self.root), GITHUB_REPOSITORY=self.repo,
+                    FAKE_COMMIT=self.commit)
     return self

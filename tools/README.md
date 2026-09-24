@@ -2,7 +2,9 @@
 
 These maintainer tools are separate from the Go CLI and run only when explicitly invoked or in GitHub Actions. They do not grant a Preflight report release authority.
 
-- `release-publish.py`: stage an exact inventory, verify provenance/SBOM attestations and the checksum signature, create a draft, verify downloaded bytes, publish. Requires Python 3.9+, GitHub CLI and cosign. Never overwrites an existing draft/release.
+- `release-publish.py`: stage an exact inventory bound to a source SHA, verify provenance/SBOM attestations and the checksum signature, create and verify a draft, publish, then verify immutable state and locked bytes. Requires Python 3.9+, GitHub CLI and cosign. Never overwrites an existing draft/release. A publication-time race is reported as a possible public incident, not prevented exposure; see the single-writer operating policy in the release guide.
+- `release_common.py`: strict commit/tag resolution, release asset metadata and checksum validation shared by the publication and tap helpers. It performs no writes to GitHub.
+- `verify-homebrew.py`: require a stable immutable release; download all assets and verify checksums plus source-bound checksum/archive provenance before any tap credentials are minted.
 - `homebrew-formula.py`: render a stable four-platform formula from verified checksums. Refuses incomplete/duplicate checksums, prereleases and downgrades when given `--current`.
 - `check-packages.py`: inspect all four archives, verify their checksums and required supporting files, and run the host's packaged executable.
 - `security/`: isolated, pinned govulncheck module. The application module still uses only the Go standard library. Dependabot maintains scanner dependencies.

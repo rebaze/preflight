@@ -79,3 +79,20 @@ Independent read-only review found no important correctness issues. It additiona
 The owner subsequently selected Apache-2.0. Added the license, Rio attribution notice, README badge and Homebrew license field; rebuilt and inspected all four archives to require both LICENSE and NOTICE. All 20 helper tests and the updated package checks passed.
 
 First hosted CI run [36002716083](https://github.com/rebaze/preflight/actions/runs/36002716083) failed the formatting gate on both test runners: the GitHub module-path migration changed import sorting in `integration/pilot_test.go`. Applying gofmt fixed the import order; the integration suite passed locally. This failure is retained; the subsequent hosted run must establish its own result.
+
+## 2026-09-24 — PR #1 release-integrity corrections
+
+Assessed all three inline Copilot findings and the summary-only build/Homebrew/attribution concerns against commit `759227f`. Reproduced the original remote-asset race with synthetic services: modifying a draft archive after its verification download still reported publication success. A fresh exported checkout with no `bin/` directory built successfully, and the Rio attribution commit resolved; those two summary concerns required no code change.
+
+Added source-SHA inventory/attestation constraints, bounded annotated-tag resolution and remote tag checks; disabled CodeQL checkout credential persistence. Publication now compares draft asset digests before the request and verifies immutable state, tag identity and downloaded locked bytes afterward. Failures after the publication request explicitly report a possible public incident and prevent downstream Homebrew. A new Homebrew helper verifies immutable state, all four actual archives, their checksums and source-bound provenance before the App token step.
+
+Regression tests first demonstrated acceptance of moved tags, wrong-commit attestations and the after-download/during-publication asset races in the old guard. Final verification:
+
+- `make check`: Go race suite, vet, 2 Conftest policy tests, helper tests and build passed.
+- Final `python3 -m unittest discover -s tools -p '*_test.py'`: 37 tests passed, including the additional tag-change-during-publication incident case.
+- `make packaging`: actionlint, shellcheck, GoReleaser configuration, four real snapshot archives and native packaged CLI checks passed.
+- Local Markdown file links and `git diff --check`: passed.
+- Independent read-only review found no important correctness issues and confirmed the REST API assumptions against official GitHub documentation. Its independent run passed the 36 tests present before the final additional tag-race test.
+- Enabled GitHub immutable releases on `rebaze/preflight` and read back `enabled: true`, `enforced_by_owner: false`. No release/tag was created; no branch/tag rules or organization policy changed.
+
+These tests use explicit offline service doubles for the race and publication cases. Actual signing/publication and Homebrew installation still await a release. Immutability begins at publication; there is no claim of atomically preventing another privileged writer from changing a draft. The single-writer operating policy and incident response are documented in `releases.md`. Hosted validation for the new commit is tracked on PR #1; the earlier failed run remains in this record.
