@@ -53,3 +53,5 @@ GitHub repository/module `github.com/rebaze/preflight` and GitHub Actions releas
 Issue 4 stage 2 implementation adds explicit read-only GitHub gates/results with bounded pagination, source/producer/SHA matching and partial-access coverage. Real validation is limited to authorized rebaze/preflight reads; no gate changes or CI dispatch occurred. Before/after comparison and final onboarding measurements remain subsequent stages.
 
 Issue 4 stage 3 implements explicit before/after observations, stale evidence and constrained structural CI explanations. General YAML/shell interpretation, automatic bisect/rerun and arbitrary ecosystem execution remain outside scope. Stage 4 investigations and stage 5 measured distribution follow.
+
+Stage 2 pre-merge review hardens target-repository matching, saved legacy status identity, status update chronology, explicit stale conclusions and bounded freshness diagnostics. Merge evidence selection distinguishes unavailable identity from complete absence according to GitHub's documented head fallback.

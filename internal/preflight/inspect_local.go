@@ -32,9 +32,9 @@ func InspectLocal(ctx context.Context, repo, base string) Discovery {
 	first := inspectLocalOnce(ctx, repo, base)
 	if first.Subject.RepoRoot != "" && first.ExitCode != 3 {
 		last := inspectLocalOnce(ctx, repo, base)
-		if first.Subject.InputDigest != last.Subject.InputDigest || first.Subject.Head != last.Subject.Head || first.Subject.IndexDigest != last.Subject.IndexDigest || !last.Subject.Current {
+		if first.Subject.InputDigest != last.Subject.InputDigest || first.Subject.Head != last.Subject.Head || first.Subject.IndexDigest != last.Subject.IndexDigest || (first.Subject.Current && !last.Subject.Current) {
 			first.Subject.Current = false
-			first.Diagnostics = append(first.Diagnostics, DiscoveryDiagnostic{Code: "source_changed", Message: "Source identity changed during discovery; collect a fresh observation before relying on these facts.", Severity: "warning"})
+			first.Diagnostics = append(first.Diagnostics, DiscoveryDiagnostic{Code: "source_changed", Message: "Source identity changed or could not be revalidated during discovery; collect a fresh observation before relying on these facts.", Severity: "warning"})
 		}
 	}
 	FinalizeDiscovery(&first)
@@ -174,10 +174,22 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 			snapshotHashField(indexHash, v)
 		}
 		if inspectExcluded(p) {
+			d.Subject.Current = false
 			excluded++
 			d.Inputs = append(d.Inputs, DiscoveryInput{Path: p, Kind: "excluded"})
 			snapshotHashField(inputHash, p)
 			snapshotHashField(inputHash, "excluded")
+			fi, statErr := snapshotLstat(r, p)
+			marker := "present"
+			if os.IsNotExist(statErr) {
+				marker = "missing"
+				if i.oid != "" {
+					inspectAddChange(&d, p, "unstaged", i, inspectEntry{})
+				}
+			} else if statErr != nil || !fi.Mode().IsRegular() {
+				marker = "unsupported"
+			}
+			snapshotHashField(inputHash, marker)
 			if untracked[p] || i != h {
 				d.Subject.Dirty = true
 			}
@@ -214,6 +226,9 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 					rawOID = inspectBlobHash(content, objectFormat)
 				}
 			}
+		}
+		if in.Kind == "unsupported" {
+			d.Subject.Current = false
 		}
 		d.Inputs = append(d.Inputs, in)
 		for _, v := range []string{in.Path, in.Kind, in.Digest, strconv.FormatUint(uint64(in.Mode), 10)} {
@@ -262,8 +277,12 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 	if excluded != 0 {
 		inspectDiagnostic(&d, "excluded_inputs", fmt.Sprintf("%d private, generated or dependency paths were excluded; their current contents and freshness are unknown.", excluded), "", false)
 	}
+	if !d.Subject.Current {
+		d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "worktree_cleanliness", Status: "partial", Detail: "Worktree cleanliness is unknown because some input identities could not be collected. dirty=false means no change was established, not a clean checkout."})
+	}
 	d.Coverage = append(d.Coverage, DiscoveryCoverage{Collector: "local_sources", Status: "complete", Detail: "At most 10,000 non-excluded paths; raw file hashes bounded to 20 MiB/file and 256 MiB total. Text allowlist: 64 KiB/file, 512 KiB total; serialized local facts bounded to 1.5 MiB. Git filters and line-ending transformations are not applied; raw differences may need review. Ignored untracked, private, generated and dependency paths are excluded."}, DiscoveryCoverage{Collector: "execution", Status: "not_requested", Detail: "No project code or checks were executed; documented and configured expectations remain unverified."})
 	inspectBoundRecords(&d)
+
 	FinalizeDiscovery(&d)
 	return d
 }
