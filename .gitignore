@@ -5,6 +5,10 @@
 /preflight.exe
 *.test
 *.test.exe
+__pycache__/
+/release-assets/
+/release-inventory.json
+/release-attestations.jsonl
 
 # Test coverage, profiles and local Go workspace configuration.
 /coverage/

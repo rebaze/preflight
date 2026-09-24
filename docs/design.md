@@ -4,7 +4,9 @@ Created: 2026-09-21; imported into this repository: 2026-09-24.
 
 Status: Prototype implemented and verified on 2026-09-23, with the real baseline failure preserved.
 
-Owner: Toni / rebaze. Working name: **rebaze Preflight**, CLI `preflight`. Public naming, licensing and distribution remain undecided.
+Owner: Toni / rebaze. Working name: **rebaze Preflight**, CLI `preflight`. Distribution: GitHub and Homebrew preparation; license: Apache-2.0 (selected 2026-09-24).
+
+2026-09-24 distribution update: the owner selected `github.com/rebaze/preflight` and requested GitHub CI/release preparation following Rio. [Release design](release-design.md) records that separate distribution boundary. The CLI's local-feedback authority and the original pilot scope remain unchanged; the owner selected Apache-2.0 to match Rio; the first version remains an explicit owner decision.
 
 This repository now owns this design. It was transferred from the original rebaze design record, `2026-09-21-release-control-preflight-design.md`; that sibling checkout is not a dependency. Section 17 takes precedence over earlier exploration for the implemented prototype. Its task checklist records the original implementation contract, not unfinished work. See [implementation status](implementation-progress.md), [current architecture](architecture.md), [actual pilot results](pilot-results.md) and [next work](roadmap.md). Historical absolute paths and tool observations below identify the original pilot; use the portable commands in [development](development.md) for new work. The roadmap is proposed work, not permission to widen execution boundaries.
 

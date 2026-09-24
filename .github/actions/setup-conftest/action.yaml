@@ -1,0 +1,7 @@
+name: Set up pinned Conftest
+description: Download and verify the explicitly selected synthetic-test evaluator
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: bash "${GITHUB_ACTION_PATH}/install.sh"

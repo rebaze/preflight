@@ -1,0 +1,87 @@
+name: Publish Homebrew
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+    secrets:
+      RELEASE_APP_PRIVATE_KEY:
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable release tag to publish to Homebrew
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preflight-homebrew
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+          persist-credentials: false
+      - name: Require configured publication
+        env:
+          ENABLED: ${{ vars.PUBLISH_HOMEBREW }}
+          APP_ID: ${{ vars.RELEASE_APP_ID }}
+        run: |
+          test "$ENABLED" = true || { echo 'Set PUBLISH_HOMEBREW=true after verifying the release App.' >&2; exit 1; }
+          test -n "$APP_ID" || { echo 'Set RELEASE_APP_ID.' >&2; exit 1; }
+      - name: Verify immutable release and all published archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/verify-homebrew.py --repo "$GITHUB_REPOSITORY" --tag "$TAG" \
+            --commit "$(git rev-parse HEAD)" --directory downloaded
+          python3 tools/homebrew-formula.py --tag "$TAG" --checksums downloaded/checksums.txt > preflight.rb
+          ruby -c preflight.rb
+      - name: Mint tap-scoped App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: rebaze
+          repositories: homebrew-tap
+          permission-contents: write
+      - name: Check out tap
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: rebaze/homebrew-tap
+          token: ${{ steps.app-token.outputs.token }}
+          path: tap
+      - name: Publish formula
+        env:
+          TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tap/Formula
+          python3 tools/homebrew-formula.py --tag "$TAG" --checksums downloaded/checksums.txt \
+            --current tap/Formula/preflight.rb > preflight.rb
+          cp preflight.rb tap/Formula/preflight.rb
+          cd tap
+          git config user.name rebaze-release-bot
+          git config user.email release-bot@rebaze.com
+          git add Formula/preflight.rb
+          if git diff --cached --quiet; then
+            echo 'Formula already up to date.'
+            exit 0
+          fi
+          git commit -m "preflight ${TAG#v}"
+          git push

@@ -15,6 +15,21 @@ func TestHelpNoSideEffects(t *testing.T) {
 		t.Fatal("no help")
 	}
 }
+
+func TestVersion(t *testing.T) {
+	for _, arg := range []string{"version", "--version"} {
+		var out, diagnostic bytes.Buffer
+		if code := run([]string{arg}, &out, &diagnostic); code != 0 {
+			t.Fatalf("%s: exit %d: %s", arg, code, diagnostic.String())
+		}
+		if got := out.String(); got != "preflight dev (commit unknown, built unknown)\n" {
+			t.Fatalf("unexpected version: %q", got)
+		}
+		if diagnostic.Len() != 0 {
+			t.Fatal(diagnostic.String())
+		}
+	}
+}
 func TestCLIJSONOnlyStdout(t *testing.T) {
 	var out, err bytes.Buffer
 	code := run([]string{"check", "--state-dir", "/nonexistent/preflight-fixture", "--format", "json"}, &out, &err)

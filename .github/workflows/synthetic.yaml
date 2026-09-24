@@ -1,0 +1,33 @@
+name: Synthetic Docker and Vitest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+      - uses: ./.github/actions/setup-conftest
+      - name: Bootstrap exact runtime and test synthetic reporters
+        shell: bash
+        run: |
+          set -euo pipefail
+          PREFLIGHT_DOCKER_TESTS=1 go test ./internal/preflight -run '^TestDockerSyntheticReports$' -v -count=1 | tee "$RUNNER_TEMP/bootstrap.txt"
+          image=$(sed -n 's/.*runtime image=\(sha256:[0-9a-f]*\) .*/\1/p' "$RUNNER_TEMP/bootstrap.txt")
+          [[ "$image" =~ ^sha256:[0-9a-f]{64}$ ]] || { echo 'Expected exactly one runtime image identity.' >&2; exit 1; }
+          echo "PREFLIGHT_DEMO_IMAGE=$image" >> "$GITHUB_ENV"
+      - name: Run full synthetic CLI workflow with real Vitest
+        env:
+          PREFLIGHT_SYNTHETIC_DEMO: "1"
+        run: go test ./integration -run '^TestSyntheticCLIWorkflow$' -v -count=1

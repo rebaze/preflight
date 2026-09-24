@@ -26,3 +26,17 @@ Append dated entries; preserve previous observations. These inform work, but the
 
 - Toni explicitly authorized the initial commit after the standalone handoff. Publication and remote setup remain separate actions.
 - Ignore rules cover Go build/test binaries, coverage/profiling outputs, local Go workspace files, private run directories, logs, dependencies, environment/key material and editor files. Repository-local skills and synthetic report examples remain eligible for version control.
+
+## 2026-09-24 — Release preparation
+
+- A Preflight binary alone is insufficient for first-time initialization: release archives and Homebrew installation must carry the matching profile and policy files while retaining explicit trust selection.
+- GoReleaser's archive glob handling must be verified against actual archive contents. The first recursive-looking docs glob selected only nested examples; explicit root/example mappings plus an archive smoke check caught and fixed the omission.
+- Python unittest discovery requires importable test module names. Keep test filenames with underscores even when the executable helper uses a hyphenated filename.
+- Homebrew App verification and release publication are separate: a successful release cannot supply a missing tap key, and token permissions do not prove that branch rules permit direct pushes. Keep a verified, no-rebuild tap retry path.
+
+## 2026-09-24 — Release review corrections
+
+- Tag names are mutable references. Store the triggering commit separately, constrain attestation verification with `--source-digest`, and resolve annotated tags before comparing remote identity.
+- A final pre-publication download is not an atomic guarantee about a draft. The demonstrated concurrent-writer race passed the old guard. Verify the immutable published result before claiming success or updating Homebrew, and report a failure after publication was attempted as an incident that may already be public. Never describe post-publication detection as prevention.
+- GitHub's immutable-release setting locks assets and tags upon publication, not while a release is a draft. Workflow concurrency also does not govern arbitrary privileged repository writers. Both limits belong in the operating contract.
+- A Homebrew retry must verify the actual downloadable archives as well as the signed checksum document. Missing/replaced assets should block the tap update before its write token is minted.

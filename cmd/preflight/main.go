@@ -4,16 +4,17 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	pf "github.com/rebaze/preflight/internal/preflight"
 	"io"
 	"os"
 	"path/filepath"
-	pf "rebaze.local/preflight/internal/preflight"
 	"strings"
 	"time"
 )
 
 const usage = `rebaze Preflight: local frontend feedback, not release authorization.
 
+preflight version
 preflight init --repo PATH --baseline SHA --profile FILE --policy-dir DIR --state-dir DIR --conftest FILE
 preflight explain --state-dir DIR [--base REF] --format text|json
 preflight prepare --state-dir DIR [--base REF] --allow-downloads
@@ -21,8 +22,16 @@ preflight check --state-dir DIR [--base REF] --format text|json [--all] [--outpu
 preflight status --state-dir DIR --report FILE --format text|json
 `
 
+var version = "dev"
+var commit = "unknown"
+var date = "unknown"
+
 func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
 func run(args []string, out, diagnostic io.Writer) int {
+	if len(args) == 1 && (args[0] == "version" || args[0] == "--version") {
+		fmt.Fprintf(out, "preflight %s (commit %s, built %s)\n", version, commit, date)
+		return 0
+	}
 	if len(args) == 0 || args[0] == "--help" || args[0] == "-h" {
 		fmt.Fprint(out, usage)
 		return 0

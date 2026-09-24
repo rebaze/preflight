@@ -9,6 +9,8 @@ Everything needed to maintain the prototype is in this repository. Machine-local
 | [Design](design.md) | Product intent, decisions, research and original six-task prototype contract; section 17 resolves exploratory alternatives |
 | [Architecture](architecture.md) | Current components, state lifecycle and trust boundaries |
 | [Development](development.md) | Reproducible local verification without the real pilot checkout |
+| [Release operations](releases.md) | GitHub CI, packaging, signing, Homebrew setup and first-release prerequisites |
+| [Release design](release-design.md) / [implementation plan](release-plan.md) | Scope and decisions for the GitHub release automation |
 | [Roadmap](roadmap.md) | Prioritized next work, acceptance criteria and unresolved product decisions |
 | [Pilot results](pilot-results.md) | Actual 2026-09-23 failed real baseline and direct-Conftest/Pi comparison |
 | [Verification record](verification.md) | Dated executed checks; new runs append their own results |

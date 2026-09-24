@@ -73,8 +73,10 @@ The recorded missing `.nuxt/tsconfig.json` is a real prerequisite failure under 
 
 ## Changes and handoff
 
+GitHub CI repeats the standard checks on Linux and macOS and validates four-platform release archives. Its Conftest 0.70.1 download uses explicit platform-specific SHA256 pins. `make check` also tests the offline release helpers; `make packaging` validates workflows and inspects real snapshot archives; `make security` runs the separately pinned govulncheck tool against the CLI and scanner. See [release operations](releases.md). These checks do not run Docker unless the separate synthetic workflow is dispatched.
+
 Use focused tests while editing; complete the standard suite for code changes. Runner/snapshot changes also need relevant actual-container evidence; full workflow changes need the real-Vitest scenario. Match verification to the changed boundary rather than rerunning the real pilot for documentation edits. Check doc links, formatting and Git diff for documentation-only changes.
 
 Keep `runtime/` and compiled runner constants synchronized. Keep schemas, strict decoding, CLI and renderer changes consistent. Preserve fail/error coexistence and the expected-control evaluator probe. Append a dated entry to [verification](verification.md) and [learnings](learnings.md) with actual evidence; list unexecuted checks explicitly.
 
-Before the first commit, review `git status --short --untracked-files=all`, ignored paths and intended file contents. Include synthetic source/examples only. A remote, license, module destination and hosted CI are separate owner decisions. Nothing in these instructions authorizes publishing or installing hooks.
+Before committing, review `git status --short --untracked-files=all`, ignored paths and intended file contents. Include synthetic source/examples only. The owner selected GitHub, the public module path and CI/release preparation on 2026-09-24. License selection and actual version tags/releases remain separate decisions. Nothing in these instructions authorizes installing hooks.

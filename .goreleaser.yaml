@@ -1,0 +1,66 @@
+version: 2
+project_name: preflight
+
+builds:
+  - main: ./cmd/preflight
+    binary: preflight
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    flags: [-trimpath]
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - src: README.md
+      - src: LICENSE
+      - src: NOTICE
+      - src: policy/*
+        dst: share/preflight/policy
+        strip_parent: true
+      - src: profiles/*
+        dst: share/preflight/profiles
+        strip_parent: true
+      - src: schemas/*
+        dst: share/preflight/schemas
+        strip_parent: true
+      - src: runtime/*
+        dst: share/preflight/runtime
+        strip_parent: true
+      - src: docs/*.md
+        dst: docs
+        strip_parent: true
+      - src: docs/examples/*
+        dst: docs/examples
+        strip_parent: true
+
+checksum:
+  name_template: checksums.txt
+
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    args:
+      - sign-blob
+      - --yes
+      - "--bundle=${signature}"
+      - "${artifact}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude: ["^docs:", "^test:", "^ci:", "^Merge pull request"]
+
+release:
+  github:
+    owner: rebaze
+    name: preflight
+  # The publication guard creates, verifies and publishes the draft instead.
+  draft: true

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	pf "rebaze.local/preflight/internal/preflight"
+	pf "github.com/rebaze/preflight/internal/preflight"
 )
 
 func testEvaluator(t *testing.T) string {

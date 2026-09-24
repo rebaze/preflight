@@ -55,3 +55,44 @@ Independent read-only handoff review found and rechecked the host-ownership fix,
 ## 2026-09-24 — Initial commit checks
 
 Before the user-authorized initial commit, reran `go test -race ./...`, `go vet ./...`, `conftest verify --policy policy` and the CLI build: all passed (Go test results reused the valid cache; Rego reported 2 passing tests). Checked 31 representative generated/private paths are ignored and 12 representative source, skill, schema and synthetic-example paths remain eligible. Staged whitespace checks passed. No new Docker or real-pilot run was needed for the ignore-rule/documentation changes; prior execution evidence remains above. No remote or publication action is included.
+
+## 2026-09-24 — GitHub release automation preparation
+
+Prepared GitHub Actions using Rio commit `56741f32e5ba0d2ad8bd01833c0b9c54fdbf9542` as a read-only reference. The selected module is now `github.com/rebaze/preflight`; CLI changes add version metadata only. No pilot runner/policy/runtime pins changed.
+
+Local macOS/arm64 results:
+
+- `go test -race ./...`, `go vet ./...`, `conftest verify --policy policy`, build: passed; 2 Rego tests. This first run selected the existing Homebrew Conftest reporting `dev`, OPA 1.20.2.
+- `python3 -m unittest discover -s tools -p '*_test.py'`: 20 tests passed, including publication refusal on changed/missing assets, invalid verification, incomplete platform inventory, existing drafts and Homebrew prerelease/downgrade rejection. Synthetic service doubles do not authenticate real signatures.
+- actionlint, shellcheck, `goreleaser check`: passed. GoReleaser 2.18.2 built all four macOS/Linux amd64/arm64 snapshot archives; the archive checker verified checksums, supporting files and the native packaged CLI/version.
+- The initial archive check failed because the documentation glob omitted top-level documents. Explicit documentation/example globs fixed the packaging; the same archive check passed afterwards.
+- Generated Homebrew formula: Ruby syntax passed. This is not a completed Homebrew installation from a published release.
+- Pinned govulncheck module: tidy/verification passed; no vulnerabilities found in the application or scanner at this run's database state.
+- Local Markdown file links and Git whitespace checks passed.
+
+No new real pilot or Docker/Vitest run was required for these distribution changes. A manual synthetic workflow is prepared. Real OIDC signing, release upload verification and tap publication require a selected version tag and configured credentials and have not been claimed as executed. The historical real-pilot failure above remains unchanged.
+
+The CI setup script was also executed locally against the official Conftest 0.70.1 Darwin arm64 archive. Archive SHA256 `b8eae5ce6c7c3a768a9b9c6c12b0c01f8fc065a99267c94646d309c479b218dd` verified; extracted executable SHA256 `a2971ccc84390569b202a853a1aa75f0923590bb8f1a0a673324f17c98f3aeed`, reporting Conftest 0.70.1 / OPA 1.20.2. The full Go race suite and both Rego tests passed with this explicitly selected evaluator as well.
+
+Independent read-only review found no important correctness issues. It additionally evaluated the generated formula with Homebrew Ruby and installed a synthetic binary plus policy/profile/runtime/schema directories into a temporary prefix successfully. It confirmed the GitHub CLI attestation JSON and CycloneDX predicate shapes against official implementation sources. Real published-archive installation, GitHub OIDC, release upload and tap push remain unexecuted.
+
+The owner subsequently selected Apache-2.0. Added the license, Rio attribution notice, README badge and Homebrew license field; rebuilt and inspected all four archives to require both LICENSE and NOTICE. All 20 helper tests and the updated package checks passed.
+
+First hosted CI run [36002716083](https://github.com/rebaze/preflight/actions/runs/36002716083) failed the formatting gate on both test runners: the GitHub module-path migration changed import sorting in `integration/pilot_test.go`. Applying gofmt fixed the import order; the integration suite passed locally. This failure is retained; the subsequent hosted run must establish its own result.
+
+## 2026-09-24 — PR #1 release-integrity corrections
+
+Assessed all three inline Copilot findings and the summary-only build/Homebrew/attribution concerns against commit `759227f`. Reproduced the original remote-asset race with synthetic services: modifying a draft archive after its verification download still reported publication success. A fresh exported checkout with no `bin/` directory built successfully, and the Rio attribution commit resolved; those two summary concerns required no code change.
+
+Added source-SHA inventory/attestation constraints, bounded annotated-tag resolution and remote tag checks; disabled CodeQL checkout credential persistence. Publication now compares draft asset digests before the request and verifies immutable state, tag identity and downloaded locked bytes afterward. Failures after the publication request explicitly report a possible public incident and prevent downstream Homebrew. A new Homebrew helper verifies immutable state, all four actual archives, their checksums and source-bound provenance before the App token step.
+
+Regression tests first demonstrated acceptance of moved tags, wrong-commit attestations and the after-download/during-publication asset races in the old guard. Final verification:
+
+- `make check`: Go race suite, vet, 2 Conftest policy tests, helper tests and build passed.
+- Final `python3 -m unittest discover -s tools -p '*_test.py'`: 37 tests passed, including the additional tag-change-during-publication incident case.
+- `make packaging`: actionlint, shellcheck, GoReleaser configuration, four real snapshot archives and native packaged CLI checks passed.
+- Local Markdown file links and `git diff --check`: passed.
+- Independent read-only review found no important correctness issues and confirmed the REST API assumptions against official GitHub documentation. Its independent run passed the 36 tests present before the final additional tag-race test.
+- Enabled GitHub immutable releases on `rebaze/preflight` and read back `enabled: true`, `enforced_by_owner: false`. No release/tag was created; no branch/tag rules or organization policy changed.
+
+These tests use explicit offline service doubles for the race and publication cases. Actual signing/publication and Homebrew installation still await a release. Immutability begins at publication; there is no claim of atomically preventing another privileged writer from changing a draft. The single-writer operating policy and incident response are documented in `releases.md`. Hosted validation for the new commit is tracked on PR #1; the earlier failed run remains in this record.

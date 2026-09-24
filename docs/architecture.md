@@ -35,6 +35,7 @@ Go paths in the table are relative to `internal/preflight/` except the explicitl
 
 ## Command lifecycle
 
+- `version` / `--version` prints release version, commit and build time injected at build time, without reading state or invoking any evaluator.
 - `init` selects a commit and supplied profile/rules/evaluator, copies reference material into empty external state, records digests and baseline test paths, then currently prints the full `explain` report. It executes the evaluator's version query, not project tests. A trusted baseline can itself fail tests.
 - `explain` describes obligations and current scope. Its `deferred/explain_only` entries mean no control evaluation has occurred.
 - `prepare --allow-downloads` evaluates static prerequisites, resolves/builds the exact runtime on initial preparation, and downloads dependencies without lifecycle scripts. Re-preparation retains the established runtime pin; changed dependency inputs need a new receipt.
@@ -56,3 +57,9 @@ The complete EER test file baseline must remain present. Process success alone i
 A private synthetic policy contract probe runs before candidate evaluation with the same evaluator/package. It requires recognizable violations from each expected control, preventing unrelated empty rules from becoming invented passes. Probe results never enter candidate findings. Actual Conftest nested metadata and its YAML `on`/`true` key representation are normalized. Raw npm/CI decisions remain in Rego; collector missing/error and later obligations remain explicit Go results.
 
 No successful-test cache exists. Only dependency preparation is reusable; each execution gets fresh writable volumes. Cleanup only targets tool-owned named containers/volumes. There is no automatic trusted-baseline update, exception approval, remote branch-protection inspection or release authorization.
+
+## Distribution pipeline
+
+The module is `github.com/rebaze/preflight`. GitHub Actions builds the CLI separately from all pilot execution. Release archives include version-matched policy/profile/runtime/schema files; the CLI continues to require explicit paths and initialization trust. Build metadata is CLI display information and does not change the report schema or evaluator/runtime identity.
+
+Tag-triggered releases depend on the reusable CI workflow, then build four macOS/Linux archives through GoReleaser. Inventory v2 records the source SHA. The guard verifies source-bound provenance/SBOM attestations and the checksum signature, checks the remote tag's peeled commit and draft asset digests, publishes, then verifies immutable state and downloaded locked bytes. It detects a concurrent publication-time mutation as a possible public incident and withholds Homebrew; it cannot atomically prevent another privileged writer from changing a draft. The documented single-writer policy and immutable releases are part of the distribution boundary. The optional Homebrew job independently verifies all four archives and their source-bound provenance before obtaining a tap-scoped GitHub App token. The source SBOM describes the tool's source scan, not a pilot application's dependencies or runtime container. See [release design](release-design.md) and [operations](releases.md).

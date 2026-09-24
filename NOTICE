@@ -1,0 +1,6 @@
+rebaze Preflight
+
+The release publication helper and its synthetic fixtures are adapted from
+rebaze Rio (https://github.com/rebaze/rio), licensed under Apache-2.0.
+Preflight-specific modifications include archive inventory validation and
+release packaging for the Preflight CLI and its supporting files.
