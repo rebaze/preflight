@@ -1,4 +1,4 @@
-# rebaze Preflight prototype
+# rebaze Preflight
 
 [![CI](https://github.com/rebaze/preflight/actions/workflows/ci.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/ci.yaml)
 [![Release](https://github.com/rebaze/preflight/actions/workflows/release.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/release.yaml)
@@ -8,11 +8,11 @@
 [![CodeQL](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml/badge.svg)](https://github.com/rebaze/preflight/actions/workflows/codeql.yaml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/rebaze/preflight/badge)](https://scorecard.dev/viewer/?uri=github.com/rebaze/preflight)
 
-A local Go CLI for one invoicex frontend release path. Preflight captures the actual Git workspace, evaluates a deliberately pinned policy using external Conftest, runs existing frontend tests in Docker, and reports the same findings as text or JSON. It issues local feedback, never a release permit.
+Preflight is a small, focused Go CLI that helps developers and coding agents check requirements before opening a pull request. It captures the Git workspace, evaluates an explicitly selected policy with Conftest, runs frontend tests in Docker, and reports findings as text or JSON. Its results provide local feedback; release decisions remain with the review and release process.
 
-## Status and direction
+## Current scope
 
-The first prototype is implemented. The synthetic real-Vitest workflow passes; the recorded real invoicex baseline fails to load all eight suites because its generated Nuxt tsconfig is absent, so it executed zero assertions. Both real static controls passed. This is local feedback, not whole-project readiness.
+Preflight checks required test evidence, npm dependency declarations, and protected CI configuration. It includes a fixed frontend/Vitest example profile and a complete synthetic workflow. The profile defines an npm workspace layout; adapting another layout requires an explicit profile and runner change.
 
 Start with the [documentation map](docs/README.md), [design and intent](docs/design.md), [architecture](docs/architecture.md), and [prioritized roadmap](docs/roadmap.md). Immediate next work is clearer setup output and an explicit decision about the frontend configuration prerequisite. Those are proposed changes, not features already implemented.
 
@@ -41,19 +41,19 @@ The profile and policy are local inputs explicitly trusted at initialization. Th
 
 ## Workflow
 
-Choose a fresh private state path **outside** the pilot Git checkout. Initialization refuses existing content. This explicit command trusts the selected commit, supplied profile/rules and evaluator file; it is not an automatic trust update from the candidate branch.
+Choose a fresh private state path **outside** the source Git checkout. Initialization refuses existing content. This explicit command trusts the selected commit, supplied profile/rules and evaluator file; it is not an automatic trust update from the candidate branch.
 
-Set these values deliberately. The repository path and baseline are local choices; do not select a newer baseline automatically. The recorded pilot commit is in [pilot results](docs/pilot-results.md). A new target needs its own approved profile work; the supplied profile currently supports the selected frontend only.
+Set these values deliberately. The repository path and baseline are local choices; do not select a newer baseline automatically. The bundled `frontend-vitest` profile expects the `@example/frontend` workspace under `applications/frontend/apps/web`. A different layout needs explicitly reviewed profile and runner changes.
 
 ```sh
-PREFLIGHT_REPO=/absolute/path/to/invoicex
+PREFLIGHT_REPO=/absolute/path/to/project
 PREFLIGHT_BASELINE=the-explicitly-selected-commit-sha
 PREFLIGHT_STATE=/absolute/private/path/to/fresh-preflight-state
 PREFLIGHT_EVALUATOR=/absolute/path/to/conftest
 
 bin/preflight init \
   --repo "$PREFLIGHT_REPO" --baseline "$PREFLIGHT_BASELINE" \
-  --profile profiles/invoicex-frontend.json --policy-dir policy \
+  --profile profiles/frontend-vitest.json --policy-dir policy \
   --state-dir "$PREFLIGHT_STATE" --conftest "$PREFLIGHT_EVALUATOR"
 
 bin/preflight explain --state-dir "$PREFLIGHT_STATE" --format text
@@ -65,6 +65,8 @@ bin/preflight status --state-dir "$PREFLIGHT_STATE" \
 ```
 
 `init` establishes the trusted reference once; it does not run project tests or edit the project. It currently prints the full explanation report. `deferred [explain_only]` means a check has not run; existing untracked/out-of-scope paths were not created by init. `Current: true` describes the inspected input, not passed tests. Do not change the project merely to clear setup notices. A reported `error` identifies an actual setup issue.
+
+The example profile and runner use neutral identifiers. State initialized with an earlier profile identity is not migrated automatically. Keep earlier evidence intact and explicitly initialize a fresh state directory for the current profile; its changed runner also requires fresh dependency preparation.
 
 `explain` does not execute repository code or download dependencies. `prepare` performs an explicit, networked, manifest-only `npm ci --ignore-scripts` in Docker and records immutable runtime identities. `check` runs static controls on every invocation and executes fresh tests when frontend/CI paths changed or `--all` is supplied. Tests run offline using a fresh writable volume cloned from prepared dependencies. `--all` always means the same selected frontend profile, never the backend or the complete monorepo.
 
@@ -116,6 +118,6 @@ The default tests use synthetic repositories and controlled subprocess fixtures.
 
 Read [AGENTS.md](AGENTS.md) for agent instructions and [development](docs/development.md) for reproducible checks. The project-local [verification skill](.agents/skills/preflight-verification/SKILL.md) routes between ordinary checks, Docker reporter tests, the separate real-Vitest demo and real pilot work. It is plain Markdown; no global skill/plugin installation is required.
 
-Normal tests require only this repository, Go, Git and Conftest. They choose `PREFLIGHT_CONFTEST` when set, otherwise Conftest on PATH. The full synthetic demo requires an explicitly supplied `PREFLIGHT_DEMO_IMAGE` from the preceding Docker bootstrap run; follow the development guide rather than copying an old machine's image digest. No invoicex checkout is needed for either synthetic scenario.
+Normal tests require only this repository, Go, Git and Conftest. They choose `PREFLIGHT_CONFTEST` when set, otherwise Conftest on PATH. The full synthetic demo requires an explicitly supplied `PREFLIGHT_DEMO_IMAGE` from the preceding Docker bootstrap run; follow the development guide rather than copying an old machine's image digest. Both synthetic scenarios are self-contained.
 
 The Go module is `github.com/rebaze/preflight`. GitHub Actions and release packaging are configured; the first release and long-term support policy remain owner decisions. Preflight is licensed under [Apache-2.0](LICENSE). The repository contains no credentials, real pilot source or private logs. Historical reports retain machine-local evidence references, which may expire. Version tags and publication remain explicit owner actions.

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "mode": "check",
   "authority": "local-feedback",
-  "runId": "f84387c6162b905206b3eea4",
-  "startedAt": "2026-09-23T06:13:02.021018Z",
-  "finishedAt": "2026-09-23T06:13:02.371869Z",
+  "runId": "1e449dbbc8eb4875ef1da811",
+  "startedAt": "2026-09-24T14:22:04.650876Z",
+  "finishedAt": "2026-09-24T14:22:05.318687Z",
   "current": true,
   "subject": {
     "repoRoot": "/synthetic/pilot",
@@ -12,7 +12,7 @@
     "comparisonBase": "synthetic-baseline",
     "head": "synthetic-baseline",
     "mergeBase": "synthetic-baseline",
-    "snapshotDigest": "sha256:71def8ba289812696ff2ad201554f8823eaa184baf09eb2f391371b6032cb70d",
+    "snapshotDigest": "sha256:f34bb4c27c344d81e967c8020f6fd1248807195329dade36363245c6f286869a",
     "excludedCategories": [
       "git metadata",
       "dependency and generated output",
@@ -25,7 +25,7 @@
   },
   "policy": {
     "packageDigest": "c1b2f57209315b60752f66685d9bc71b267806479bb9bbc5faec9a00b69fe951",
-    "profileDigest": "d9a74a5faaab9dad51060241697b53b9aedcb6c4426652c82e9b04615880a9c1",
+    "profileDigest": "63af40ac90bd95cef6a56a7696b291e8dbb511a7dbb3b4dab56c2087b58c4fec",
     "baselineCommit": "synthetic-baseline"
   },
   "runtime": {
@@ -35,7 +35,7 @@
     "preparationInputDigest": ""
   },
   "scope": {
-    "profile": "invoicex-frontend",
+    "profile": "frontend-vitest",
     "deferred": [
       "artifact verification at trusted build/release",
       "vulnerability and license assessment"

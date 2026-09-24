@@ -1,6 +1,6 @@
 # Development and reproducible verification
 
-Run commands from the repository root. The synthetic workflow needs no invoicex checkout, sibling repository, retained report or prior chat. Historical absolute paths in dated reports are evidence of earlier runs, not prerequisites.
+Run commands from the repository root. The synthetic workflow needs no external application checkout, sibling repository, retained report or prior chat. Historical absolute paths in dated reports are evidence of earlier runs, not prerequisites.
 
 ## Tools and local selection
 
@@ -80,3 +80,7 @@ Use focused tests while editing; complete the standard suite for code changes. R
 Keep `runtime/` and compiled runner constants synchronized. Keep schemas, strict decoding, CLI and renderer changes consistent. Preserve fail/error coexistence and the expected-control evaluator probe. Append a dated entry to [verification](verification.md) and [learnings](learnings.md) with actual evidence; list unexecuted checks explicitly.
 
 Before committing, review `git status --short --untracked-files=all`, ignored paths and intended file contents. Include synthetic source/examples only. The owner selected GitHub, the public module path and CI/release preparation on 2026-09-24. License selection and actual version tags/releases remain separate decisions. Nothing in these instructions authorizes installing hooks.
+
+## Neutral example profile
+
+The bundled profile is `profiles/frontend-vitest.json`, and the fixture workspace is `@example/frontend` at `applications/frontend/apps/web`. Runtime scripts and compiled definitions use the same names. Existing state using earlier identifiers is retained as historical evidence; initialize a new state directory explicitly for the current profile and run preparation again. No real application checkout is renamed or edited by these changes.

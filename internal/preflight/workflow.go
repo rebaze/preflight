@@ -60,7 +60,7 @@ func collectFacts(s pinnedState, p Profile, snap Snapshot, stateDir string) (Fac
 		return facts, baseline, nil, e
 	}
 	for _, path := range snap.Subject.ChangedPaths {
-		if strings.HasPrefix(path, testsPrefix) || path == frontendRoot+"/scripts/dependency-compatibility.test.mjs" || (strings.HasPrefix(path, frontendRoot+"/apps/einfache-erechnung/") && (strings.HasSuffix(path, ".test.ts") || strings.HasSuffix(path, ".spec.ts"))) {
+		if strings.HasPrefix(path, testsPrefix) || path == frontendRoot+"/scripts/dependency-compatibility.test.mjs" || (strings.HasPrefix(path, frontendRoot+"/apps/web/") && (strings.HasSuffix(path, ".test.ts") || strings.HasSuffix(path, ".spec.ts"))) {
 			facts.Scope.ChangedTestPaths = append(facts.Scope.ChangedTestPaths, path)
 		}
 	}
@@ -90,7 +90,7 @@ func testPrerequisite(s pinnedState, snap Snapshot) TestEvidence {
 			return f
 		}
 	}
-	b, e := readBoundedFile(filepath.Join(snap.Dir, "applications/frontend/apps/einfache-erechnung/package.json"), 1<<20)
+	b, e := readBoundedFile(filepath.Join(snap.Dir, "applications/frontend/apps/web/package.json"), 1<<20)
 	if e != nil {
 		f.Status = "missing"
 		f.ReasonCode = "test_manifest_missing"

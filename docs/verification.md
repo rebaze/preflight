@@ -104,3 +104,19 @@ Stored `RELEASE_APP_PRIVATE_KEY` from the user-selected 1Password reference dire
 The checker now relies on explicit permission selection at minting, verifies the installation token's repository list contains exactly `rebaze/homebrew-tap`, and reads the tap contents. This remains read-only and does not claim that branch rules permit a future push. actionlint and whitespace checks passed; live verification of the corrected workflow is recorded in its GitHub run.
 
 The first corrected branch run, [36010675331](https://github.com/rebaze/preflight/actions/runs/36010675331), exposed a GitHub CLI argument incompatibility: `--slurp` cannot be combined with its built-in `--jq`. The workflow now pipes paginated JSON through standalone jq under Bash pipefail. This failure did not indicate a key or App permission problem.
+
+## 2026-09-24 — Neutral example identifiers and project description
+
+Removed source-project and workspace identities from current source, schemas, fixtures, examples, packaging and public documentation. The bundled profile is `frontend-vitest`; its synthetic npm workspace is `@example/frontend` under `applications/frontend/apps/web`. The compiled runner and inspectable runtime script changed together. The README and design describe Preflight as a small, focused project. Historical reference-checkout paths and revision identifiers were omitted; the original eight suite-loading failures and zero assertions remain recorded as failures. Historical labels are anonymized, not claims that the current neutral names were the original input identities.
+
+Verification:
+
+- Profile naming test first failed against the previous profile, then passed with the neutral profile. The explicit receipt regression rejects the previous runner entrypoint digest; compiled/runtime equality also passed.
+- `make check`: Go race tests, vet, 2 Conftest policy tests, 37 release-helper tests and CLI build passed.
+- Docker reporter exercise: pass, fail and missing-report cases all passed. Freshly observed runner image: `sha256:be68af644897c1368b94ffbe3f6c703308f4fa0fa25fbcc94e84a0fa1cc5793f`.
+- Full real-Vitest synthetic CLI workflow using that run's explicit image: passed in 29.67 seconds. Private synthetic run directory: `/tmp/preflight-synthetic-demo-2658113732`.
+- `make packaging`: actionlint, shellcheck, GoReleaser config, all four archives and native packaged CLI passed; package checks require the renamed profile file.
+- Regenerated common-model text/JSON examples. Current file names/content have no source-project identities or withdrawn project-stage labels; JSON parsing, local Markdown links/anchors and whitespace checks passed.
+- Independent review confirmed code/path consistency, the previous runner digest in the receipt regression, preserved historical outcomes and explicit state migration guidance. Remaining framing and generated-example whitespace findings were corrected.
+
+The profile/runner rename intentionally does not migrate private initialized state. Keep older evidence intact and explicitly initialize/prepare new state for the current profile. No real application checkout was accessed or changed. Existing Git history was not rewritten.

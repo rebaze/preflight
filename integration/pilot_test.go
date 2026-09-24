@@ -36,9 +36,9 @@ func TestPilotCLIWorkflow(t *testing.T) {
 	}
 	put("applications/frontend/.node-version", "24.18.0\n")
 	put("applications/frontend/package.json", `{"packageManager":"npm@11.17.0","workspaces":["apps/*"],"overrides":{"brace-expansion":"5.0.9","js-yaml":"4.3.1"}}`)
-	put("applications/frontend/apps/einfache-erechnung/package.json", `{"name":"@clarula/einfache-erechnung-frontend","scripts":{"test":"vitest run"}}`)
-	put("applications/frontend/package-lock.json", `{"lockfileVersion":3,"packages":{"":{},"apps/einfache-erechnung":{"name":"@clarula/einfache-erechnung-frontend"},"node_modules/@clarula/einfache-erechnung-frontend":{"link":true,"resolved":"apps/einfache-erechnung"}}}`)
-	testPath := "applications/frontend/apps/einfache-erechnung/test/synthetic.test.ts"
+	put("applications/frontend/apps/web/package.json", `{"name":"@example/frontend","scripts":{"test":"vitest run"}}`)
+	put("applications/frontend/package-lock.json", `{"lockfileVersion":3,"packages":{"":{},"apps/web":{"name":"@example/frontend"},"node_modules/@example/frontend":{"link":true,"resolved":"apps/web"}}}`)
+	testPath := "applications/frontend/apps/web/test/synthetic.test.ts"
 	put(testPath, "// synthetic baseline test\n")
 	put(".github/workflows/ci.yml", "on: [push, pull_request]\njobs:\n  changes: {runs-on: ubuntu-latest}\n  frontend-eer-run: {needs: changes}\n  frontend-operator-run: {needs: changes}\n  build-and-test: {needs: [changes, frontend-eer-run, frontend-operator-run], if: 'always()'}\n")
 	git := func(args ...string) string {
@@ -83,7 +83,7 @@ func TestPilotCLIWorkflow(t *testing.T) {
 		}
 		return r
 	}
-	invoke(0, "init", "--repo", repo, "--baseline", git("rev-parse", "HEAD"), "--profile", "../profiles/invoicex-frontend.json", "--policy-dir", "../policy", "--state-dir", state, "--conftest", evaluator)
+	invoke(0, "init", "--repo", repo, "--baseline", git("rev-parse", "HEAD"), "--profile", "../profiles/frontend-vitest.json", "--policy-dir", "../policy", "--state-dir", state, "--conftest", evaluator)
 	invoke(0, "explain", "--state-dir", state)
 	reportPath := filepath.Join(state, "report.json")
 	invoke(0, "check", "--state-dir", state, "--output", reportPath)

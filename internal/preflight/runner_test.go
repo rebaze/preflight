@@ -55,7 +55,7 @@ func TestFailedJUnitIsFailure(t *testing.T) {
 	}
 }
 func TestNestedJUnitNotDoubleCounted(t *testing.T) {
-	e := parseTestEvidence([]byte(`<testsuites tests="1"><testsuite tests="1"><testsuite tests="1"><testcase name="x"/></testsuite></testsuite></testsuites>`), []byte(`{"testResults":[{"name":"/work/applications/frontend/apps/einfache-erechnung/test/a.test.ts","assertionResults":[{"status":"passed"}]}]}`), 0, []string{"applications/frontend/apps/einfache-erechnung/test/a.test.ts"})
+	e := parseTestEvidence([]byte(`<testsuites tests="1"><testsuite tests="1"><testsuite tests="1"><testcase name="x"/></testsuite></testsuite></testsuites>`), []byte(`{"testResults":[{"name":"/work/applications/frontend/apps/web/test/a.test.ts","assertionResults":[{"status":"passed"}]}]}`), 0, []string{"applications/frontend/apps/web/test/a.test.ts"})
 	if e.Status != "pass" || e.Tests != 1 {
 		t.Fatalf("%+v", e)
 	}
@@ -122,7 +122,7 @@ func TestDockerSyntheticReports(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	o := RunnerOptions{SnapshotDir: snapshot, StateDir: t.TempDir(), Profile: Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@clarula/einfache-erechnung-frontend"}}
+	o := RunnerOptions{SnapshotDir: snapshot, StateDir: t.TempDir(), Profile: Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@example/frontend"}}
 	p, e := PrepareRuntime(context.Background(), o)
 	if e != nil {
 		t.Fatal(e)
@@ -186,7 +186,7 @@ func TestPreparedManifestDigestChanges(t *testing.T) {
 			t.Fatal(e)
 		}
 	}
-	p := Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@clarula/einfache-erechnung-frontend"}
+	p := Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@example/frontend"}
 	a, e := DependencyInputDigest(dir, p)
 	if e != nil {
 		t.Fatal(e)
@@ -246,7 +246,7 @@ func TestPrepareChangedInputsKeepsPinnedRuntime(t *testing.T) {
 	for n, v := range map[string]string{"package.json": `{"packageManager":"npm@11.17.0","workspaces":[]}`, "package-lock.json": `{"lockfileVersion":3}`, ".node-version": "24.18.0"} {
 		os.WriteFile(filepath.Join(front, n), []byte(v), 0600)
 	}
-	o := RunnerOptions{SnapshotDir: snapshot, StateDir: t.TempDir(), DependencyDigest: "old-input", Profile: Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@clarula/einfache-erechnung-frontend"}}
+	o := RunnerOptions{SnapshotDir: snapshot, StateDir: t.TempDir(), DependencyDigest: "old-input", Profile: Profile{NodeVersion: "24.18.0", NPMVersion: "11.17.0", TestWorkspace: "@example/frontend"}}
 	prior := Preparation{SchemaVersion: 1, DependencyDigest: o.DependencyDigest, BaseDigest: "node@sha256:" + strings.Repeat("a", 64), ImageID: "sha256:" + strings.Repeat("b", 64), Architecture: "arm64", DockerfileDigest: runnerHash([]byte(runnerDockerfile)), EntrypointDigest: runnerHash([]byte(runnerEntrypoint)), Volume: "preflight-dependencies-" + strings.Repeat("c", 24), PreparedAt: time.Now().UTC().Format(time.RFC3339)}
 	prior.InputDigest = preparationPinnedDigest(o, prior)
 	b, _ := json.Marshal(prior)
@@ -261,5 +261,22 @@ func TestPrepareChangedInputsKeepsPinnedRuntime(t *testing.T) {
 	}
 	if got.ImageID != prior.ImageID || got.BaseDigest != prior.BaseDigest || got.Architecture != prior.Architecture || got.InputDigest == prior.InputDigest {
 		t.Fatalf("pin or input identity incorrect: %+v", got)
+	}
+}
+
+// Existing receipts retain their original runner identity and cannot authorize
+// execution after the example workspace is renamed.
+func TestPreparationRejectsPreviousRunnerIdentity(t *testing.T) {
+	o := RunnerOptions{DependencyDigest: "synthetic-dependencies"}
+	p := Preparation{SchemaVersion: 1, DependencyDigest: o.DependencyDigest,
+		BaseDigest: "node@sha256:" + strings.Repeat("a", 64),
+		ImageID:    "sha256:" + strings.Repeat("b", 64), Architecture: "arm64",
+		DockerfileDigest: runnerHash([]byte(runnerDockerfile)),
+		EntrypointDigest: "0127dc83145eaffe3869d09a11c09fbbf765c45ebec2ffda775325e2748918f2",
+		Volume:           "preflight-dependencies-" + strings.Repeat("c", 24),
+		PreparedAt:       time.Now().UTC().Format(time.RFC3339)}
+	p.InputDigest = preparationPinnedDigest(o, p)
+	if err := PreparationCompatible(o, p); err == nil || !strings.Contains(err.Error(), "entrypoint identity changed") {
+		t.Fatalf("previous runner receipt must be rejected: %v", err)
 	}
 }

@@ -1,18 +1,10 @@
 # Pilot results — 2026-09-23
 
-The implemented workflow runs against both synthetic fixtures and the read-only invoicex frontend. The real pilot correctly reports a **baseline frontend failure**, with both static controls passing. No pilot files were modified, no controls were weakened, and no backend, hosted LLM, E2E, deployment or infrastructure operation ran. No commits, pushes, branch-protection changes or publication occurred.
+The implemented workflow runs against both synthetic fixtures and a read-only reference frontend. The real pilot correctly reports a **baseline frontend failure**, with both static controls passing. No pilot files were modified, no controls were weakened, and no backend, hosted LLM, E2E, deployment or infrastructure operation ran. No commits, pushes, branch-protection changes or publication occurred.
 
 ## Real result and evidence
 
-Source: `/Users/tonit/devel/invoicex/invoicex`; baseline and HEAD: `ed91ed4dcb21d363497308f7f3f31d54d9a2fc7d`.
-
-Private state:
-`/var/folders/yp/1p9p25pd4dx_6dr01lncvwz00000gn/T/preflight-invoicex-pilot-20260923-0e0vy2v6`
-
-Final report:
-`/var/folders/yp/1p9p25pd4dx_6dr01lncvwz00000gn/T/preflight-invoicex-pilot-20260923-0e0vy2v6/report-final.json`
-
-The final run material is under `runs/check-592167416/` inside that state: captured projection, `tests.log`, `vitest.xml`, `vitest.json`, normalized `evaluation/facts.json`, both CI inputs, raw Conftest output and the common report. `commands.json` records actual argv, elapsed times and exit codes. No pilot source, lock contents or raw test logs are in this project.
+Source-checkout identity, commit identifiers and private evidence locations are omitted from this public record. The selected baseline and HEAD matched. Original logs, snapshots and command transcripts remain private; the recorded outcomes below are unchanged. Profile/workspace labels elsewhere in this document use the current neutral example names rather than identifying the original input.
 
 | Finding | Actual result |
 | --- | --- |
@@ -22,15 +14,15 @@ The final run material is under `runs/check-592167416/` inside that state: captu
 | `scope.review` | review_required — 1,565 existing non-ignored untracked paths outside the selected projection; path names only |
 | `artifact.verification` | deferred — requires trusted build/release evidence |
 
-The compatibility patch completed and both existing Node compatibility tests passed. Vitest attempted all eight baseline EER test files. The app's tsconfig extends generated `.nuxt/tsconfig.json`; generated `.nuxt` is excluded from the fresh projection and no Nuxt preparation command is in the approved runner. Each suite failed to load that configuration. JUnit represented eight failing suite cases; Vitest JSON reported eight failed suites and **zero actual tests/assertions**. Those are preserved as a failure, not counted as successful execution. Adding an offline Nuxt preparation step would be a separately reviewed runner change; this prototype did not add it or use host-generated files.
+The compatibility patch completed and both existing Node compatibility tests passed. Vitest attempted all eight baseline EER test files. The app's tsconfig extends generated `.nuxt/tsconfig.json`; generated `.nuxt` is excluded from the fresh projection and no Nuxt preparation command is in the approved runner. Each suite failed to load that configuration. JUnit represented eight failing suite cases; Vitest JSON reported eight failed suites and **zero actual tests/assertions**. Those are preserved as a failure, not counted as successful execution. Adding an offline Nuxt preparation step would be a separately reviewed runner change; this project did not add it or use host-generated files.
 
 Final `check --all`: exit **1**, `current: true`, summary **2 pass / 1 fail / 1 review_required / 1 deferred**. Final `status`: exit **1**, `current: true`; it retains the current failed result rather than changing it to success.
 
-The pilot's complete NUL-delimited Git status before/after is byte-identical, SHA256 `b7c260f32ae619c916d26a335d2944916952c14df6978974b6b38f1188fca4a5`. The selected-source fingerprint also remained unchanged across execution.
+The reference checkout's complete NUL-delimited Git status was byte-identical before and after the run. The selected-source fingerprint also remained unchanged across execution.
 
 ## Actual commands and timings
 
-Build and workflow syntax are in [README](../README.md). The real commands used the exact source/baseline above, `profiles/invoicex-frontend.json`, `policy/`, and the private state above. These are individual observations, not comparative performance benchmarks:
+Build and workflow syntax are in [README](../README.md). The real commands used an explicitly selected source/baseline, profile, policy and private state. Identifying arguments are omitted; the current neutral profile is `profiles/frontend-vitest.json`. These are individual observations, not comparative performance benchmarks:
 
 | Command | Exit | Seconds | Observation |
 | --- | ---: | ---: | --- |
@@ -57,7 +49,7 @@ From the private final run's `evaluation/` directory, with tool-owned empty HOME
   facts.json baseline-ci.yaml candidate-ci.yaml
 ```
 
-`PREFLIGHT_STATE` denotes the private state above; the actual expanded argv is recorded in `commands.json`. `direct-conftest-final.json` and `comparison-final.json` record agreement. The same Rego package produced exactly the same violation identity and reason as Preflight. Wrapper-only scope and lifecycle obligations are explicitly separate from evaluator verdicts.
+`PREFLIGHT_STATE` denotes the privately retained state; the actual expanded argv is recorded in `commands.json`. `direct-conftest-final.json` and `comparison-final.json` record agreement. The same Rego package produced exactly the same violation identity and reason as Preflight. Wrapper-only scope and lifecycle obligations are explicitly separate from evaluator verdicts.
 
 Conftest already provides policy evaluation, combined configuration inputs, JSON/text output and policy tests; early invocation and agent compatibility are not novel. The wrapper supplies context/evidence that direct Conftest in this comparison receives ready-made. It does not replace Rego with a second dependency/CI decision implementation. See official [combined inputs and configuration precedence](https://www.conftest.dev/options/), [Vitest reporter behavior](https://vitest.dev/guide/reporters.html), and [npm ci script controls](https://docs.npmjs.com/cli/v11/commands/npm-ci/).
 

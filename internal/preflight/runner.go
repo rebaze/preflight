@@ -36,7 +36,7 @@ export HOME=/tmp/home
 mkdir -p "$HOME"
 node scripts/apply-dependency-compatibility-patches.mjs
 node --test scripts/dependency-compatibility.test.mjs
-npm --ignore-scripts run test --workspace @clarula/einfache-erechnung-frontend -- --reporter=junit --reporter=json --outputFile.junit=/out/vitest.xml --outputFile.json=/out/vitest.json
+npm --ignore-scripts run test --workspace @example/frontend -- --reporter=junit --reporter=json --outputFile.junit=/out/vitest.xml --outputFile.json=/out/vitest.json
 `
 const logLimit = 1 << 20
 const reportLimit = 20 << 20
@@ -205,7 +205,7 @@ func prepareContainerArgs(name, image, work string) []string {
 
 // Only package manifests belonging to the declared npm workspaces enter networked preparation.
 func dependencyInputs(snapshot string, p Profile) (map[string][]byte, error) {
-	if p.NodeVersion != "24.18.0" || p.NPMVersion != "11.17.0" || p.TestWorkspace != "@clarula/einfache-erechnung-frontend" {
+	if p.NodeVersion != "24.18.0" || p.NPMVersion != "11.17.0" || p.TestWorkspace != "@example/frontend" {
 		return nil, errors.New("unsupported runtime/profile: require Node 24.18.0, npm 11.17.0 and the EER workspace")
 	}
 	base := filepath.Join(snapshot, "applications/frontend")
@@ -521,7 +521,7 @@ func RunTests(ctx context.Context, o RunnerOptions, p Preparation) (TestEvidence
 			return TestEvidence{Status: "fail", ReasonCode: "required_test_file_missing", Message: "required baseline test file is absent: " + f, Files: []string{}}, nil
 		}
 	}
-	b, e := readRunnerFile(filepath.Join(o.SnapshotDir, "applications/frontend/apps/einfache-erechnung/package.json"), reportLimit)
+	b, e := readRunnerFile(filepath.Join(o.SnapshotDir, "applications/frontend/apps/web/package.json"), reportLimit)
 	if e != nil {
 		return result, e
 	}

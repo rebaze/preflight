@@ -1,6 +1,6 @@
 # Full synthetic CLI demonstration
 
-Executed on 2026-09-23 using the compiled CLI, real pinned Conftest, Docker, Node 24.18.0, npm 11.17.0 and actual Vitest 4.1.10. This demonstration uses generated source and a disposable synthetic Git repository; it contains no invoicex source or data.
+Executed on 2026-09-23 using the compiled CLI, real pinned Conftest, Docker, Node 24.18.0, npm 11.17.0 and actual Vitest 4.1.10. This demonstration uses generated source and a disposable synthetic Git repository; it contains no external application source or data.
 
 To recreate this historical demonstration, follow [the current development guide](development.md#full-cli-workflow-with-real-vitest): bootstrap the local runtime with the Docker reporter exercise, then pass its printed immutable image ID as `PREFLIGHT_DEMO_IMAGE`. Current test fixtures select `PREFLIGHT_CONFTEST` or PATH rather than the original author's evaluator location.
 
@@ -35,6 +35,6 @@ Review artifacts:
 - `state/runs/check-*/`: captured synthetic inputs, normalized policy facts, JUnit, Vitest JSON, bounded process logs and canonical reports.
 - `summary.txt`: synthetic baseline and immutable runner image identity.
 
-Runner image: `sha256:8b20521bb87c0faff185daa61be542bdf5ef2a45948fc62f547945df6effafe1`. The compatibility patch and Node compatibility test in this fixture are synthetic. Actual invoicex compatibility scripts and its complete frontend suite are exercised separately in the real pilot documented in `pilot-results.md`.
+Runner image: `sha256:8b20521bb87c0faff185daa61be542bdf5ef2a45948fc62f547945df6effafe1`. The compatibility patch and Node compatibility test in this fixture are synthetic. The reference application's compatibility scripts and its complete frontend suite are exercised separately in the real pilot documented in `pilot-results.md`.
 
 All intentional failures occur only in the synthetic repository. The only Git commit is its generated baseline, with fixture identity and disabled signing/hooks. The demonstration never changes or executes the real pilot checkout, publishes artifacts, accesses credentials or invokes backend, E2E, deployment or infrastructure operations.

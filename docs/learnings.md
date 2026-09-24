@@ -2,7 +2,7 @@
 
 Append dated entries; preserve previous observations. These inform work, but the user instruction and current design remain authoritative.
 
-## 2026-09-23 — Prototype evidence and boundaries
+## 2026-09-23 — Initial verification evidence and boundaries
 
 - The existing Pi extension already plans checks and associates evidence with fingerprints. Compare actual behavior; do not claim invention of planning/invalidation.
 - Complete npm declarations include bundled packages without their own URL/SRI. Require an actual containing package declaration and accepted ancestry; a bare `inBundle` flag is not an exemption.
@@ -40,3 +40,8 @@ Append dated entries; preserve previous observations. These inform work, but the
 - A final pre-publication download is not an atomic guarantee about a draft. The demonstrated concurrent-writer race passed the old guard. Verify the immutable published result before claiming success or updating Homebrew, and report a failure after publication was attempted as an incident that may already be public. Never describe post-publication detection as prevention.
 - GitHub's immutable-release setting locks assets and tags upon publication, not while a release is a draft. Workflow concurrency also does not govern arbitrary privileged repository writers. Both limits belong in the operating contract.
 - A Homebrew retry must verify the actual downloadable archives as well as the signed checksum document. Missing/replaced assets should block the tap update before its write token is minted.
+
+## 2026-09-24 — Neutral project examples
+
+- Public examples should use neutral source and workspace identifiers. Names can be embedded in strict profile validation, file collectors, runtime commands, schemas and package assertions as well as prose, so a naming cleanup needs consistent edits and actual container verification.
+- Anonymize historical source identity without inventing replacement observations or changing failed results. Treat renamed profile/runner identities as an explicit new trust selection; do not silently reuse or migrate earlier initialized state.

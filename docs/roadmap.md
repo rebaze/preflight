@@ -2,15 +2,15 @@
 
 Updated 2026-09-24. Owner: Toni / rebaze. This is a proposed ordered backlog, not permission to execute every item or widen the current pilot scope. Select a bounded item in the next task and record its accepted changes here and in the design.
 
-## What we are trying to prove
+## Project direction
 
-Help a developer or coding agent answer: which requirements apply to this change, what can be checked now, what evidence is missing, and what needs a later decision? Preserve effective checks while reducing surprises before a PR. Reduced release delays and product demand are hypotheses, not measured outcomes.
+Help developers and coding agents understand which requirements apply to a change, what they can check locally, what evidence is missing, and what needs a later decision.
 
-The prototype tests whether a reusable workflow around existing evaluators adds enough value to justify a standalone tool. Conftest already supplies policy evaluation and reports. The existing pilot Pi extension already plans checks and associates success with fingerprints. Compare with both honestly; packaging project scripts or contributing an extension remains a valid outcome.
+Preflight combines change context, selected policy, isolated test execution and evidence freshness in a small CLI. Conftest evaluates policy; Preflight supplies the inputs and presents common findings. Priorities are clearer setup, reliable frontend verification and simpler onboarding.
 
 ## Starting point
 
-All five commands and three controls are implemented. Synthetic real-Vitest pass/fail/tamper/staleness scenarios passed. The 2026-09-23 real pilot preserved eight suite-loading failures due to missing generated Nuxt tsconfig, with zero assertions executed; npm and CI controls passed. The original pilot was not modified. See [results](pilot-results.md) and [verification](verification.md).
+The checking workflow and three controls are implemented. Synthetic real-Vitest pass/fail/tamper/staleness scenarios passed. The 2026-09-23 real pilot preserved eight suite-loading failures due to missing generated Nuxt tsconfig, with zero assertions executed; npm and CI controls passed. The original pilot was not modified. See [results](pilot-results.md) and [verification](verification.md).
 
 The next operator session must not assume old `/tmp` reports, dependency volumes, the Homebrew path or image IDs still exist. [Development](development.md) reconstructs the synthetic workflow from this repository.
 
@@ -38,7 +38,7 @@ Acceptance: a clean second machine can run the documented synthetic workflow wit
 
 After setup/readability and the real frontend prerequisite are addressed, observe a developer and a coding agent doing the same bounded change. Record time to first useful report, misunderstood findings, repeated integration work and maintenance effort. Compare direct Conftest with supplied facts and an appropriately scoped Pi integration. Running Pi's broader hooks is a new execution-scope decision, not implied by this backlog.
 
-Acceptance: document which parts were exercised versus read, preserve inconvenient findings, and decide whether a standalone CLI, a maintained rules/runner package or upstream integration is justified. Do not infer market demand or release-speed gains from synthetic success.
+Acceptance: document which parts were exercised versus read, preserve inconvenient findings, and use the observations to improve the CLI and its integrations. Record usability improvements against actual user experience.
 
 ## Deliberately deferred
 

@@ -13,7 +13,7 @@ import tempfile
 
 def check(directory):
     required = {"preflight", "README.md", "LICENSE", "NOTICE", "share/preflight/policy/main.rego",
-                "share/preflight/profiles/invoicex-frontend.json",
+                "share/preflight/profiles/frontend-vitest.json",
                 "share/preflight/runtime/run-tests.sh",
                 "share/preflight/schemas/report-v1.json", "docs/development.md"}
     expected = {(os, arch) for os in ("darwin", "linux") for arch in ("amd64", "arm64")}

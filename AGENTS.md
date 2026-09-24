@@ -6,7 +6,7 @@ This repository is self-contained. Read [README](README.md) first, then only the
 
 Preflight helps developers and coding agents understand and check requirements before opening a PR. It owns change context, a deliberately selected policy baseline, isolated evidence production, common findings and invalidation after edits. Conftest owns policy evaluation. Output is **local feedback**, never release authorization.
 
-The current prototype supports one invoicex frontend profile and three controls: existing EER tests, npm source/integrity declarations plus compatibility overrides, and preservation of protected CI objects. See [design](docs/design.md), especially section 17, for the contract. [Architecture](docs/architecture.md) describes implementation; [roadmap](docs/roadmap.md) separates proposed work from existing behavior. Current user instructions take priority. Surface conflicts; do not silently weaken controls to obtain success.
+The current project supports one frontend/Vitest example profile and three controls: existing EER tests, npm source/integrity declarations plus compatibility overrides, and preservation of protected CI objects. See [design](docs/design.md), especially section 17, for the contract. [Architecture](docs/architecture.md) describes implementation; [roadmap](docs/roadmap.md) separates proposed work from existing behavior. Current user instructions take priority. Surface conflicts; do not silently weaken controls to obtain success.
 
 ## Where to work
 

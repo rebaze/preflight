@@ -9,7 +9,7 @@ import (
 )
 
 func contractReport() Report {
-	r := Report{SchemaVersion: 1, Mode: "check", Authority: "local-feedback", RunID: "test-run", StartedAt: "2026-09-23T00:00:00Z", FinishedAt: "2026-09-23T00:00:01Z", Current: true, Subject: Subject{RepoRoot: "/synthetic/repo", BaselineCommit: "baseline", Head: "head", MergeBase: "base", SnapshotDigest: "sha256:snapshot"}, Policy: Policy{PackageDigest: "sha256:policy", ProfileDigest: "sha256:profile", BaselineCommit: "baseline"}, Scope: Scope{Profile: "invoicex-frontend"}, Findings: []Finding{NewFinding("eer.tests", "pass", "tests_passed", "Required tests passed.")}}
+	r := Report{SchemaVersion: 1, Mode: "check", Authority: "local-feedback", RunID: "test-run", StartedAt: "2026-09-23T00:00:00Z", FinishedAt: "2026-09-23T00:00:01Z", Current: true, Subject: Subject{RepoRoot: "/synthetic/repo", BaselineCommit: "baseline", Head: "head", MergeBase: "base", SnapshotDigest: "sha256:snapshot"}, Policy: Policy{PackageDigest: "sha256:policy", ProfileDigest: "sha256:profile", BaselineCommit: "baseline"}, Scope: Scope{Profile: "frontend-vitest"}, Findings: []Finding{NewFinding("eer.tests", "pass", "tests_passed", "Required tests passed.")}}
 	FinalizeReport(&r)
 	return r
 }

@@ -7,16 +7,19 @@ import (
 )
 
 func TestProfilePinned(t *testing.T) {
-	p, err := LoadProfile("../../profiles/invoicex-frontend.json")
+	p, err := LoadProfile("../../profiles/frontend-vitest.json")
 	if err != nil {
 		t.Fatal(err)
+	}
+	if p.ID != "frontend-vitest" || p.TestWorkspace != "@example/frontend" {
+		t.Fatalf("profile must use neutral example identifiers: %+v", p)
 	}
 	if p.NodeVersion != "24.18.0" || p.NPMVersion != "11.17.0" || p.RequiredOverrides["brace-expansion"] != "5.0.9" || p.RequiredOverrides["js-yaml"] != "4.3.1" {
 		t.Fatalf("wrong pins: %+v", p)
 	}
 }
 func TestProfileStrict(t *testing.T) {
-	b, err := os.ReadFile("../../profiles/invoicex-frontend.json")
+	b, err := os.ReadFile("../../profiles/frontend-vitest.json")
 	if err != nil {
 		t.Fatal(err)
 	}
