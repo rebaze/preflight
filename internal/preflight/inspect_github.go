@@ -392,13 +392,21 @@ func collectDiscoveryGitHub(ctx context.Context, repository, localHead, branch, 
 		g.collectProtection(ctx, fetch, prefix)
 	}
 	if g.Head != "" {
-		g.collectResults(ctx, fetch, g.HeadRepository, g.Head, "head")
+		g.collectResults(ctx, fetch, g.Repository, g.Head, "head")
 	}
 	if g.MergeCandidate != "" && g.MergeCandidate != g.Head {
 		g.collectResults(ctx, fetch, repository, g.MergeCandidate, "merge_candidate")
 	}
 	g.EvidenceRevision = g.Head
 	g.EvidenceSubject = "head"
+	// A missing merge SHA cannot establish that merge-candidate checks are
+	// absent. When its SHA is known and both endpoints are complete but empty,
+	// GitHub uses head checks (see troubleshooting-required-status-checks).
+	if g.PullRequest > 0 && g.MergeCandidate == "" {
+		g.EvidenceRevision = ""
+		g.EvidenceSubject = "unknown"
+		g.cover("merge_candidate", "unknown", "Pull request merge-candidate revision is unavailable; head results remain recorded without establishing relevant evidence", "https://api.github.com/"+prefix+"/pulls/"+strconv.Itoa(g.PullRequest))
+	}
 	if g.MergeCandidate != "" && g.MergeCandidate != g.Head {
 		mergeKnown := g.completeResource("merge_candidate.check_runs") && g.completeResource("merge_candidate.statuses")
 		mergePresent := false
@@ -647,7 +655,7 @@ func (g *DiscoveryGitHub) collectResults(ctx context.Context, fetch githubFetch,
 		g.cover(subject+".statuses", "complete", "Legacy commit statuses observed; creator is not proof of GitHub App identity", "https://api.github.com/"+path)
 	}
 	for _, status := range statuses {
-		g.Results = append(g.Results, DiscoveryGitHubResult{ID: fmt.Sprintf("status:%s:%d", repository, status.ID), Kind: "commit_status", Name: status.Name, Revision: sha, Repository: repository, AppID: 0, Creator: status.Creator.Login, State: status.State, CompletedAt: status.UpdatedAt, UpdatedAt: status.CreatedAt, Source: "https://api.github.com/" + path, ObservedAt: g.ObservedAt})
+		g.Results = append(g.Results, DiscoveryGitHubResult{ID: fmt.Sprintf("status:%s:%d", repository, status.ID), Kind: "commit_status", Name: status.Name, Revision: sha, Repository: repository, AppID: 0, Creator: status.Creator.Login, State: status.State, CompletedAt: status.UpdatedAt, UpdatedAt: status.UpdatedAt, Source: "https://api.github.com/" + path, ObservedAt: g.ObservedAt})
 	}
 }
 
@@ -663,17 +671,18 @@ func (g *DiscoveryGitHub) matchRequirements() {
 		latest := map[string]DiscoveryGitHubResult{}
 		unidentifiedProducer := false
 		for _, r := range g.Results {
-			if r.Revision != g.EvidenceRevision || r.Name != req.Context {
+			if r.Repository != g.Repository || r.Revision != g.EvidenceRevision || r.Name != req.Context {
 				continue
 			}
 			if githubResultNumber(r.ID) <= 0 {
 				unidentifiedProducer = true
 				continue
 			}
+			if r.Kind == "commit_status" && (r.AppID != 0 || req.Producer == "app") {
+				unidentifiedProducer = true
+				continue
+			}
 			if req.Producer == "app" && r.AppID != req.AppID {
-				if r.Kind == "commit_status" {
-					unidentifiedProducer = true
-				}
 				continue
 			}
 			if r.Kind == "check_run" && r.AppID <= 0 {
@@ -731,6 +740,8 @@ func githubResultState(r DiscoveryGitHubResult, observed string) string {
 			switch r.Conclusion {
 			case "success", "neutral", "skipped":
 				state = "matched"
+			case "stale":
+				state = "stale"
 			case "failure", "cancelled", "timed_out", "action_required", "startup_failure":
 				state = "failed"
 			}
@@ -831,6 +842,9 @@ func ValidateDiscoveryGitHub(g *DiscoveryGitHub) error {
 		if r.ID == "" || r.Source == "" || !validTime(r.ObservedAt) || !githubSlug.MatchString(r.Repository) || !oneOf(r.Kind, "check_run", "commit_status") {
 			return fail("result")
 		}
+		if r.Kind == "commit_status" && r.AppID != 0 {
+			return fail("legacy status app identity")
+		}
 		if _, exists := results[r.ID]; exists {
 			return fail("duplicate result")
 		}
@@ -851,7 +865,7 @@ func ValidateDiscoveryGitHub(g *DiscoveryGitHub) error {
 		seen := map[string]bool{}
 		for _, id := range m.ResultIDs {
 			r, ok := results[id]
-			if !ok || seen[id] || r.Revision != m.Revision || r.Name != req.Context || req.Producer == "app" && r.AppID != req.AppID {
+			if !ok || seen[id] || r.Repository != g.Repository || r.Revision != m.Revision || r.Name != req.Context || req.Producer == "app" && r.AppID != req.AppID {
 				return fail("match identity")
 			}
 			seen[id] = true

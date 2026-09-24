@@ -156,3 +156,20 @@ Stage 4 final standard validation passed: `go test -race ./...`, `go vet ./...`,
 ## 2026-09-24 — pre-merge Copilot review, stage 4
 
 The packet helper now requires an exact integer observation exit code. Boolean/float/string/null/missing values cannot masquerade as complete discovery through Python equality. The regression failed before correction; all eleven investigation tests pass. This tightens malformed-input handling without turning any hypothesis into verified evidence.
+
+## 2026-09-24 — pre-merge Copilot review, stage 3
+
+A regression reproduced duplicate event keys in a workflow `on` mapping producing known trigger semantics. The constrained parser now rejects duplicate event keys as ambiguous; no verified PR-trigger removal can be derived from that input. Focused structural regression tests passed after the fix.
+
+
+## 2026-09-24 — issue 4 stage 2 Copilot review before integration
+
+The new focused regressions first failed for wrong fork/target result repository, forged legacy App identity, lost status update ordering, unnormalized `stale`, unknown merge SHA treated as head evidence, and an overflow of the post-GitHub diagnostic bound. Repairs then passed `go test ./internal/preflight -run '^TestGitHub' -count=1`, `go test -race ./...` (all packages), `go vet ./...`, `conftest verify --policy policy` (2/2), build and `git diff --check`. No runner or execution behavior changed; container exercises were not rerun.
+
+The requested removal of complete-empty merge-result fallback was not adopted: GitHub's official troubleshooting documentation selects head checks when a known test merge commit has no status. Tests distinguish complete empty results from an unavailable merge SHA, denied merge collection, and an observed merge failure alongside denied collection. Matching requires target-repository identity even for a fork head; strict saved observations reject a nonzero legacy-status App ID. The JSON schema records the same legacy status constraint.
+
+The explicitly authorized read-only smoke test (`PREFLIGHT_GITHUB_READONLY_TEST=1 go test ./internal/preflight -run '^TestGitHubAuthorizedRealRepository$' -count=1 -v`) passed: target `main`, 0 observed rules/requirements, 6 results, complete repository/PR/rules/protection/result coverage, `clean_head_only`; adapter duration 2.759 seconds. This is real repository evidence, not project test execution, merge eligibility or human usability validation. No API writes or workflow dispatch occurred during the smoke test.
+
+## 2026-09-24 — pre-merge Copilot review, stage 1
+
+The owner authorized autonomous review-driven integration of the PR stack. Regression tests reproduced excluded/unsupported tracked inputs advertising current worktree identity, incomplete claim citations, and comparison-ref movement escaping the digest. Discovery now explicitly reports unknown cleanliness/current=false when identity is incomplete, observes excluded-file deletion via metadata without reading bytes, hashes comparison ref/commit, and requires a SHA256 digest plus positive source line. Historical failed initial harness authentication remains intact; later successful stage1 runs were already appended and are not replacements for it.

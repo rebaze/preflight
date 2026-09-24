@@ -266,13 +266,16 @@
       ],
       "properties": {
         "path": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "digest": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
         },
         "line": {
-          "type": "integer"
+          "type": "integer",
+          "minimum": 1
         }
       }
     },
@@ -679,7 +682,25 @@
         "observed_at": {
           "type": "string"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "commit_status"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "app_id": {
+                "const": 0
+              }
+            }
+          }
+        }
+      ]
     },
     "DiscoveryGitHubMatch": {
       "type": "object",

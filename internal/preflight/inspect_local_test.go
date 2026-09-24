@@ -230,6 +230,62 @@ func TestInspectLocalSHA256RepositoryAndIgnoredSources(t *testing.T) {
 	}
 }
 
+func TestInspectExcludedTrackedWorktreeIsUnknown(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	snapshotWrite(t, repo, "private.txt", "do not disclose")
+	snapshotGit(t, repo, "add", "private.txt")
+	snapshotGit(t, repo, "commit", "-m", "private fixture")
+	snapshotWrite(t, repo, "private.txt", "changed private content")
+	d := InspectLocal(context.Background(), repo, "")
+	if d.Subject.Current {
+		t.Fatal("excluded tracked bytes cannot establish current worktree identity")
+	}
+	found := false
+	for _, c := range d.Coverage {
+		if c.Collector == "worktree_cleanliness" && c.Status == "partial" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("worktree cleanliness uncertainty not explicit")
+	}
+	if err := os.Remove(filepath.Join(repo, "private.txt")); err != nil {
+		t.Fatal(err)
+	}
+	d = InspectLocal(context.Background(), repo, "")
+	if !d.Subject.Dirty {
+		t.Fatal("known deletion of excluded tracked file lost")
+	}
+	for _, s := range d.Sources {
+		if s.Path == "private.txt" {
+			t.Fatal("private contents disclosed")
+		}
+	}
+}
+func TestInspectUnsupportedTrackedWorktreeIsUnknown(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	p := filepath.Join(repo, "applications/frontend/base.txt")
+	if err := os.Remove(p); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("missing", p); err != nil {
+		t.Fatal(err)
+	}
+	d := InspectLocal(context.Background(), repo, "")
+	if d.Subject.Current {
+		t.Fatal("unsupported source cannot establish current worktree identity")
+	}
+	found := false
+	for _, c := range d.Coverage {
+		if c.Collector == "worktree_cleanliness" && c.Status == "partial" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("unsupported tracked state not explicit")
+	}
+}
+
 func TestInspectLocalComparisonTipChangesIdentity(t *testing.T) {
 	repo, baseline, _ := snapshotFixture(t)
 	snapshotGit(t, repo, "switch", "-c", "topic")

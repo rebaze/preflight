@@ -114,3 +114,19 @@ func TestStructuralCIDuplicateOrUnrecognizedJobNameIsNotMapped(t *testing.T) {
 		})
 	}
 }
+
+func TestStructuralCIDuplicateEventKeysRemainUnverified(t *testing.T) {
+	for _, text := range []string{"on:\n  pull_request:\n  pull_request:\n", "on:\n  pull_request:\n  push:\n  push:\n"} {
+		text += "jobs:\n  test:\n    runs-on: ubuntu-latest\n"
+		if inspectCIShape(text).triggerKnown {
+			t.Fatal("duplicate event key accepted as known trigger semantics")
+		}
+		before := []DiscoverySource{ciSource(".github/workflows/ci.yml", text)}
+		after := []DiscoverySource{ciSource(".github/workflows/ci.yml", "on: push\njobs:\n  test:\n    runs-on: ubuntu-latest\n")}
+		for _, change := range ExplainStructuralCI(before, after, nil) {
+			if change.Kind == "pr_trigger_removed" && change.Verification == "verified" {
+				t.Fatal("verified removal from ambiguous events")
+			}
+		}
+	}
+}
