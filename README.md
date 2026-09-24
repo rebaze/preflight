@@ -56,7 +56,7 @@ preflight inspect --base main --format json
 preflight inspect --github --pr 123 --format json
 ```
 
-`--base` changes comparison context, never trusted policy. GitHub checks actually required, CI configured in files and existing remote results are separate facts. Remote results do not cover local edits. Discovery exit 0 means the requested bounded scan completed, 2 means useful partial coverage and 3 means an invocation/collection error; none means tests passed. The skill consumes useful partial results.
+`--base` changes comparison context, never trusted policy. GitHub checks actually required, CI configured in files and existing remote results are separate facts. Remote results do not cover local edits. PR results belong to the target repository, including fork PRs; unavailable merge-candidate identity remains unknown. Discovery exit 0 means the requested bounded scan completed, 2 means useful partial coverage and 3 means an invocation/collection error; none means tests passed. The skill consumes useful partial results.
 
 ## Current scope
 

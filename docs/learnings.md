@@ -53,3 +53,9 @@ Append dated entries; preserve previous observations. These inform work, but the
 - An internally valid source digest is insufficient if its source record has no matching captured input. Strict saved observations validate both directions, and size-limited collection preserves those pairs.
 - GoReleaser configuration validation and mocked archive tests did not catch an incorrect destination layout. Actual four-archive content inspection did; the failed candidate was not installed.
 - Successful timed briefings did not establish every optional workflow. A separate serial-investigation scenario exposed a guessed skill path and overbroad fallback lookup. The miss stayed recorded; catalog-visible registered-path guidance and a fresh versioned candidate were required for an unassisted retest. Skill guidance remains distinct from harness-enforced permissions.
+
+
+## 2026-09-24 — GitHub head and test-merge evidence
+
+- A fork head identifies the source of a commit, while target-repository required checks must match results in the target repository. A shared SHA/check name/App ID alone is insufficient.
+- A known merge SHA with a complete empty check/status result is different from an unavailable merge SHA or denied collection. GitHub documents head-check fallback only for the observed absence case; preserve unknown selection and any captured failures otherwise.

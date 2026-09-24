@@ -399,6 +399,14 @@ func collectDiscoveryGitHub(ctx context.Context, repository, localHead, branch, 
 	}
 	g.EvidenceRevision = g.Head
 	g.EvidenceSubject = "head"
+	// A missing merge SHA cannot establish that merge-candidate checks are
+	// absent. When its SHA is known and both endpoints are complete but empty,
+	// GitHub uses head checks (see troubleshooting-required-status-checks).
+	if g.PullRequest > 0 && g.MergeCandidate == "" {
+		g.EvidenceRevision = ""
+		g.EvidenceSubject = "unknown"
+		g.cover("merge_candidate", "unknown", "Pull request merge-candidate revision is unavailable; head results remain recorded without establishing relevant evidence", "https://api.github.com/"+prefix+"/pulls/"+strconv.Itoa(g.PullRequest))
+	}
 	if g.MergeCandidate != "" && g.MergeCandidate != g.Head {
 		mergeKnown := g.completeResource("merge_candidate.check_runs") && g.completeResource("merge_candidate.statuses")
 		mergePresent := false
@@ -669,7 +677,7 @@ func (g *DiscoveryGitHub) collectResults(ctx context.Context, fetch githubFetch,
 		g.cover(subject+".statuses", "complete", "Legacy commit statuses observed; creator is not proof of GitHub App identity", "https://api.github.com/"+path)
 	}
 	for _, status := range statuses {
-		g.Results = append(g.Results, DiscoveryGitHubResult{ID: fmt.Sprintf("status:%s:%d", repository, status.ID), Kind: "commit_status", Name: status.Name, Revision: sha, Repository: repository, AppID: 0, Creator: status.Creator.Login, State: status.State, CompletedAt: status.UpdatedAt, UpdatedAt: status.CreatedAt, Source: "https://api.github.com/" + path, ObservedAt: g.ObservedAt})
+		g.Results = append(g.Results, DiscoveryGitHubResult{ID: fmt.Sprintf("status:%s:%d", repository, status.ID), Kind: "commit_status", Name: status.Name, Revision: sha, Repository: repository, AppID: 0, Creator: status.Creator.Login, State: status.State, CompletedAt: status.UpdatedAt, UpdatedAt: status.UpdatedAt, Source: "https://api.github.com/" + path, ObservedAt: g.ObservedAt})
 	}
 }
 
@@ -692,10 +700,11 @@ func (g *DiscoveryGitHub) matchRequirements() {
 				unidentifiedProducer = true
 				continue
 			}
+			if r.Kind == "commit_status" && (r.AppID != 0 || req.Producer == "app") {
+				unidentifiedProducer = true
+				continue
+			}
 			if req.Producer == "app" && r.AppID != req.AppID {
-				if r.Kind == "commit_status" {
-					unidentifiedProducer = true
-				}
 				continue
 			}
 			if r.Kind == "check_run" && r.AppID <= 0 {
@@ -753,6 +762,8 @@ func githubResultState(r DiscoveryGitHubResult, observed string) string {
 			switch r.Conclusion {
 			case "success", "neutral", "skipped":
 				state = "matched"
+			case "stale":
+				state = "stale"
 			case "failure", "cancelled", "timed_out", "action_required", "startup_failure":
 				state = "failed"
 			}
@@ -852,6 +863,9 @@ func ValidateDiscoveryGitHub(g *DiscoveryGitHub) error {
 	for _, r := range g.Results {
 		if r.ID == "" || r.Source == "" || !validTime(r.ObservedAt) || !githubSlug.MatchString(r.Repository) || !oneOf(r.Kind, "check_run", "commit_status") {
 			return fail("result")
+		}
+		if r.Kind == "commit_status" && r.AppID != 0 {
+			return fail("legacy status app identity")
 		}
 		if _, exists := results[r.ID]; exists {
 			return fail("duplicate result")

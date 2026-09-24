@@ -25,7 +25,7 @@ func InspectGitHub(ctx context.Context, d *Discovery, base string, pr int) {
 	if now.Subject.InputDigest != d.Subject.InputDigest || !now.Subject.Current {
 		d.Subject.Current = false
 		g.LocalCoverage = "stale_local_edits"
-		d.Diagnostics = append(d.Diagnostics, DiscoveryDiagnostic{Code: "source_changed", Severity: "warning", Message: "Local input changed while reading GitHub; remote results do not cover the current worktree."})
+		inspectDiagnostic(d, "source_changed", "Local input changed while reading GitHub; remote results do not cover the current worktree.", "", false)
 	}
 	FinalizeDiscovery(d)
 }

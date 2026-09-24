@@ -63,3 +63,8 @@ Constraints: standard-library-only Go; Git required only for Git context; no dep
 - Implementation complete for candidate review: five stacked PRs #5–#9, all standard/local/package/harness evidence recorded. Original main checkout remains clean. Human review, sequential integration, release tag/publication and marketplace submission remain owner actions; no merge/tag/release/submission occurred.
 
 - 2026-09-24 integration authorization: the owner explicitly requested autonomous Copilot review handling and merging every ready PR into main, plus a small local HTML final-tester onboarding site. This supersedes the earlier no-merge instruction; release tags/publication remain unapproved. Review fixes are tested on their owning stages and carried forward by merge commits. The static tester page contains copyable commands, expected outcomes and opt-in local feedback, with no automatic project execution or telemetry.
+
+
+
+
+- 2026-09-24 pre-merge stage 2 review: fixed target-repository and legacy producer validation, preserved status update times/stale conclusions, bounded freshness diagnostics, and made unavailable merge identity unknown. Retained documented complete-empty merge-to-head fallback with explicit regression coverage. Standard race/vet/Conftest/build and authorized real repository read passed; exact failures and results are appended in verification. User now authorizes autonomous sequential integration after review and checks; no tag/release/marketplace publication is authorized.

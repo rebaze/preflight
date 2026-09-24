@@ -41,6 +41,7 @@ func inspectCIShape(content string) ciShape {
 	current := -1
 	onBlock, onChildSeen, jobsBlock := false, false, false
 	properties := map[string]bool{}
+	events := map[string]bool{}
 	for i, raw := range strings.Split(content, "\n") {
 		line := strings.TrimSpace(raw)
 		if line == "" || strings.HasPrefix(line, "#") {
@@ -111,10 +112,11 @@ func inspectCIShape(content string) ciShape {
 			}
 			if indent == 2 {
 				onChildSeen = true
-				if !ok || !ciKey.MatchString(key) {
+				if !ok || !ciKey.MatchString(key) || events[key] {
 					s.triggerKnown = false
 					continue
 				}
+				events[key] = true
 				if key == "pull_request" {
 					s.pr = true
 				}

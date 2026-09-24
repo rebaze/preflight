@@ -351,8 +351,10 @@ func TestGitHubMissingRuleIdentityIsPartial(t *testing.T) {
 
 func TestGitHubForkPullRequestUsesTargetRepositoryEvidence(t *testing.T) {
 	f := githubRequirementFixture()
-	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":"","head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/fork"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestHead)
+	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":%q,"head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/fork"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestMerge, githubTestHead)
 	f["repos/example/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(42, 42, githubTestHead, "failure", time.Now().Add(-time.Hour)) + `]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/statuses?per_page=100&page=1"] = `[]`
 	g := collectDiscoveryGitHub(context.Background(), "example/project", githubTestHead, "topic", "", false, 5, f.fetch(t))
 	githubMatch(t, g, "failed")
 	if g.HeadRepository != "contributor/fork" {
@@ -371,12 +373,14 @@ func TestGitHubForkPullRequestUsesTargetRepositoryEvidence(t *testing.T) {
 
 func TestReviewForkPRResultScope(t *testing.T) {
 	f := githubRequirementFixture()
-	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":"","head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/project"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestHead)
+	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":%q,"head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/project"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestMerge, githubTestHead)
 	f["repos/example/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(10, 42, githubTestHead, "failure", time.Now().Add(-time.Hour)) + `]}`
 	f["repos/contributor/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(11, 42, githubTestHead, "success", time.Now().Add(-time.Hour)) + `]}`
 	f["repos/contributor/project/commits/"+githubTestHead+"/statuses?per_page=100&page=1"] = `[]`
+	f["repos/example/project/commits/"+githubTestMerge+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/statuses?per_page=100&page=1"] = `[]`
 	g := collectDiscoveryGitHub(context.Background(), "example/project", githubTestHead, "topic", "", false, 5, f.fetch(t))
-	t.Logf("match=%+v results=%+v", g.Matches, g.Results)
+	githubMatch(t, g, "failed")
 	if len(g.Matches) == 1 && g.Matches[0].Status == "matched" {
 		t.Fatal("fork success satisfied base required check despite base repository failure")
 	}
