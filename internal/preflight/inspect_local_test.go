@@ -372,3 +372,17 @@ func TestInspectLocalDiagnosticBudgetPreservesPartialCoverage(t *testing.T) {
 		t.Fatal("diagnostic bound hid fatal error")
 	}
 }
+
+func TestInspectBranchSelectionChangesIdentity(t *testing.T) {
+	repo, _, _ := snapshotFixture(t)
+	before := InspectLocal(context.Background(), repo, "")
+	snapshotGit(t, repo, "branch", "same-commit-topic")
+	snapshotGit(t, repo, "symbolic-ref", "HEAD", "refs/heads/same-commit-topic")
+	after := InspectLocal(context.Background(), repo, "")
+	if before.Subject.Head != after.Subject.Head || before.Subject.Branch == after.Subject.Branch {
+		t.Fatal("invalid branch-only fixture")
+	}
+	if before.Subject.InputDigest == after.Subject.InputDigest {
+		t.Fatal("branch selection must invalidate discovery identity even at the same SHA")
+	}
+}

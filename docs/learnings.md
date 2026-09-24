@@ -46,6 +46,14 @@ Append dated entries; preserve previous observations. These inform work, but the
 - Public examples should use neutral source and workspace identifiers. Names can be embedded in strict profile validation, file collectors, runtime commands, schemas and package assertions as well as prose, so a naming cleanup needs consistent edits and actual container verification.
 - Anonymize historical source identity without inventing replacement observations or changing failed results. Treat renamed profile/runner identities as an explicit new trust selection; do not silently reuse or migrate earlier initialized state.
 
+## 2026-09-24 — discovery and installed harness evaluation
+
+- Git diff/status can invoke clean filters even when external diff drivers are disabled. Discovery uses read-only object/index metadata and bounded raw file hashing instead; filter/fsmonitor/hook tripwires verify this boundary.
+- API response order is not a rule identity. Stable ruleset/type/source identities and explicit duplicate coverage are needed for before/after comparison. Fork source identity and the repository hosting required PR results are separate dimensions.
+- An internally valid source digest is insufficient if its source record has no matching captured input. Strict saved observations validate both directions, and size-limited collection preserves those pairs.
+- GoReleaser configuration validation and mocked archive tests did not catch an incorrect destination layout. Actual four-archive content inspection did; the failed candidate was not installed.
+- Successful timed briefings did not establish every optional workflow. A separate serial-investigation scenario exposed a guessed skill path and overbroad fallback lookup. The miss stayed recorded; catalog-visible registered-path guidance and a fresh versioned candidate were required for an unassisted retest. Skill guidance remains distinct from harness-enforced permissions.
+
 
 ## 2026-09-24 — GitHub head and test-merge evidence
 

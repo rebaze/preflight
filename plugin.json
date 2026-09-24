@@ -1,11 +1,18 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "preflight",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.4",
   "description": "Sourced project expectations and revision-aware evidence for coding changes.",
-  "author": { "name": "rebaze", "url": "https://github.com/rebaze" },
+  "author": {
+    "name": "rebaze",
+    "url": "https://github.com/rebaze"
+  },
   "homepage": "https://github.com/rebaze/preflight",
   "repository": "https://github.com/rebaze/preflight",
   "license": "Apache-2.0",
-  "keywords": ["coding", "requirements", "evidence"]
+  "keywords": [
+    "coding",
+    "requirements",
+    "evidence"
+  ]
 }

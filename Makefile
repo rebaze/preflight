@@ -10,6 +10,7 @@ check:
 	go vet ./...
 	"$(PREFLIGHT_CONFTEST)" verify --policy policy
 	python3 -m unittest discover -s tools -p '*_test.py'
+	python3 -m unittest discover -s evaluation -p 'test_*.py'
 	$(MAKE) build
 
 packaging:

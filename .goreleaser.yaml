@@ -33,8 +33,34 @@ archives:
       - src: runtime/*
         dst: share/preflight/runtime
         strip_parent: true
+      - src: plugin.json
+        dst: share/preflight/plugins/preflight
+        strip_parent: true
+      - src: .codex-plugin/plugin.json
+        dst: share/preflight/plugins/preflight/.codex-plugin
+        strip_parent: true
+      - src: skills/preflight/**
+        dst: share/preflight/plugins/preflight/skills/preflight
+      - src: LICENSE
+        dst: share/preflight/plugins/preflight
+        strip_parent: true
+      - src: package/marketplace.json
+        dst: share/preflight/.agents/plugins
+        strip_parent: true
+      - src: docs/*.html
+        dst: docs
+        strip_parent: true
       - src: docs/*.md
         dst: docs
+        strip_parent: true
+      - src: docs/plans/*.md
+        dst: docs/plans
+        strip_parent: true
+      - src: evaluation/*.md
+        dst: evaluation
+        strip_parent: true
+      - src: evaluation/*.py
+        dst: evaluation
         strip_parent: true
       - src: docs/examples/*
         dst: docs/examples

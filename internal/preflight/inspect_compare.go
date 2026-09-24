@@ -434,7 +434,7 @@ func inspectRequirementsComplete(g *DiscoveryGitHub) bool {
 		return false
 	}
 	for _, coverage := range g.Coverage {
-		if strings.HasPrefix(coverage.Resource, "rule:") && coverage.Status != "complete" {
+		if (strings.HasPrefix(coverage.Resource, "rule:") || strings.HasPrefix(coverage.Resource, "rulesets.") || strings.HasPrefix(coverage.Resource, "branch_protection.")) && coverage.Status != "complete" {
 			return false
 		}
 	}
@@ -519,10 +519,7 @@ func inspectComparableEvidence(g *DiscoveryGitHub, req DiscoveryGitHubRequiremen
 	if match.Status != "matched" && match.Status != "failed" {
 		return match.Status, ""
 	}
-	repository := g.HeadRepository
-	if g.EvidenceSubject == "merge_candidate" {
-		repository = g.Repository
-	}
+	repository := g.Repository
 	state := "passing"
 	producers := []string{}
 	for _, id := range match.ResultIDs {

@@ -12,9 +12,10 @@ import (
 	"time"
 )
 
-const usage = `rebaze Preflight: local frontend feedback, not release authorization.
+const usage = `rebaze Preflight: sourced discovery and bounded local checks, not release authorization.
 
 preflight version
+preflight capabilities [--format text|json]
 preflight inspect [--repo PATH] [--base REF] [--github] [--pr NUMBER] [--compare FILE] [--output FILE] [--format text|json]
 preflight init --repo PATH --baseline SHA --profile FILE --policy-dir DIR --state-dir DIR --conftest FILE
 preflight explain --state-dir DIR [--base REF] --format text|json
@@ -38,6 +39,9 @@ func run(args []string, out, diagnostic io.Writer) int {
 		return 0
 	}
 	mode := args[0]
+	if mode == "capabilities" {
+		return runCapabilities(args[1:], out, diagnostic)
+	}
 	if mode == "inspect" {
 		return runInspect(args[1:], out, diagnostic)
 	}

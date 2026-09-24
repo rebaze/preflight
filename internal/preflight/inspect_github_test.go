@@ -348,3 +348,101 @@ func TestGitHubMissingRuleIdentityIsPartial(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGitHubForkPullRequestUsesTargetRepositoryEvidence(t *testing.T) {
+	f := githubRequirementFixture()
+	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":%q,"head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/fork"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestMerge, githubTestHead)
+	f["repos/example/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(42, 42, githubTestHead, "failure", time.Now().Add(-time.Hour)) + `]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/statuses?per_page=100&page=1"] = `[]`
+	g := collectDiscoveryGitHub(context.Background(), "example/project", githubTestHead, "topic", "", false, 5, f.fetch(t))
+	githubMatch(t, g, "failed")
+	if g.HeadRepository != "contributor/fork" {
+		t.Fatal("lost fork source identity")
+	}
+	if len(g.Results) != 1 || g.Results[0].Repository != "example/project" {
+		t.Fatalf("evidence came from wrong repository: %+v", g.Results)
+	}
+	// A matching SHA/name/App in a fork cannot satisfy the target repository rule.
+	g.Results[0].Repository = "contributor/fork"
+	g.Results[0].Conclusion = "success"
+	g.Matches = []DiscoveryGitHubMatch{}
+	g.matchRequirements()
+	githubMatch(t, g, "missing")
+}
+
+func TestReviewForkPRResultScope(t *testing.T) {
+	f := githubRequirementFixture()
+	f["repos/example/project/pulls/5"] = fmt.Sprintf(`{"number":5,"state":"open","merge_commit_sha":%q,"head":{"sha":%q,"ref":"topic","repo":{"full_name":"contributor/project"}},"base":{"ref":"main","sha":"base","repo":{"full_name":"example/project"}}}`, githubTestMerge, githubTestHead)
+	f["repos/example/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(10, 42, githubTestHead, "failure", time.Now().Add(-time.Hour)) + `]}`
+	f["repos/contributor/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(11, 42, githubTestHead, "success", time.Now().Add(-time.Hour)) + `]}`
+	f["repos/contributor/project/commits/"+githubTestHead+"/statuses?per_page=100&page=1"] = `[]`
+	f["repos/example/project/commits/"+githubTestMerge+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[]}`
+	f["repos/example/project/commits/"+githubTestMerge+"/statuses?per_page=100&page=1"] = `[]`
+	g := collectDiscoveryGitHub(context.Background(), "example/project", githubTestHead, "topic", "", false, 5, f.fetch(t))
+	githubMatch(t, g, "failed")
+	if len(g.Matches) == 1 && g.Matches[0].Status == "matched" {
+		t.Fatal("fork success satisfied base required check despite base repository failure")
+	}
+}
+func TestReviewPartialRulesMustNotEstablishRemoval(t *testing.T) {
+	f := githubRequirementFixture()
+	before := githubObserve(t, f)
+	f["repos/example/project/rules/branches/main?per_page=100&page=1"] = `[{"type":"required_status_checks","ruleset_source_type":"Repository","ruleset_source":"example/project","ruleset_id":0,"parameters":{"required_status_checks":[{"context":"test","integration_id":42}]}}]`
+	after := githubObserve(t, f)
+	c := DiscoveryComparison{Compatible: true}
+	inspectCompareGitHub(before, after, &c)
+	t.Logf("changes=%+v coverage=%+v", c.RequirementChanges, after.Coverage)
+	for _, change := range c.RequirementChanges {
+		if change.Change == "removed" {
+			t.Fatal("partial rules inventory established removal")
+		}
+	}
+}
+
+func TestReviewRulesReorderIsNotARequirementChange(t *testing.T) {
+	f := githubRequirementFixture()
+	required := f["repos/example/project/rules/branches/main?per_page=100&page=1"]
+	review := `{"type":"pull_request","ruleset_source_type":"Repository","ruleset_source":"example/project","ruleset_id":8,"parameters":{"required_approving_review_count":1}}`
+	f["repos/example/project/rules/branches/main?per_page=100&page=1"] = strings.TrimSuffix(required, "]") + "," + review + "]"
+	before := githubObserve(t, f)
+	f["repos/example/project/rules/branches/main?per_page=100&page=1"] = "[" + review + "," + strings.TrimPrefix(required, "[")
+	after := githubObserve(t, f)
+	c := DiscoveryComparison{Compatible: true}
+	inspectCompareGitHub(before, after, &c)
+	t.Logf("changes=%+v", c.RequirementChanges)
+	if len(c.RequirementChanges) != 0 {
+		t.Fatal("order-only response change reports requirement changes")
+	}
+}
+
+func TestGitHubDuplicateRulesRetainDistinctRequirements(t *testing.T) {
+	f := githubRequirementFixture()
+	first := strings.TrimSuffix(strings.TrimPrefix(f["repos/example/project/rules/branches/main?per_page=100&page=1"], "["), "]")
+	other := strings.Replace(first, `"context":"test"`, `"context":"other"`, 1)
+	f["repos/example/project/rules/branches/main?per_page=100&page=1"] = "[" + first + "," + other + "," + first + "]"
+	f["repos/example/project/commits/"+githubTestHead+"/check-runs?filter=latest&per_page=100&page=1"] = `{"check_runs":[` + githubRun(42, 42, githubTestHead, "failure", time.Now().Add(-time.Hour)) + `]}`
+	before := githubObserve(t, f)
+	if len(before.Requirements) != 2 || len(before.Rules) != 2 || inspectRequirementsComplete(before) {
+		t.Fatalf("duplicate declarations were lost or represented as complete: %+v", before)
+	}
+	if err := ValidateDiscoveryGitHub(before); err != nil {
+		t.Fatal(err)
+	}
+	failed := false
+	for _, m := range before.Matches {
+		if m.Status == "failed" {
+			failed = true
+		}
+	}
+	if !failed {
+		t.Fatal("known failure hidden by divergent duplicate")
+	}
+	f["repos/example/project/rules/branches/main?per_page=100&page=1"] = "[" + other + "," + first + "," + first + "]"
+	after := githubObserve(t, f)
+	c := DiscoveryComparison{Compatible: true}
+	inspectCompareGitHub(before, after, &c)
+	if len(c.RequirementChanges) != 0 {
+		t.Fatalf("duplicate reordering changed identities: %+v", c.RequirementChanges)
+	}
+}

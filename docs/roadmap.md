@@ -16,7 +16,7 @@ The next operator session must not assume old `/tmp` reports, dependency volumes
 
 ## Approved near-term sequence — issue 4
 
-[Issue 4](https://github.com/rebaze/preflight/issues/4) authorizes five working increments. [Plan and durable progress](plans/issue-4.md) records implementation and verification. Stage 1 adds independent bounded local inspection and the public skill. Stages 2–5 add actual GitHub gates/results, saved comparisons, optional bounded investigations and installable measured onboarding. These capabilities extend discovery; arbitrary ecosystem execution, hosted models and release authority remain excluded. Older R1–R4 below remain separate proposed work.
+[Issue 4](https://github.com/rebaze/preflight/issues/4) authorizes five working increments. [Plan and durable progress](plans/issue-4.md) records implementation and verification. The five increments now implement independent local inspection/public skill, actual GitHub gates/results, saved comparisons, optional bounded investigations and installable measured onboarding; see the final delivery status below. These capabilities extend discovery; arbitrary ecosystem execution, hosted models and release authority remain excluded. Older R1–R4 below remain separate proposed work.
 
 ## R1 — Make setup and results understandable
 
@@ -55,5 +55,13 @@ Issue 4 stage 2 implementation adds explicit read-only GitHub gates/results with
 Issue 4 stage 3 implements explicit before/after observations, stale evidence and constrained structural CI explanations. General YAML/shell interpretation, automatic bisect/rerun and arbitrary ecosystem execution remain outside scope. Stage 4 investigations and stage 5 measured distribution follow.
 
 Issue 4 stage 4 adds optional bounded investigation packets, serial fallback and citation/identity reconciliation. Actual native-tool and fallback observations are recorded separately from deterministic tests. Final candidate packaging and onboarding metrics remain stage 5.
+
+Issue 4 stage 5 packages the versioned plugin candidate inside the existing four CLI archives and adds explicit CLI compatibility. Final acceptance depends on recorded installation and actual fresh-harness measurements, including all misses; deterministic fixtures alone do not establish human usability. Publication/tagging/marketplace submission remain owner actions.
+
+## Issue 4 delivery status — 2026-09-24
+
+All five candidate increments are implemented in the stacked review sequence [#5](https://github.com/rebaze/preflight/pull/5), [#6](https://github.com/rebaze/preflight/pull/6), [#7](https://github.com/rebaze/preflight/pull/7), [#8](https://github.com/rebaze/preflight/pull/8), [#9](https://github.com/rebaze/preflight/pull/9). The first measured candidate was0.1.0-rc.3; rc.4 carries review corrections and the local tester guide; [candidate identities](candidate.md) and [actual evaluation](../evaluation/stage-5-results.md) record the tested artifacts. Final timing target:5/5 within60seconds across4layouts; twelve actual final harness scenarios passed, with earlier misses preserved. These are agent evaluations, not human observations. Earlier stage-by-stage notes above are the delivery chronology, not remaining implementation items.
+
+The owner subsequently authorized autonomous integration of the reviewed PR stack and a local tester onboarding page. Current integration state is recorded on the linked PRs. Remaining publication work is to choose a release tag, run guarded publication and explicitly approve marketplace submission. No release/tag publication is implied by integration. The separate historical frontend prerequisite and roadmap R1–R4 remain outside this discovery/harness issue.
 
 Stage 2 pre-merge review hardens target-repository matching, saved legacy status identity, status update chronology, explicit stale conclusions and bounded freshness diagnostics. Merge evidence selection distinguishes unavailable identity from complete absence according to GitHub's documented head fallback.

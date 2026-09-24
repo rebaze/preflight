@@ -272,3 +272,39 @@ func TestWorkflowCoverageRejectsOrphanedOrExcludedSource(t *testing.T) {
 		t.Fatal("excluded workflow source counted as complete")
 	}
 }
+
+func TestCompareRequirementsIncompleteDetailIsUnknown(t *testing.T) {
+	for _, resource := range []string{"rulesets.identity", "rulesets.duplicates", "branch_protection.checks", "rule:unknown"} {
+		t.Run(resource, func(t *testing.T) {
+			before := compareGitHubFixture("2026-09-24T10:00:00Z", "before", "success", 7)
+			after := compareGitHubFixture("2026-09-24T11:00:00Z", "after", "success", 7)
+			after.Rules = []DiscoveryGitHubRule{}
+			after.Requirements = []DiscoveryGitHubRequirement{}
+			after.Matches = []DiscoveryGitHubMatch{}
+			after.Coverage = append(after.Coverage, DiscoveryGitHubCoverage{Resource: resource, Status: "error", Source: "https://api.github.com/repos/example/service/rules/branches/main", ObservedAt: after.ObservedAt})
+			c := DiscoveryComparison{Compatible: true}
+			inspectCompareGitHub(before, after, &c)
+			if len(c.RequirementChanges) == 0 {
+				t.Fatal("lost unknown change")
+			}
+			for _, change := range c.RequirementChanges {
+				if change.Change != "unknown" {
+					t.Fatalf("partial requirement list proved a change: %+v", change)
+				}
+			}
+		})
+	}
+}
+func TestCompareForkEvidenceIsBoundToTargetRepository(t *testing.T) {
+	g := compareGitHubFixture("2026-09-24T10:00:00Z", "revision", "success", 7)
+	g.HeadRepository = "contributor/fork"
+	state, _ := inspectComparableEvidence(g, g.Requirements[0])
+	if state != "passing" {
+		t.Fatalf("target-repository evidence rejected for fork head: %s", state)
+	}
+	g.Results[0].Repository = g.HeadRepository
+	state, _ = inspectComparableEvidence(g, g.Requirements[0])
+	if state != "unknown" {
+		t.Fatalf("fork-repository evidence accepted: %s", state)
+	}
+}

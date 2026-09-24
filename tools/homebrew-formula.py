@@ -40,16 +40,19 @@ def render(tag, checksums, current=None):
     lines += [
         "", '  depends_on "conftest"', '  depends_on "git"', "",
         "  def install", '    bin.install "preflight"',
-        '    pkgshare.install Dir["share/preflight/*"]', "  end", "",
+        '    pkgshare.install Dir["share/preflight/*"]', '    pkgshare.install "share/preflight/.agents"', "  end", "",
         "  def caveats", "    <<~EOS",
         "      Profiles and policies: #{pkgshare}",
+        "      Plugin marketplace: #{pkgshare}/.agents/plugins/marketplace.json",
         "      Docker with a Linux daemon is required for prepare and test execution.",
         "      Select the policy baseline and Conftest executable explicitly at init.",
         "    EOS", "  end", "",
         "  test do",
         '    assert_match "preflight #{version}", shell_output("#{bin}/preflight version")',
         '    assert_path_exists pkgshare/"profiles/frontend-vitest.json"',
-        '    assert_path_exists pkgshare/"policy/main.rego"', "  end", "end", "",
+        '    assert_path_exists pkgshare/"policy/main.rego"',
+        '    assert_path_exists pkgshare/".agents/plugins/marketplace.json"',
+        '    assert_path_exists pkgshare/"plugins/preflight/skills/preflight/SKILL.md"', "  end", "end", "",
     ]
     return "\n".join(lines)
 

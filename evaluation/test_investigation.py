@@ -11,6 +11,7 @@ import tempfile
 import unittest
 
 
+sys.dont_write_bytecode = True
 SCRIPT = Path(__file__).resolve().parents[1] / "skills/preflight/scripts/reconcile_investigation.py"
 SPEC = importlib.util.spec_from_file_location("reconcile_investigation", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)

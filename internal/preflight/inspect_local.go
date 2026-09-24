@@ -269,6 +269,7 @@ func inspectLocalOnce(ctx context.Context, repo, base string) Discovery {
 	}
 	d.Subject.IndexDigest = hex.EncodeToString(indexHash.Sum(nil))
 	snapshotHashField(inputHash, d.Subject.Head)
+	snapshotHashField(inputHash, d.Subject.Branch)
 	snapshotHashField(inputHash, d.Subject.BaseRef)
 	snapshotHashField(inputHash, d.Subject.BaseCommit)
 	snapshotHashField(inputHash, d.Subject.IndexDigest)
